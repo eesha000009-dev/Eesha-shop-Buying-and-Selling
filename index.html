@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eesha - Your One-Stop Shopping Destination</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f0474a',
+                        secondary: '#2c3e50',
+                        'custom-red': {
+                            50: '#fff1f1',
+                            100: '#ffe4e4',
+                            200: '#fecaca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            background-color: #fff1f1;
+        }
+    </style>
+</head>
+<body class="bg-custom-red-50">
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="fixed inset-0 bg-gradient-to-br from-custom-red-50 via-rose-100 to-primary/80 flex justify-center items-center z-[9999]">
+        <div class="relative flex flex-col items-center">
+            <img src="splash-screen.mp4" alt="Eesha Logo" class="max-w-[300px] animate-cart-slide floating">
+            <div class="mt-6 text-3xl font-bold text-primary opacity-0 transition-opacity duration-500 text-center drop-shadow-lg" id="splash-text">
+                Welcome to Eesha
+            </div>
+            <div class="mt-3 text-lg font-medium text-secondary opacity-0 transition-opacity duration-500 text-center bg-white/50 px-4 py-1 rounded-full backdrop-blur-sm shadow-md" id="kaduna-text">
+                Available only in Kaduna
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <img src="Eesha buying folder/shared/image.svg" alt="Eesha Logo" class="h-16 w-16">
+                </div>
+
+                <!-- Search Bar -->
+                <div class="hidden md:flex flex-1 max-w-xl mx-8">
+                    <div class="relative w-full">
+                        <input type="text" placeholder="Search products..." 
+                               class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary">
+                        <button class="absolute right-0 top-0 bottom-0 px-4 bg-primary text-white rounded-r-lg" aria-label="Search">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="flex items-center space-x-6">
+                    <a href="Eesha buying folder/login.html" class="hidden md:block text-gray-600 hover:text-primary">
+                        <i class="fas fa-user mr-2"></i>Login
+                    </a>
+                    <a href="Eesha buying folder/signup.html" class="hidden md:block text-gray-600 hover:text-primary">
+                        <i class="fas fa-user-plus mr-2"></i>Sign Up
+                    </a>
+                    <a href="Eesha buying folder/cart.html" class="relative text-gray-600 hover:text-primary">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </a>
+                    <button class="md:hidden text-gray-600" id="mobileMenuBtn" aria-label="Toggle mobile menu">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Categories Menu -->
+            <div class="hidden md:flex items-center space-x-8 mt-4">
+                <a href="#" class="text-gray-600 hover:text-primary">Electronics</a>
+                <a href="#" class="text-gray-600 hover:text-primary">Fashion</a>
+                <a href="#" class="text-gray-600 hover:text-primary">Home & Living</a>
+                <a href="#" class="text-gray-600 hover:text-primary">Beauty</a>
+                <a href="#" class="text-gray-600 hover:text-primary">Sports</a>
+                <a href="#" class="text-gray-600 hover:text-primary">Books</a>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu -->
+        <div class="md:hidden hidden" id="mobileMenu">
+            <div class="px-4 py-2 bg-custom-red-50">
+                <div class="flex flex-col space-y-4">
+                    <a href="Eesha buying folder/login.html" class="text-gray-600">Login</a>
+                    <a href="Eesha buying folder/signup.html" class="text-gray-600">Sign Up</a>
+                    <div class="border-t border-gray-200 pt-2">
+                        <a href="#" class="block py-2 text-gray-600">Electronics</a>
+                        <a href="#" class="block py-2 text-gray-600">Fashion</a>
+                        <a href="#" class="block py-2 text-gray-600">Home & Living</a>
+                        <a href="#" class="block py-2 text-gray-600">Beauty</a>
+                        <a href="#" class="block py-2 text-gray-600">Sports</a>
+                        <a href="#" class="block py-2 text-gray-600">Books</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 mt-32">
+        <!-- Hero Section -->
+        <section class="mb-12">
+            <div class="bg-custom-red-100 rounded-xl overflow-hidden h-96 relative">
+                <!-- Hero Slider will be added here -->
+                <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-custom-red-200/80 to-transparent">
+                    <h2 class="text-4xl font-bold text-gray-800">Welcome to Eesha</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Deals -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">Featured Deals</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" id="featuredProducts">
+                <!-- Product cards will be added dynamically -->
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">Shop by Category</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="bg-white rounded-lg shadow-md p-4 text-center hover:shadow-lg transition-shadow cursor-pointer">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+                        <i class="fas fa-mobile-alt text-2xl text-primary"></i>
+                    </div>
+                    <h3 class="text-gray-800">Electronics</h3>
+                </div>
+                <!-- More category cards will be added -->
+            </div>
+        </section>
+    </main>
+
+    <!-- AI Shopping Assistant -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button id="openAIChat" class="bg-primary text-white rounded-full px-6 py-3 flex items-center space-x-2 shadow-lg hover:bg-opacity-90 transition-opacity">
+            <i class="fas fa-robot"></i>
+            <span>Shopping Assistant</span>
+        </button>
+    </div>
+
+    <!-- AI Chat Modal -->
+    <div id="aiChatModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="absolute bottom-24 right-6 w-96 bg-white rounded-lg shadow-xl">
+            <div class="p-4 bg-primary text-white rounded-t-lg flex justify-between items-center">
+                <h3 class="text-lg font-semibold flex items-center">
+                    <i class="fas fa-robot mr-2"></i>
+                    Shopping Assistant
+                </h3>
+                <button id="closeAIChat" class="text-white hover:text-gray-200" aria-label="Close chat">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="h-96 overflow-y-auto p-4" id="aiChatMessages">
+                <!-- Chat messages will appear here -->
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex space-x-2">
+                    <input type="text" id="aiChatInput" placeholder="Type your message..."
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                    <button id="aiChatSend" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90" aria-label="Send message">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12 py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">About Eesha</h3>
+                    <p class="text-gray-400">Your trusted online shopping destination for quality products.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms & Conditions</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Connect With Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white text-xl" aria-label="Facebook">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl" aria-label="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+                <p>&copy; 2025 Eesha. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Sample product data
+        const products = [
+            {
+                id: 1,
+                name: "Wireless Headphones",
+                price: 99.99,
+                image: "path/to/headphones.jpg",
+                description: "High-quality wireless headphones with noise cancellation"
+            },
+            // More products will be added
+        ];
+
+        // Render featured products
+        function renderProducts() {
+            const productGrid = document.getElementById('featuredProducts');
+            productGrid.innerHTML = products.map(product => `
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                    <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">${product.name}</h3>
+                        <p class="text-gray-600 mb-2">${product.description}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-primary font-bold">$${product.price}</span>
+                            <button onclick="addToCart(${product.id})" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // AI Chat functionality
+        const aiChatModal = document.getElementById('aiChatModal');
+        const openAIChat = document.getElementById('openAIChat');
+        const closeAIChat = document.getElementById('closeAIChat');
+        const chatMessages = document.getElementById('aiChatMessages');
+        const userInput = document.getElementById('aiChatInput');
+        const sendMessage = document.getElementById('aiChatSend');
+
+        openAIChat.addEventListener('click', () => {
+            aiChatModal.classList.remove('hidden');
+            // Add initial greeting message
+            if (chatMessages.children.length === 0) {
+                addMessage('ai', 'Hello! I\'m your shopping assistant. How can I help you today?');
+            }
+        });
+
+        closeAIChat.addEventListener('click', () => {
+            aiChatModal.classList.add('hidden');
+        });
+
+        // Handle both click and Enter key for sending messages
+        sendMessage.addEventListener('click', handleMessageSend);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleMessageSend();
+            }
+        });
+
+        function handleMessageSend() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage('user', message);
+                userInput.value = '';
+                // Simulate AI response
+                setTimeout(() => {
+                    addMessage('ai', 'I can help you find the perfect product. Could you tell me more about what you\'re looking for?');
+                }, 1000);
+            }
+        });
+
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `mb-4 ${sender === 'user' ? 'text-right' : ''}`;
+            messageDiv.innerHTML = `
+                <div class="${sender === 'user' ? 'bg-primary text-white ml-auto' : 'bg-gray-200'} inline-block rounded-lg px-4 py-2 max-w-[80%]">
+                    ${text}
+                </div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Initialize app functionality
+        function initializeApp() {
+            renderProducts();
+
+            // Handle Enter key in search bar
+            const searchInput = document.querySelector('input[placeholder="Search products..."]');
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    // Implement search functionality
+                    console.log('Searching for:', searchInput.value);
+                }
+            });
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+        });
+    </script>
+            <p>&copy; 2025 Eesha. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <style>
+        @keyframes cartSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-100%) rotate(-5deg) scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(10%) rotate(2deg) scale(1.05);
+            }
+            75% {
+                transform: translateX(-5%) rotate(-1deg) scale(0.98);
+            }
+            90% {
+                transform: translateX(2%) rotate(0.5deg) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) rotate(0) scale(1);
+            }
+        }
+        .animate-cart-slide {
+            animation: cartSlideIn 2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes floatEffect {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        .floating {
+            animation: floatEffect 3s ease-in-out infinite;
+        }
+    </style>
+
+    <script>
+        // Splash Screen
+        document.addEventListener('DOMContentLoaded', () => {
+            const splash = document.getElementById('splash-screen');
+            const splashText = document.getElementById('splash-text');
+            
+            // Show welcome text after cart animation
+            setTimeout(() => {
+                splashText.style.opacity = '1';
+                document.getElementById('kaduna-text').style.opacity = '1';
+            }, 1500);
+
+            // Hide splash screen
+            setTimeout(() => {
+                splash.style.opacity = '0';
+                splash.style.transition = 'opacity 0.8s ease';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 800);
+            }, 3000);
+        });
+
+        // Initialize other functionality
+        initializeApp();
+    </script>
+</body>
+</html>
