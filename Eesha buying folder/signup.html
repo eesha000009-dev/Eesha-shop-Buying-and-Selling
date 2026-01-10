@@ -3,285 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Eesha</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Sign Up - Eesha Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <!-- Centralized Supabase initializer -->
+    <script src="../js/config/supabase.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .auth-container {
-            max-width: 400px;
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Sign Up - Eesha</title>
-                <script src="https://cdn.tailwindcss.com"></script>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-                <script>
-                    tailwind.config = {
-                        theme: {
-                            extend: {
-                                colors: {
-                                    primary: '#f0474a',
-                                    secondary: '#2c3e50',
-                                }
-                            }
-                        }
-                    }
-                </script>
-            </head>
-            <body class="bg-gray-50 min-h-screen flex items-center justify-center">
-                <div class="bg-white max-w-md w-full mx-auto rounded-lg shadow-md p-8">
-                    <h2 class="text-2xl font-bold text-center text-primary mb-8">Create an Account</h2>
-                    <form class="space-y-6" id="signupForm">
-                        <div>
-                            <label for="name" class="block text-gray-700 font-semibold mb-2">Full Name</label>
-                            <input type="text" id="name" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary" placeholder="Enter your name">
-                        </div>
-                        <div>
-                            <label for="email" class="block text-gray-700 font-semibold mb-2">Email</label>
-                            <input type="email" id="email" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary" placeholder="Enter your email">
-                        </div>
-                        <div>
-                            <label for="password" class="block text-gray-700 font-semibold mb-2">Password</label>
-                            <input type="password" id="password" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary" placeholder="Enter your password">
-                        </div>
-                        <div>
-                            <label for="confirmPassword" class="block text-gray-700 font-semibold mb-2">Confirm Password</label>
-                            <input type="password" id="confirmPassword" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary" placeholder="Confirm your password">
-                        </div>
-                        <div class="flex justify-center gap-8 my-4">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="userType" value="buyer" checked class="accent-primary">
-                                <i class="fas fa-shopping-cart"></i> Buyer
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="userType" value="seller" class="accent-primary">
-                                <i class="fas fa-store"></i> Seller
-                            </label>
-                        </div>
-                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 transition">Create Account</button>
-                        <p class="text-red-500 text-center text-sm mt-2 hidden" id="errorMessage"></p>
-                    </form>
-                    <div class="text-center mt-6">
-                        <p class="text-gray-600">Already have an account? <a href="login.html" class="text-primary font-semibold hover:underline">Log in</a></p>
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <!-- Main Container -->
+    <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <img src="../Eesha buying folder/shared/image1.svg" alt="Eesha Logo" class="mx-auto h-20">
+            <h2 class="mt-4 text-3xl font-bold text-gray-900">Create your account</h2>
+            <p class="mt-2 text-gray-600">Get started with Eesha Shop</p>
+        </div>
+
+        <!-- Signup Card -->
+        <div class="bg-white shadow-xl rounded-lg p-8">
+            <!-- Email/Password Form -->
+            <form id="signupForm" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                    <input type="email" id="email" name="email" required
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#f0474a] focus:border-[#f0474a]">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" required minlength="6"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#f0474a] focus:border-[#f0474a]">
+                </div>
+
+                <button type="submit" id="signupButton"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-[#f0474a] hover:bg-[#e43d40] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f0474a]">
+                    <span>Sign up</span>
+                    <i class="fas fa-spinner loading ml-2 hidden"></i>
+                </button>
+                
+                <!-- Message Area -->
+                <div id="messageArea" class="hidden text-sm text-center"></div>
+            </form>
+
+            <!-- Divider -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Or continue with</span>
                     </div>
                 </div>
-                <script>
-                    document.getElementById('signupForm').addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        const name = document.getElementById('name').value;
-                        const email = document.getElementById('email').value;
-                        const password = document.getElementById('password').value;
-                        const confirmPassword = document.getElementById('confirmPassword').value;
-                        const userType = document.querySelector('input[name="userType"]:checked').value;
-                        if (password !== confirmPassword) {
-                            document.getElementById('errorMessage').textContent = 'Passwords do not match';
-                            document.getElementById('errorMessage').classList.remove('hidden');
-                            return;
-                        }
-                        // Here we'll add actual registration logic
-                        // For now, just redirect to appropriate dashboard
-                        if (userType === 'seller') {
-                            window.location.href = '../eesha selling folder/Seller-index.html';
-                        } else {
-                            window.location.href = 'dashboard.html';
-                        }
-                    });
-                </script>
-            </body>
-            </html>
-    max-width: 1200px;
-}
+            </div>
 
-/* Header */
-header {
-    background-color: #2c3e50;
-    color: white;
-    padding: 1rem 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+            <!-- Google Sign In -->
+            <div class="mt-6">
+                <button id="googleSignIn" 
+                        class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f0474a]">
+                    <i class="fab fa-google mr-2"></i>
+                    Sign up with Google
+                </button>
+            </div>
 
-header h1 {
-    margin: 0;
-    font-size: 1.8rem;
-}
+            <!-- Sign In Link -->
+            <p class="mt-6 text-center text-sm text-gray-600">
+                Already have an account? 
+                <a href="login.html" class="font-medium text-[#f0474a] hover:underline">Sign in</a>
+            </p>
+        </div>
+    </div>
 
-header nav a, header nav button {
-    color: white;
-    text-decoration: none;
-    background: #3498db;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-}
-header nav span {
-    margin-right: 15px;
-}
+    <script>
+        // Use centralized Supabase client
+        const supabase = window.supabase;
 
-/* Product Grid */
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
+        // Elements
+        const signupForm = document.getElementById('signupForm');
+        const signupButton = document.getElementById('signupButton');
+        const googleSignIn = document.getElementById('googleSignIn');
+        const messageArea = document.getElementById('messageArea');
+        const loadingIcon = signupButton.querySelector('.loading');
 
-.product-card {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
+        // Helper Functions
+        function showMessage(message, isError = true) {
+            messageArea.textContent = message;
+            messageArea.classList.remove('hidden', 'text-red-600', 'text-green-600');
+            messageArea.classList.add(isError ? 'text-red-600' : 'text-green-600');
+        }
 
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
+        function hideMessage() {
+            messageArea.classList.add('hidden');
+        }
 
-.product-card img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-}
+        function setLoading(isLoading) {
+            loadingIcon.classList.toggle('hidden', !isLoading);
+            signupButton.disabled = isLoading;
+            googleSignIn.disabled = isLoading;
+        }
 
-.product-card h3 {
-    margin: 0.5rem 0;
-    font-size: 1.1rem;
-    padding: 0 10px;
-}
+        // Email/Password Sign Up
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessage();
+            setLoading(true);
 
-.product-card .price {
-    color: #e74c3c;
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-}
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
-/* Auth Page */
-.auth-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #3498db, #2c3e50);
-}
+            try {
+                // Attempt to sign up the new user directly.
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                });
 
-.auth-container {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-}
+                if (error) {
+                    // Check if the error is because the user already exists.
+                    if (error.message && error.message.includes("already registered")) {
+                        throw new Error('A user with this email already exists. Please sign in.');
+                    } else {
+                        // Throw other errors to be caught by the catch block.
+                        throw error;
+                    }
+                }
 
-.auth-container h2 {
-    margin-bottom: 1.5rem;
-}
+                // If no error, sign-up is successful (or confirmation email was re-sent).
+                showMessage('Sign-up successful! Please check your email to verify your account.', false);
+                signupForm.reset();
 
-.auth-container input[type="text"],
-.auth-container input[type="email"],
-.auth-container input[type="password"] {
-    width: calc(100% - 20px);
-    padding: 10px;
-    margin-bottom: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+            } catch (error) {
+                showMessage(error.message || 'Failed to sign up');
+            } finally {
+                setLoading(false);
+            }
+        });
 
-.auth-container button {
-    width: 100%;
-    padding: 12px;
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-}
+        // Google Sign Up
+        googleSignIn.addEventListener('click', async () => {
+            hideMessage();
+            
+            // No pre-check needed. Supabase handles creating the user if they don't exist.
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+            });
 
-.auth-container p {
-    margin-top: 1rem;
-}
-.auth-container a {
-    color: #3498db;
-    text-decoration: none;
-    font-weight: bold;
-}
-.user-type {
-    margin-bottom: 1rem;
-    text-align: left;
-}
-
-/* Dashboard */
-.dashboard-form {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.dashboard-form input, .dashboard-form textarea {
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-.dashboard-form button {
-    background-color: #2c3e50;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-/* AI Assistant */
-.ai-assistant {
-    background-color: #eaf5ff;
-    border: 1px solid #bde0ff;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.ai-assistant h3 {
-    margin-top: 0;
-}
-
-.ai-chat-box {
-    display: flex;
-    gap: 10px;
-}
-
-.ai-chat-box input {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.ai-chat-box button {
-    padding: 10px 20px;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#ai-results {
-    margin-top: 1rem;
-}</script>
+            if (error) {
+                showMessage('Failed to sign up with Google');
+            }
+        });
+    </script>
 </body>
 </html>

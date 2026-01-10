@@ -3,215 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Eesha</title>
+    <title>Login - Eesha Shop</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <!-- Centralized Supabase initializer -->
+    <script src="../js/config/supabase.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#f0474a',
-                        secondary: '#2c3e50',
-                    }
-                }
-            }
+    <style>
+        .loading {
+            animation: spin 1s linear infinite;
         }
-    </script>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
-    <div class="bg-white max-w-md w-full mx-auto rounded-lg shadow-md p-8">
-        <h2>Login to Eesha</h2>
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Login - Eesha</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-            <script>
-                tailwind.config = {
-                    theme: {
-                        extend: {
-                            colors: {
-                                primary: '#f0474a',
-                                secondary: '#2c3e50',
-                            }
-                        }
-                    }
-                }
-            </script>
-        </head>
-        <body class="bg-gray-50 min-h-screen flex items-center justify-center">
-            <div class="bg-white max-w-md w-full mx-auto rounded-lg shadow-md p-8">
-                <h2 class="text-2xl font-bold text-center text-primary mb-8">Login to Eesha</h2>
-                <form class="space-y-6" id="loginForm">
-                    <div>
-                        <label for="email" class="block text-gray-700 font-semibold mb-2">Email</label>
-                        <input type="email" id="email" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary" placeholder="Enter your email">
-                    </div>
-                    <div>
-                        <label for="password" class="block text-gray-700 font-semibold mb-2">Password</label>
-                        <input type="password" id="password" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary" placeholder="Enter your password">
-                    </div>
-                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 transition">Login</button>
-                    <p class="text-red-500 text-center text-sm mt-2 hidden" id="errorMessage"></p>
-                </form>
-                <div class="text-center mt-6">
-                    <p class="text-gray-600">Don't have an account? <a href="signup.html" class="text-primary font-semibold hover:underline">Sign up</a></p>
-                    <p class="mt-2"><a href="#" class="text-primary hover:underline">Forgot password?</a></p>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <!-- Main Container -->
+    <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <img src="../Eesha buying folder/shared/image1.svg" alt="Eesha Logo" class="mx-auto h-20">
+            <h2 class="mt-4 text-3xl font-bold text-gray-900">Welcome back</h2>
+            <p class="mt-2 text-gray-600">Please sign in to continue</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white shadow-xl rounded-lg p-8">
+            <!-- Email/Password Form -->
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                    <input type="email" id="email" name="email" required
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#f0474a] focus:border-[#f0474a]">
                 </div>
-                <div class="text-center mt-6 border-t pt-4">
-                    <a href="../eesha selling folder/login.html" class="text-gray-500 hover:text-primary flex items-center justify-center gap-2">
-                        <i class="fas fa-store"></i> Login as Seller
-                    </a>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" required
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#f0474a] focus:border-[#f0474a]">
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember-me" class="h-4 w-4 text-[#f0474a] focus:ring-[#f0474a] border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                    </div>
+                    <a href="#" class="text-sm text-[#f0474a] hover:underline">Forgot password?</a>
+                </div>
+
+                <button type="submit" id="loginButton"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-[#f0474a] hover:bg-[#e43d40] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f0474a]">
+                    <span>Sign in</span>
+                    <i class="fas fa-spinner loading ml-2 hidden"></i>
+                </button>
+                
+                <!-- Error Message -->
+                <div id="errorMessage" class="hidden text-red-600 text-sm text-center"></div>
+            </form>
+
+            <!-- Divider -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Or continue with</span>
+                    </div>
                 </div>
             </div>
-            <script>
-                document.getElementById('loginForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const email = document.getElementById('email').value;
-                    const password = document.getElementById('password').value;
-                    if (email && password) {
-                        if (email.includes('seller')) {
-                            window.location.href = '../eesha selling folder/Seller-index.html';
-                        } else {
-                            window.location.href = 'dashboard.html';
-                        }
-                    } else {
-                        document.getElementById('errorMessage').textContent = 'Please fill in all fields';
-                        document.getElementById('errorMessage').classList.remove('hidden');
-                    }
+
+            <!-- Google Sign In -->
+            <div class="mt-6">
+                <button id="googleSignIn" 
+                        class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f0474a]">
+                    <i class="fab fa-google mr-2"></i>
+                    Sign in with Google
+                </button>
+            </div>
+
+            <!-- Sign Up Link -->
+            <p class="mt-6 text-center text-sm text-gray-600">
+                Don't have an account? 
+                <a href="signup.html" class="font-medium text-[#f0474a] hover:underline">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Use centralized Supabase client
+        const supabase = window.supabase;
+
+        // Elements
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const googleSignIn = document.getElementById('googleSignIn');
+        const errorMessage = document.getElementById('errorMessage');
+        const loadingIcon = loginButton.querySelector('.loading');
+
+        // Helper Functions
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorMessage.classList.add('hidden');
+        }
+
+        function setLoading(isLoading) {
+            loadingIcon.classList.toggle('hidden', !isLoading);
+            loginButton.disabled = isLoading;
+            googleSignIn.disabled = isLoading;
+        }
+
+        // Handle authentication checks
+        async function handleAuthChecks(user) {
+            if (!user) return false;
+
+            // Check if email is verified
+            if (!user.email_confirmed_at) {
+                showError('Please verify your email address first. Check your inbox.');
+                await supabase.auth.signOut(); // Log out user until they verify
+                return false;
+            }
+
+            // All checks passed
+            return true;
+        }
+
+        // Email/Password Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideError();
+            setLoading(true);
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
                 });
-            </script>
-        </body>
-        </html>
-        <style
-.product-card .price {
-    color: #e74c3c;
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-}
 
-/* Auth Page */
-.auth-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #3498db, #2c3e50);
-}
+                if (error) {
+                    // Supabase returns 'Invalid login credentials' for both wrong password and user not found
+                    // to prevent email enumeration attacks.
+                    if (error.message === 'Invalid login credentials') {
+                        showError('Incorrect email or password. New user? Please sign up.');
+                    } else {
+                        throw error;
+                    }
+                    return;
+                }
 
-.auth-container {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-}
+                const success = await handleAuthChecks(data.user);
+                if (success) {
+                    window.location.href = '../index.html'; // Redirect to dashboard
+                }
+            } catch (error) {
+                showError(error.message || 'Failed to sign in');
+            } finally {
+                setLoading(false);
+            }
+        });
 
-.auth-container h2 {
-    margin-bottom: 1.5rem;
-}
+        // Google Sign In
+        googleSignIn.addEventListener('click', async () => {
+            hideError();
+            setLoading(true);
 
-.auth-container input[type="text"],
-.auth-container input[type="email"],
-.auth-container input[type="password"] {
-    width: calc(100% - 20px);
-    padding: 10px;
-    margin-bottom: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+            try {
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google'
+                });
 
-.auth-container button {
-    width: 100%;
-    padding: 12px;
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-}
+                if (error) throw error;
+                // Redirect is handled by Supabase. Checks will run on page load after redirect.
+            } catch (error) {
+                showError('Failed to sign in with Google');
+                setLoading(false);
+            }
+        });
 
-.auth-container p {
-    margin-top: 1rem;
-}
-.auth-container a {
-    color: #3498db;
-    text-decoration: none;
-    font-weight: bold;
-}
-.user-type {
-    margin-bottom: 1rem;
-    text-align: left;
-}
-
-/* Dashboard */
-.dashboard-form {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.dashboard-form input, .dashboard-form textarea {
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-.dashboard-form button {
-    background-color: #2c3e50;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-/* AI Assistant */
-.ai-assistant {
-    background-color: #eaf5ff;
-    border: 1px solid #bde0ff;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.ai-assistant h3 {
-    margin-top: 0;
-}
-
-.ai-chat-box {
-    display: flex;
-    gap: 10px;
-}
-
-.ai-chat-box input {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.ai-chat-box button {
-    padding: 10px 20px;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#ai-results {
-    margin-top: 1rem;
-}</script>
+        // Check session on load (for OAuth redirect and existing sessions)
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session?.user) {
+                const success = await handleAuthChecks(session.user);
+                if (success) {
+                    window.location.href = '../index.html';
+                }
+            }
+        });
+    </script>
 </body>
 </html>

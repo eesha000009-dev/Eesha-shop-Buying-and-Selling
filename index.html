@@ -1,402 +1,671 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eesha - Your One-Stop Shopping Destination</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#f0474a',
-                        secondary: '#2c3e50',
-                        'custom-red': {
-                            50: '#fff1f1',
-                            100: '#ffe4e4',
-                            200: '#fecaca',
-                        }
-                    }
-                }
+﻿<!doctype html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Eesha Market — Connect, Trade, Thrive</title>
+        <meta name="description" content="Eesha Market - Your Marketplace for Infinite Possibilities">
+
+        <!-- Fonts & Icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        
+        <!-- Tailwind & Supabase -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/@supabase/supabase-js"></script>
+
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; color: #1f2937; }
+            
+            /* EeshaPay Branding */
+            :root {
+                --primary: #FBBF24;
+                --dark-blue: #0F172A;
+                --text-dark: #1f2937;
+                --text-light: #6b7280;
+                --bg-light: #f9fafb;
+                --border: #e5e7eb;
             }
-        }
-    </script>
-    <style>
-        :root {
-            background-color: #fff1f1;
-        }
-    </style>
-</head>
-<body class="bg-custom-red-50">
-    <!-- Splash Screen -->
-    <div id="splash-screen" class="fixed inset-0 bg-gradient-to-br from-custom-red-50 via-rose-100 to-primary/80 flex justify-center items-center z-[9999]">
-        <div class="relative flex flex-col items-center">
-            <img src="Eesha buying folder/shared/image.svg" alt="Eesha Logo" class="max-w-[300px] animate-cart-slide floating">
-            <div class="mt-6 text-3xl font-bold text-primary opacity-0 transition-opacity duration-500 text-center drop-shadow-lg" id="splash-text">
-                Welcome to Eesha
-            </div>
-            <div class="mt-3 text-lg font-medium text-secondary opacity-0 transition-opacity duration-500 text-center bg-white/50 px-4 py-1 rounded-full backdrop-blur-sm shadow-md" id="kaduna-text">
-                Available only in Kaduna
-            </div>
-        </div>
-    </div>
 
-    <!-- Header -->
-    <header class="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
-        <nav class="container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <!-- Logo -->
-                <div class="flex items-center">
-                    <img src="Eesha buying folder/shared/image.svg" alt="Eesha Logo" class="h-16 w-16">
+            /* Header Sticky */
+            header { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 50; }
+            .header-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+            .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--dark-blue); font-weight: 700; font-size: 1.25rem; }
+            .logo img { height: 48px; }
+            
+            /* Search Bar */
+            .search-container { flex: 1; max-width: 500px; margin: 0 32px; display: flex; align-items: center; background: var(--bg-light); border-radius: 8px; padding: 8px 12px; border: 1px solid var(--border); }
+            .search-container input { flex: 1; background: none; border: none; outline: none; font-size: 14px; }
+            .search-container button { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 16px; }
+
+            /* Header Right */
+            .header-right { display: flex; align-items: center; gap: 24px; }
+            .nav-link { text-decoration: none; color: var(--text-dark); font-size: 14px; font-weight: 500; transition: color 0.2s; }
+            .nav-link:hover { color: var(--primary); }
+            .auth-buttons { display: flex; gap: 12px; }
+            .btn-login { background: transparent; color: var(--dark-blue); border: 1px solid var(--dark-blue); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+            .btn-login:hover { background: var(--dark-blue); color: white; }
+            .btn-signup { background: var(--primary); color: var(--dark-blue); border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+            .btn-signup:hover { background: #f0a600; transform: translateY(-1px); }
+            .cart-link { position: relative; color: var(--text-dark); text-decoration: none; font-size: 18px; transition: color 0.2s; }
+            .cart-link:hover { color: var(--primary); }
+            .cart-count { position: absolute; top: -8px; right: -8px; background: var(--primary); color: var(--dark-blue); border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+
+            /* Category Tabs */
+            .category-tabs { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+            .tab-btn { background: none; border: none; padding: 8px 12px; color: var(--text-light); font-weight: 500; cursor: pointer; font-size: 14px; transition: all 0.2s; border-bottom: 3px solid transparent; }
+            .tab-btn.active { color: var(--dark-blue); border-bottom-color: var(--primary); }
+            .tab-btn:hover { color: var(--dark-blue); }
+
+            /* Product Grid */
+            .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+            .product-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.3s; cursor: pointer; }
+            .product-card:hover { box-shadow: 0 8px 16px rgba(0,0,0,0.12); transform: translateY(-4px); }
+            .product-image { width: 100%; height: 200px; object-fit: cover; }
+            .product-info { padding: 12px; }
+            .product-title { font-weight: 600; font-size: 14px; margin-bottom: 8px; color: var(--text-dark); }
+            .product-price { color: var(--primary); font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+            .product-footer { display: flex; justify-content: space-between; align-items: center; }
+            .btn-add { background: var(--dark-blue); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: background 0.2s; }
+            .btn-add:hover { background: var(--primary); color: var(--dark-blue); }
+
+            /* Hero Section */
+            .hero { margin: 32px 0; border-radius: 12px; overflow: hidden; }
+            .hero img { width: 100%; height: auto; max-height: 400px; object-fit: cover; }
+
+            /* Footer */
+            footer { background: var(--dark-blue); color: white; padding: 40px 0 20px; margin-top: 60px; }
+            .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 30px; }
+            .footer-col h4 { font-weight: 700; margin-bottom: 12px; color: var(--primary); }
+            .footer-col p, .footer-col a { font-size: 14px; color: rgba(255,255,255,0.8); }
+            .footer-col a { display: block; margin-bottom: 8px; text-decoration: none; transition: color 0.2s; }
+            .footer-col a:hover { color: var(--primary); }
+            .footer-bottom { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; text-align: center; font-size: 14px; color: rgba(255,255,255,0.6); }
+
+            /* Mobile Menu Toggle */
+            .mobile-menu-btn { display: none; background: none; border: none; font-size: 20px; color: var(--text-dark); cursor: pointer; }
+            
+            /* User Menu */
+            .user-menu { display: none; align-items: center; gap: 12px; }
+            .user-menu.visible { display: flex; }
+            .user-email { color: var(--text-dark); font-weight: 500; font-size: 14px; }
+            .btn-logout { background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: background 0.2s; }
+            .btn-logout:hover { background: #b91c1c; }
+
+            /* Auth Modal */
+            .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+            .modal.show { display: flex; }
+            .modal-content { background: white; border-radius: 12px; padding: 40px; max-width: 400px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+            .modal-content h2 { color: var(--dark-blue); margin-bottom: 12px; font-size: 1.5rem; }
+            .modal-content p { color: var(--text-light); margin-bottom: 24px; }
+            .modal-buttons { display: flex; gap: 12px; }
+            .modal-buttons button { flex: 1; padding: 12px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+            .modal-btn-login { background: var(--dark-blue); color: white; }
+            .modal-btn-login:hover { background: #0a0f1f; }
+            .modal-btn-signup { background: var(--primary); color: var(--dark-blue); }
+            .modal-btn-signup:hover { background: #f0a600; }
+            .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 24px; color: var(--text-light); cursor: pointer; }
+
+            /* Splash Screen (stronger metallic radial highlight) */
+            #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                /* larger/brighter radial gold highlight centered behind the logo + deep blue base */
+                background:
+                    radial-gradient(circle at 50% 38%, rgba(251,191,36,0.30) 0%, rgba(251,191,36,0.20) 12%, rgba(251,191,36,0.10) 26%, rgba(251,191,36,0.04) 40%, transparent 60%),
+                    linear-gradient(135deg, var(--dark-blue) 0%, #061326 50%, #071428 72%, rgba(6,18,40,0.98) 100%);
+                display: flex; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.6s ease-out; opacity: 1; color: var(--primary);
+            }
+            #splashScreen.hidden { opacity: 0; pointer-events: none; }
+            .splash-container { text-align: center; animation: splashFadeIn 0.8s ease-out; }
+            .splash-logo { width: 300px; margin: 0 auto 30px; animation: splashSlideUp 0.8s ease-out; }
+            .splash-logo:hover { transform: translateY(-3px); filter: drop-shadow(0 6px 12px rgba(251, 191, 36, 0.25)); }
+            .splash-arrow { stroke-dasharray: 380; stroke-dashoffset: 380; animation: splashDraw 5s ease-out forwards; }
+            .splash-coin { animation: splashSpin 2s linear infinite; transform-origin: 50px 40px; }
+            .loading-text { color: var(--primary); font-size: 18px; font-weight: 600; margin-top: 30px; letter-spacing: 1px; animation: splashFadeInText 1s ease-out 0.5s both; }
+            .loading-dot { display: inline-block; animation: splashDot 1.4s infinite; }
+            .loading-dot:nth-child(1) { animation-delay: 0s; }
+            .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+            .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+            .subtitle { color: rgba(255, 255, 255, 0.85); font-size: 14px; margin-top: 10px; animation: splashFadeInText 1s ease-out 0.8s both; }
+            /* Gold fade for splash text */
+            .splash-text { opacity: 0; animation: goldFade 1s ease 0.9s forwards; }
+            @keyframes goldFade { from { opacity: 0; filter: blur(0.6px); } to { opacity: 1; filter: none; } }
+            @keyframes splashFadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes splashSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+            @keyframes splashFadeInText { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes splashDraw { to { stroke-dashoffset: 0; } }
+            @keyframes splashSpin { to { transform: rotate(360deg); } }
+            @keyframes splashDot { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+
+            @media (max-width: 768px) {
+                .mobile-menu-btn { display: block; }
+                .search-container { display: none; }
+                .header-right { gap: 12px; }
+                .auth-buttons { display: none; }
+                .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+            }
+        </style>
+    </head>
+    <body>
+
+        <!-- Splash Screen -->
+        <div id="splashScreen">
+            <div class="splash-container">
+                <svg class="splash-logo" viewBox="0 0 480 90" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="splashG1" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#0F172A"/>
+                            <stop offset="100%" stop-color="#1E293B"/>
+                        </linearGradient>
+                        <linearGradient id="splashGold" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#FBBF24"/>
+                            <stop offset="100%" stop-color="#F59E0B"/>
+                        </linearGradient>
+                    </defs>
+                    <g class="splash-coin">
+                        <circle cx="40" cy="40" r="18" fill="none" stroke="url(#splashGold)" stroke-width="3"/>
+                        <text x="32" y="48" font-size="16" fill="url(#splashGold)" font-weight="bold">₦</text>
+                    </g>
+                    <text class="splash-text" x="80" y="65" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="950" fill="url(#splashGold)" stroke="rgba(255,255,255,0.12)" stroke-width="0.6" letter-spacing="-0.5">
+                        EeshaMart
+                    </text>
+                    <path class="splash-arrow" d="M 150 68 Q 260 78, 440 68 L 430 58" 
+                          stroke="url(#splashGold)" stroke-width="4" fill="none" stroke-linecap="round"/>
+                </svg>
+                <div class="loading-text">
+                    Loading<span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span>
                 </div>
+                <div class="subtitle">Your marketplace for infinite possibilities</div>
+            </div>
+            <!-- Snow canvas (covers splash) -->
+            <canvas id="snowCanvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:10002;"></canvas>
+        </div>
 
-                <!-- Search Bar -->
-                <div class="hidden md:flex flex-1 max-w-xl mx-8">
-                    <div class="relative w-full">
-                        <input type="text" placeholder="Search products..." 
-                               class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary">
-                        <button class="absolute right-0 top-0 bottom-0 px-4 bg-primary text-white rounded-r-lg" aria-label="Search">
-                            <i class="fas fa-search"></i>
+        <!-- Header -->
+        <header>
+            <div class="container mx-auto px-4">
+                <div class="header-top">
+                    <a href="/" class="logo">
+                        <img src="Eesha buying folder/shared/image.svg" alt="Eesha">
+                        <span>Eesha</span>
+                    </a>
+                    
+                    <div class="search-container">
+                        <input type="text" placeholder="Search products..." id="searchInput">
+                        <button><i class="fas fa-search"></i></button>
+                    </div>
+
+                    <div class="header-right">
+                        <a href="search-result.html" class="nav-link hidden md:inline">Shop</a>
+                        <a href="EeshaPayPlatform/index.html" class="nav-link hidden md:inline">Platform</a>
+                        
+                        <div class="auth-buttons" id="authButtons">
+                            <a href="Eesha buying folder/login.html" class="btn-login">Login</a>
+                            <a href="Eesha buying folder/signup.html" class="btn-signup">Sign Up</a>
+                        </div>
+
+                        <div class="user-menu" id="userMenu">
+                            <span class="user-email" id="userEmail"></span>
+                            <button class="btn-logout" id="logoutBtn">Logout</button>
+                        </div>
+
+                        <a href="Eesha buying folder/cart.html" class="cart-link" aria-label="Shopping cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span id="cartCount" class="cart-count">0</span>
+                        </a>
+
+                        <button class="mobile-menu-btn" id="mobileMenuBtn">
+                            <i class="fas fa-bars"></i>
                         </button>
                     </div>
                 </div>
+            </div>
+        </header>
 
-                <!-- Navigation Links -->
-                <div class="flex items-center space-x-6">
-                    <a href="Eesha buying folder/login.html" class="hidden md:block text-gray-600 hover:text-primary">
-                        <i class="fas fa-user mr-2"></i>Login
-                    </a>
-                    <a href="Eesha buying folder/signup.html" class="hidden md:block text-gray-600 hover:text-primary">
-                        <i class="fas fa-user-plus mr-2"></i>Sign Up
-                    </a>
-                    <a href="Eesha buying folder/cart.html" class="relative text-gray-600 hover:text-primary">
-                        <i class="fas fa-shopping-cart text-xl"></i>
-                        <span class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
-                    </a>
-                    <button class="md:hidden text-gray-600" id="mobileMenuBtn" aria-label="Toggle mobile menu">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
+        <!-- Hero -->
+        <main class="container mx-auto px-4" style="padding: 32px 0;">
+            <section class="hero">
+                <img src="Eesha buying folder/attached_assets/hero.jpg" alt="Welcome to Eesha Market">
+                <div style="background: linear-gradient(to bottom, rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.8)); color: white; padding: 40px; text-align: center; transform: translateY(-40%); position: relative; z-index: 10;">
+                    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 8px;">Welcome to Eesha Market</h1>
+                    <p style="font-size: 1.125rem; color: #FBBF24; font-weight: 500;">Connect, Trade, Thrive</p>
+                </div>
+            </section>
+
+            <!-- Category Tabs & Product Grid -->
+            <section style="margin-top: 32px;">
+                <div id="categoryTabs" class="category-tabs"></div>
+                <div id="categoryTabContent"></div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="container mx-auto px-4">
+                <div class="footer-grid">
+                    <div class="footer-col">
+                        <h4>About Eesha</h4>
+                        <p>Your trusted local marketplace — buy and sell with confidence. Millions of products and sellers in one place.</p>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Quick Links</h4>
+                        <a href="#">About Us</a>
+                        <a href="#">Contact Us</a>
+                        <a href="#">Blog</a>
+                        <a href="#">Careers</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>For Sellers</h4>
+                        <a href="#">Start Selling</a>
+                        <a href="#">Seller Dashboard</a>
+                        <a href="#">Seller Support</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Connect With Us</h4>
+                        <a href="#"><i class="fab fa-facebook"></i> Facebook</a>
+                        <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
+                        <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    &copy; 2025 Eesha Market. All rights reserved. | <a href="#" style="color: #FBBF24;">Privacy Policy</a> | <a href="#" style="color: #FBBF24;">Terms of Service</a>
                 </div>
             </div>
+        </footer>
 
-            <!-- Categories Menu -->
-            <div class="hidden md:flex items-center space-x-8 mt-4">
-                <a href="#" class="text-gray-600 hover:text-primary">Electronics</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Fashion</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Home & Living</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Beauty</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Sports</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Books</a>
-            </div>
-        </nav>
-
-        <!-- Mobile Menu -->
-        <div class="md:hidden hidden" id="mobileMenu">
-            <div class="px-4 py-2 bg-custom-red-50">
-                <div class="flex flex-col space-y-4">
-                    <a href="Eesha buying folder/login.html" class="text-gray-600">Login</a>
-                    <a href="Eesha buying folder/signup.html" class="text-gray-600">Sign Up</a>
-                    <div class="border-t border-gray-200 pt-2">
-                        <a href="#" class="block py-2 text-gray-600">Electronics</a>
-                        <a href="#" class="block py-2 text-gray-600">Fashion</a>
-                        <a href="#" class="block py-2 text-gray-600">Home & Living</a>
-                        <a href="#" class="block py-2 text-gray-600">Beauty</a>
-                        <a href="#" class="block py-2 text-gray-600">Sports</a>
-                        <a href="#" class="block py-2 text-gray-600">Books</a>
-                    </div>
+        <!-- Auth Modal -->
+        <div id="authModal" class="modal">
+            <div class="modal-content" style="position: relative;">
+                <button class="modal-close" id="modalClose">&times;</button>
+                <h2>Sign In Required</h2>
+                <p>Please log in or sign up to add items to your cart and continue shopping.</p>
+                <div class="modal-buttons">
+                    <a href="Eesha buying folder/login.html" class="modal-btn-login" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">Login</a>
+                    <a href="Eesha buying folder/signup.html" class="modal-btn-signup" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">Sign Up</a>
                 </div>
             </div>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 mt-32">
-        <!-- Hero Section -->
-        <section class="mb-12">
-            <div class="bg-custom-red-100 rounded-xl overflow-hidden h-96 relative">
-                <!-- Hero Slider will be added here -->
-                <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-custom-red-200/80 to-transparent">
-                    <h2 class="text-4xl font-bold text-gray-800">Welcome to Eesha</h2>
-                </div>
-            </div>
-        </section>
+        <!-- Project Scripts -->
+        <script src="js/config/supabase.js"></script>
+        <script src="js/products-loader.js"></script>
 
-        <!-- Featured Deals -->
-        <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-6">Featured Deals</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" id="featuredProducts">
-                <!-- Product cards will be added dynamically -->
-            </div>
-        </section>
+        <script>
+            // ===== App Initialization =====
+            window.currentUser = window.currentUser || null;
+            const supabaseClient = window.supabase;
 
-        <!-- Categories Section -->
-        <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-6">Shop by Category</h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <div class="bg-white rounded-lg shadow-md p-4 text-center hover:shadow-lg transition-shadow cursor-pointer">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
-                        <i class="fas fa-mobile-alt text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-gray-800">Electronics</h3>
-                </div>
-                <!-- More category cards will be added -->
-            </div>
-        </section>
-    </main>
+            // ===== Simple Snow Effect =====
+            (function(){
+                let canvas, ctx, w, h, flakes = [], running = false, rafId;
 
-    <!-- AI Shopping Assistant -->
-    <div class="fixed bottom-6 right-6 z-50">
-        <button id="openAIChat" class="bg-primary text-white rounded-full px-6 py-3 flex items-center space-x-2 shadow-lg hover:bg-opacity-90 transition-opacity">
-            <i class="fas fa-robot"></i>
-            <span>Shopping Assistant</span>
-        </button>
-    </div>
-
-    <!-- AI Chat Modal -->
-    <div id="aiChatModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-        <div class="absolute bottom-24 right-6 w-96 bg-white rounded-lg shadow-xl">
-            <div class="p-4 bg-primary text-white rounded-t-lg flex justify-between items-center">
-                <h3 class="text-lg font-semibold flex items-center">
-                    <i class="fas fa-robot mr-2"></i>
-                    Shopping Assistant
-                </h3>
-                <button id="closeAIChat" class="text-white hover:text-gray-200" aria-label="Close chat">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="h-96 overflow-y-auto p-4" id="aiChatMessages">
-                <!-- Chat messages will appear here -->
-            </div>
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex space-x-2">
-                    <input type="text" id="aiChatInput" placeholder="Type your message..."
-                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
-                    <button id="aiChatSend" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90" aria-label="Send message">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white mt-12 py-8">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <h3 class="text-xl font-semibold mb-4">About Eesha</h3>
-                    <p class="text-gray-400">Your trusted online shopping destination for quality products.</p>
-                </div>
-                <div>
-                    <h3 class="text-xl font-semibold mb-4">Quick Links</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Terms & Conditions</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-xl font-semibold mb-4">Connect With Us</h3>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white text-xl" aria-label="Facebook">
-                            <i class="fab fa-facebook"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white text-xl" aria-label="Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white text-xl" aria-label="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
-                <p>&copy; 2025 Eesha. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Mobile Menu Toggle
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        // Sample product data
-        const products = [
-            {
-                id: 1,
-                name: "Wireless Headphones",
-                price: 99.99,
-                image: "path/to/headphones.jpg",
-                description: "High-quality wireless headphones with noise cancellation"
-            },
-            // More products will be added
-        ];
-
-        // Render featured products
-        function renderProducts() {
-            const productGrid = document.getElementById('featuredProducts');
-            productGrid.innerHTML = products.map(product => `
-                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">${product.name}</h3>
-                        <p class="text-gray-600 mb-2">${product.description}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-primary font-bold">$${product.price}</span>
-                            <button onclick="addToCart(${product.id})" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // AI Chat functionality
-        const aiChatModal = document.getElementById('aiChatModal');
-        const openAIChat = document.getElementById('openAIChat');
-        const closeAIChat = document.getElementById('closeAIChat');
-        const chatMessages = document.getElementById('aiChatMessages');
-        const userInput = document.getElementById('aiChatInput');
-        const sendMessage = document.getElementById('aiChatSend');
-
-        openAIChat.addEventListener('click', () => {
-            aiChatModal.classList.remove('hidden');
-            // Add initial greeting message
-            if (chatMessages.children.length === 0) {
-                addMessage('ai', 'Hello! I\'m your shopping assistant. How can I help you today?');
-            }
-        });
-
-        closeAIChat.addEventListener('click', () => {
-            aiChatModal.classList.add('hidden');
-        });
-
-        // Handle both click and Enter key for sending messages
-        sendMessage.addEventListener('click', handleMessageSend);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleMessageSend();
-            }
-        });
-
-        function handleMessageSend() {
-            const message = userInput.value.trim();
-            if (message) {
-                addMessage('user', message);
-                userInput.value = '';
-                // Simulate AI response
-                setTimeout(() => {
-                    addMessage('ai', 'I can help you find the perfect product. Could you tell me more about what you\'re looking for?');
-                }, 1000);
-            }
-        });
-
-        function addMessage(sender, text) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `mb-4 ${sender === 'user' ? 'text-right' : ''}`;
-            messageDiv.innerHTML = `
-                <div class="${sender === 'user' ? 'bg-primary text-white ml-auto' : 'bg-gray-200'} inline-block rounded-lg px-4 py-2 max-w-[80%]">
-                    ${text}
-                </div>
-            `;
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Initialize app functionality
-        function initializeApp() {
-            renderProducts();
-
-            // Handle Enter key in search bar
-            const searchInput = document.querySelector('input[placeholder="Search products..."]');
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    // Implement search functionality
-                    console.log('Searching for:', searchInput.value);
+                function resize() {
+                    if (!canvas) return;
+                    w = canvas.width = canvas.clientWidth = window.innerWidth;
+                    h = canvas.height = canvas.clientHeight = window.innerHeight;
                 }
+
+                function createFlakes(count) {
+                    flakes = [];
+                    for (let i = 0; i < count; i++) {
+                        flakes.push({
+                            x: Math.random() * w,
+                            y: Math.random() * h,
+                            r: Math.random() * 3 + 1,
+                            d: Math.random() * 1 + 0.5,
+                            vx: (Math.random() - 0.5) * 0.6
+                        });
+                    }
+                }
+
+                function draw() {
+                    if (!running) return;
+                    ctx.clearRect(0,0,w,h);
+                    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                    for (let i = 0; i < flakes.length; i++) {
+                        const f = flakes[i];
+                        ctx.beginPath();
+                        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+                        ctx.fill();
+                        f.y += f.d + 0.4;
+                        f.x += f.vx + Math.sin(f.y * 0.01) * 0.3;
+                        if (f.y > h + 10) {
+                            f.y = -10;
+                            f.x = Math.random() * w;
+                        }
+                    }
+                    rafId = requestAnimationFrame(draw);
+                }
+
+                window.startSnow = function startSnow() {
+                    const c = document.getElementById('snowCanvas');
+                    if (!c) return;
+                    canvas = c;
+                    ctx = canvas.getContext('2d');
+                    resize();
+                    createFlakes(Math.min(120, Math.floor(window.innerWidth / 10)));
+                    running = true;
+                    window.addEventListener('resize', resize);
+                    draw();
+                };
+
+                window.stopSnow = function stopSnow() {
+                    running = false;
+                    if (rafId) cancelAnimationFrame(rafId);
+                    if (ctx && canvas) ctx.clearRect(0,0,canvas.width, canvas.height);
+                };
+            })();
+
+            // ===== Auth State Management =====
+            async function updateAuthUI() {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                const authButtons = document.getElementById('authButtons');
+                const userMenu = document.getElementById('userMenu');
+                const userEmail = document.getElementById('userEmail');
+                const logoutBtn = document.getElementById('logoutBtn');
+
+                if (session?.user) {
+                    // User is logged in
+                    window.currentUser = session.user;
+                    authButtons.style.display = 'none';
+                    userMenu.classList.add('visible');
+                    userEmail.textContent = session.user.email;
+
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', async (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            try {
+                                const { error } = await supabaseClient.auth.signOut();
+                                if (error) throw error;
+                                // Clear cart and reload
+                                localStorage.removeItem('guest_cart');
+                                localStorage.removeItem('cart');
+                                setTimeout(() => window.location.href = 'index.html', 500);
+                            } catch (err) {
+                                console.error('Logout error:', err);
+                                alert('Error logging out. Please try again.');
+                            }
+                        });
+                    }
+                } else {
+                    // User is not logged in
+                    window.currentUser = null;
+                    authButtons.style.display = 'flex';
+                    userMenu.classList.remove('visible');
+                }
+            }
+
+            // ===== Modal Functions =====
+            function showAuthModal() {
+                document.getElementById('authModal').classList.add('show');
+            }
+
+            function closeAuthModal() {
+                document.getElementById('authModal').classList.remove('show');
+            }
+
+            // Close modal on X click
+            document.getElementById('modalClose').addEventListener('click', closeAuthModal);
+
+            // Close modal on background click
+            document.getElementById('authModal').addEventListener('click', (e) => {
+                if (e.target.id === 'authModal') closeAuthModal();
             });
-        }
 
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeApp();
-        });
-    </script>
-            <p>&copy; 2025 Eesha. All rights reserved.</p>
-        </div>
-    </footer>
+            // ===== Cart Functions =====
+            function readCanonicalCart() {
+                try {
+                    return JSON.parse(localStorage.getItem('cart') || localStorage.getItem('guest_cart') || '[]');
+                } catch (e) {
+                    console.warn('cart parse', e);
+                    return [];
+                }
+            }
 
-    <style>
-        @keyframes cartSlideIn {
-            0% {
-                opacity: 0;
-                transform: translateX(-100%) rotate(-5deg) scale(0.8);
+            function handleProductClick(event, productId) {
+                if (event.target.closest('button')) return;
+                window.location.href = `Eesha buying folder/product.html?id=${productId}`;
             }
-            50% {
-                opacity: 1;
-                transform: translateX(10%) rotate(2deg) scale(1.05);
-            }
-            75% {
-                transform: translateX(-5%) rotate(-1deg) scale(0.98);
-            }
-            90% {
-                transform: translateX(2%) rotate(0.5deg) scale(1.02);
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0) rotate(0) scale(1);
-            }
-        }
-        .animate-cart-slide {
-            animation: cartSlideIn 2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        @keyframes floatEffect {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-        .floating {
-            animation: floatEffect 3s ease-in-out infinite;
-        }
-    </style>
 
-    <script>
-        // Splash Screen
-        document.addEventListener('DOMContentLoaded', () => {
-            const splash = document.getElementById('splash-screen');
-            const splashText = document.getElementById('splash-text');
-            
-            // Show welcome text after cart animation
-            setTimeout(() => {
-                splashText.style.opacity = '1';
-                document.getElementById('kaduna-text').style.opacity = '1';
-            }, 1500);
+            async function addToCart(productId) {
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    const user = session?.user;
 
-            // Hide splash screen
-            setTimeout(() => {
-                splash.style.opacity = '0';
-                splash.style.transition = 'opacity 0.8s ease';
-                setTimeout(() => {
-                    splash.style.display = 'none';
-                }, 800);
-            }, 3000);
-        });
+                    if (!user) {
+                        showAuthModal();
+                        return;
+                    }
 
-        // Initialize other functionality
-        initializeApp();
-    </script>
-</body>
+                    const { data: existingItem, error: fetchError } = await supabaseClient
+                        .from('cart_items')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .eq('product_id', productId)
+                        .single();
+
+                    if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+
+                    if (existingItem) {
+                        await supabaseClient
+                            .from('cart_items')
+                            .update({ quantity: existingItem.quantity + 1 })
+                            .eq('id', existingItem.id);
+                    } else {
+                        await supabaseClient
+                            .from('cart_items')
+                            .insert([{ user_id: user.id, product_id: productId, quantity: 1 }]);
+                    }
+
+                    await updateCartCount();
+                    alert('✓ Added to cart!');
+                } catch (err) {
+                    console.error('addToCart', err);
+                    alert('Error adding to cart. Please try again.');
+                }
+            }
+
+            async function updateCartCount() {
+                try {
+                    let count = 0;
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    const user = session?.user;
+
+                    if (user) {
+                        const { data: rows, error } = await supabaseClient
+                            .from('cart_items')
+                            .select('quantity')
+                            .eq('user_id', user.id);
+                        if (!error && rows) {
+                            count = rows.reduce((s, r) => s + (r.quantity || 0), 0);
+                        }
+                    } else {
+                        const g = readCanonicalCart();
+                        count = g.reduce((s, i) => s + (i.quantity || 0), 0);
+                    }
+
+                    const el = document.getElementById('cartCount');
+                    if (el) el.textContent = count;
+                } catch (e) {
+                    console.error('updateCartCount', e);
+                }
+            }
+
+            async function mergeGuestCart(user) {
+                try {
+                    const guest = readCanonicalCart();
+                    if (!guest.length) return;
+
+                    for (const item of guest) {
+                        const { data: existing, error: fe } = await supabaseClient
+                            .from('cart_items')
+                            .select('*')
+                            .eq('user_id', user.id)
+                            .eq('product_id', item.productId)
+                            .single();
+
+                        if (fe && fe.code !== 'PGRST116') {
+                            console.error(fe);
+                            continue;
+                        }
+
+                        if (existing) {
+                            await supabaseClient
+                                .from('cart_items')
+                                .update({ quantity: existing.quantity + item.quantity })
+                                .eq('id', existing.id);
+                        } else {
+                            await supabaseClient
+                                .from('cart_items')
+                                .insert([{ user_id: user.id, product_id: item.productId, quantity: item.quantity }]);
+                        }
+                    }
+
+                    localStorage.removeItem('guest_cart');
+                    await updateCartCount();
+                } catch (e) {
+                    console.error('mergeGuestCart', e);
+                }
+            }
+
+            // ===== Main Initialization =====
+            document.addEventListener('DOMContentLoaded', async () => {
+                // Keep track of when splash started so we can ensure minimal display time
+                const _splashStart = Date.now();
+
+                // Function to hide splash screen (ensures minimal display time)
+                function hideSplashScreen() {
+                    const splash = document.getElementById('splashScreen');
+                    if (!splash || splash.classList.contains('hidden')) return;
+                    const minDisplay = 5000; // milliseconds - lets the gold fade complete
+                    const elapsed = Date.now() - _splashStart;
+                    const doHide = () => {
+                        console.log('Hiding splash screen after', elapsed, 'ms');
+                        splash.classList.add('hidden');
+                        try { if (window.stopSnow) window.stopSnow(); } catch(e) { console.warn('stopSnow failed', e); }
+                    };
+                    console.log('hideSplashScreen called, elapsed:', elapsed, 'minDisplay:', minDisplay);
+                    if (elapsed < minDisplay) {
+                        const delayTime = minDisplay - elapsed;
+                        console.log('Delaying hide by', delayTime, 'ms');
+                        setTimeout(doHide, delayTime);
+                    } else {
+                        doHide();
+                    }
+                }
+
+                // Start snow effect for the splash
+                try { if (window.startSnow) window.startSnow(); } catch(e) { console.warn('startSnow failed', e); }
+
+                // Track loading state
+                let loadingComplete = false;
+
+                // Update auth UI on load
+                await updateAuthUI();
+
+                // Auth state change listener
+                supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    if (event === 'SIGNED_IN' && session?.user) {
+                        await mergeGuestCart(session.user);
+                    }
+                    await updateAuthUI();
+                    await updateCartCount();
+                });
+
+                // Load products
+                try {
+                    const { data: products, error } = await supabaseClient.from('products').select('*');
+
+                    if (!error && products && products.length > 0) {
+                        const tabs = document.getElementById('categoryTabs');
+                        const cats = ['All', ...new Set(products.map(p => p.category || 'Uncategorized'))];
+
+                        tabs.innerHTML = cats
+                            .map((c, i) => `<button class="tab-btn ${i === 0 ? 'active' : ''}" data-category="${c}">${c}</button>`)
+                            .join('');
+
+                        const render = (list) => {
+                            const wrap = document.getElementById('categoryTabContent');
+                            if (!wrap) return;
+                            if (list.length === 0) {
+                                wrap.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">No products found in this category.</p>';
+                                return;
+                            }
+                            wrap.innerHTML =
+                                '<div class="grid">' +
+                                list
+                                    .map(
+                                        (prod) => `
+                                    <div class="product-card" onclick="handleProductClick(event, ${prod.id})">
+                                        <img src="${prod.image_url || prod.image || 'https://via.placeholder.com/240x200?text=No+Image'}" alt="${(prod.name || '').replace(/"/g, '')}" class="product-image">
+                                        <div class="product-info">
+                                            <div class="product-title">${prod.name || 'Unnamed Product'}</div>
+                                            <div class="product-price">$${(prod.price || 0).toFixed(2)}</div>
+                                            <div class="product-footer">
+                                                <button class="btn-add" onclick="event.stopPropagation(); addToCart(${prod.id})" title="Add to cart">+ Add</button>
+                                            </div>
+                                        </div>
+                                    </div>`
+                                    )
+                                    .join('') +
+                                '</div>';
+                        };
+
+                        const filterAndRender = () => {
+                            const active = document.querySelector('.tab-btn.active');
+                            const cat = active?.dataset?.category;
+                            const list = cat === 'All' ? products : products.filter((p) => (p.category || 'Uncategorized') === cat);
+                            render(list);
+                        };
+
+                        tabs.querySelectorAll('.tab-btn').forEach((btn) =>
+                            btn.addEventListener('click', () => {
+                                tabs.querySelector('.tab-btn.active')?.classList.remove('active');
+                                btn.classList.add('active');
+                                filterAndRender();
+                            })
+                        );
+
+                        filterAndRender();
+                    } else {
+                        document.getElementById('categoryTabContent').innerHTML =
+                            '<p style="text-align: center; color: var(--text-light); padding: 40px;">No products available. Check back soon!</p>';
+                    }
+                } catch (e) {
+                    console.error('products init', e);
+                    document.getElementById('categoryTabContent').innerHTML =
+                        '<p style="text-align: center; color: #dc2626; padding: 40px;">Error loading products. Please refresh the page.</p>';
+                }
+
+                await updateCartCount();
+
+                // Search functionality
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            const q = (searchInput.value || '').trim();
+                            if (!q) return;
+                            window.location.href = `search-result.html?q=${encodeURIComponent(q)}`;
+                        }
+                    });
+                    const searchBtn = searchInput.parentElement?.querySelector('button');
+                    if (searchBtn) {
+                        searchBtn.addEventListener('click', () => {
+                            const q = (searchInput.value || '').trim();
+                            if (!q) return;
+                            window.location.href = `search-result.html?q=${encodeURIComponent(q)}`;
+                        });
+                    }
+                }
+
+                // Mark loading as complete and hide splash screen
+                loadingComplete = true;
+                console.log('Loading complete, calling hideSplashScreen');
+                hideSplashScreen();
+            });
+        </script>
+        <script src="js/main.js"></script>
+    </body>
 </html>
