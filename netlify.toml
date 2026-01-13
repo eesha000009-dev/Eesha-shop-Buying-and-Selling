@@ -4,6 +4,9 @@
   command = ""
   functions = "netlify/functions"
 
+[build.environment]
+  GIT_SUBMODULE_STRATEGY = "none"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

@@ -1,3 +1,3 @@
-[submodule "EeshaShop"]
-	path = EeshaShop
-	url = 
+# .gitmodules intentionally left empty/disabled to avoid Netlify submodule checkout errors.
+# If you need submodules, re-add entries here with their URLs.
+# This file can be deleted or restored to proper contents as needed.
