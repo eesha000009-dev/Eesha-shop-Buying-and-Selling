@@ -3,12 +3,9 @@
   publish = "."
   command = ""
   functions = "netlify/functions"
-<<<<<<< HEAD
-=======
 
 [build.environment]
   GIT_SUBMODULE_STRATEGY = "none"
->>>>>>> 7ef33812e91a53205284a43f2d45f3dd646de6df
 
 [[redirects]]
   from = "/*"
