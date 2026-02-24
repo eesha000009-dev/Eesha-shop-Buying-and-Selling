@@ -1,0 +1,13 @@
+{
+  "name": "eesha-shop",
+  "version": "1.0.0",
+  "description": "Buy and sell platform",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Build complete'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0"
+  },
+  "devDependencies": {}
+}
