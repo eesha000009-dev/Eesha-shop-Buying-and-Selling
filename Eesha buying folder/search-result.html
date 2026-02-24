@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eesha - Buyer Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #f0474a;
+            --secondary-color: #2c3e50;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        /* Header styles */
+        .header {
+            background-color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.8rem 3rem 0.8rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .search-bar button {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            padding: 0 1rem;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-actions a {
+            color: var(--dark-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cart-count {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 50%;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Filters */
+        .filters {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Product grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 1rem;
+        }
+
+        .product-category {
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .add-to-cart {
+            flex: 1;
+            padding: 0.8rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s;
+        }
+
+        .add-to-cart:hover {
+            background-color: #d63d40;
+        }
+
+        .wishlist-btn {
+            padding: 0.8rem;
+            background: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .wishlist-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* AI Assistant */
+        .ai-assistant {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+
+        .ai-button {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 10px rgba(240,71,74,0.3);
+            transition: transform 0.3s;
+        }
+
+        .ai-button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>Eesha</h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="nav-actions">
+                <a href="#" class="wishlist">
+                    <i class="fas fa-heart"></i>
+                    Wishlist
+                </a>
+                <a href="cart.html" class="cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    Cart
+                    <span class="cart-count">0</span>
+                </a>
+                <a href="#" class="account">
+                    <i class="fas fa-user"></i>
+                    Account
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="filters">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="">All Categories</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="fashion">Fashion</option>
+                        <option value="home">Home & Living</option>
+                        <option value="books">Books</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="price">Price Range</label>
+                    <select id="price">
+                        <option value="">All Prices</option>
+                        <option value="0-50">$0 - $50</option>
+                        <option value="51-100">$51 - $100</option>
+                        <option value="101-200">$101 - $200</option>
+                        <option value="201+">$201+</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sort">Sort By</label>
+                    <select id="sort">
+                        <option value="popular">Most Popular</option>
+                        <option value="newest">Newest First</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="product-grid" id="productGrid">
+            <!-- Products will be added dynamically -->
+        </section>
+    </main>
+
+    <div class="ai-assistant">
+        <button class="ai-button" onclick="openAIAssistant()">
+            <i class="fas fa-robot"></i>
+            Shopping Assistant
+        </button>
+    </div>
+
+    <script>
+        // Sample product data
+        const products = [
+            {
+                id: 1,
+                name: "Wireless Headphones",
+                category: "Electronics",
+                price: 99.99,
+                image: "path/to/headphones.jpg",
+                description: "High-quality wireless headphones with noise cancellation"
+            },
+            // More products will be added
+        ];
+
+        // Render products
+        function renderProducts() {
+            const productGrid = document.getElementById('productGrid');
+            productGrid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-info">
+                        <div class="product-category">${product.category}</div>
+                        <h3 class="product-name">${product.name}</h3>
+                        <div class="product-price">$${product.price}</div>
+                        <div class="product-actions">
+                            <button class="add-to-cart" onclick="addToCart(${product.id})">
+                                <i class="fas fa-shopping-cart"></i>
+                                Add to Cart
+                            </button>
+                            <button class="wishlist-btn" onclick="addToWishlist(${product.id})">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter products
+        function filterProducts() {
+            const category = document.getElementById('category').value;
+            const priceRange = document.getElementById('price').value;
+            const sortBy = document.getElementById('sort').value;
+
+            // Implement filtering logic here
+            renderProducts();
+        }
+
+        // Cart functionality — require login
+        async function addToCart(productId) {
+            // If Supabase is available, prefer it; otherwise fallback to simple login check
+            try {
+                if (window.supabase) {
+                    const supabase = window.supabase;
+                    const { data: { session } } = await supabase.auth.getSession();
+                    const user = session?.user;
+
+                    if (!user) {
+                        alert('Please sign in to add items to your cart.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    // Add to Supabase cart_items
+                    const { data: existing, error: fetchErr } = await supabase
+                        .from('cart_items')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .eq('product_id', productId)
+                        .single();
+
+                    if (fetchErr && fetchErr.code !== 'PGRST116') throw fetchErr;
+
+                    if (existing) {
+                        const { error: updateErr } = await supabase
+                            .from('cart_items')
+                            .update({ quantity: existing.quantity + 1 })
+                            .eq('id', existing.id);
+                        if (updateErr) throw updateErr;
+                    } else {
+                        const { error: insertErr } = await supabase
+                            .from('cart_items')
+                            .insert([{ user_id: user.id, product_id: productId, quantity: 1 }]);
+                        if (insertErr) throw insertErr;
+                    }
+
+                    updateCartCount();
+                    alert('Product added to cart');
+                    return;
+                }
+
+                // Fallback: require a local login marker
+                const isLoggedIn = !!localStorage.getItem('user') || !!sessionStorage.getItem('eeshaCurrentUser');
+                if (!isLoggedIn) {
+                    alert('Please sign in to add items to your cart.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Minimal fallback behavior: store in localStorage cart for logged-in mock users
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                const existing = cart.find(i => i.id === productId);
+                if (existing) existing.quantity += 1; else cart.push({ id: productId, quantity: 1 });
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartCount();
+                alert('Product added to cart');
+            } catch (err) {
+                console.error('addToCart error', err);
+                alert('Could not add to cart. Please try again later.');
+            }
+        }
+
+        function updateCartCount() {
+            // Update cart count in the header (simple approximation)
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const count = cart.reduce((s, i) => s + (i.quantity || 0), 0);
+            document.querySelector('.cart-count').textContent = count;
+        }
+
+        // Wishlist functionality
+        function addToWishlist(productId) {
+            // Implement wishlist logic
+            console.log('Adding to wishlist:', productId);
+        }
+
+        // AI Assistant
+        function openAIAssistant() {
+            // Implement AI assistant modal
+            console.log('Opening AI assistant');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts();
+
+            // Add event listeners for filters
+            document.getElementById('category').addEventListener('change', filterProducts);
+            document.getElementById('price').addEventListener('change', filterProducts);
+            document.getElementById('sort').addEventListener('change', filterProducts);
+        });
+    </script>
+</body>
+</html>

@@ -52,41 +52,7 @@ function checkLoginStatus() {
     return false;
 }
 
-// AI Shopping Assistant
-const aiChatModal = document.getElementById('ai-chat-modal');
-const openAIChatBtn = document.getElementById('openAIChat');
-const closeModal = document.querySelector('.close-modal');
-const chatMessages = document.getElementById('chatMessages');
-const userInput = document.getElementById('userInput');
-const sendMessageBtn = document.getElementById('sendMessage');
-
-// Open AI chat modal
-openAIChatBtn.onclick = () => {
-    aiChatModal.style.display = 'block';
-}
-
-// Close AI chat modal
-closeModal.onclick = () => {
-    aiChatModal.style.display = 'none';
-}
-
-// Close modal when clicking outside
-window.onclick = (event) => {
-    if (event.target == aiChatModal) {
-        aiChatModal.style.display = 'none';
-    }
-}
-
-// Send message in AI chat
-sendMessageBtn.onclick = () => {
-    const message = userInput.value.trim();
-    if (message) {
-        addMessageToChat('user', message);
-        // Here we'll implement AI response
-        simulateAIResponse(message);
-        userInput.value = '';
-    }
-}
+// AI Shopping Assistant - DOM elements are queried after DOMContentLoaded
 
 // Add message to chat
 function addMessageToChat(sender, message) {
@@ -109,4 +75,43 @@ function simulateAIResponse(userMessage) {
 document.addEventListener('DOMContentLoaded', () => {
     initializeHeroSlider();
     displayProducts(sampleProducts);
+
+    // Initialize AI chat elements safely (guard against missing elements)
+    const aiChatModal = document.getElementById('ai-chat-modal');
+    const openAIChatBtn = document.getElementById('openAIChat');
+    const closeModal = document.querySelector('.close-modal');
+    const chatMessages = document.getElementById('chatMessages');
+    const userInput = document.getElementById('userInput');
+    const sendMessageBtn = document.getElementById('sendMessage');
+
+    if (openAIChatBtn && aiChatModal) {
+        openAIChatBtn.addEventListener('click', () => {
+            aiChatModal.style.display = 'block';
+        });
+    }
+
+    if (closeModal && aiChatModal) {
+        closeModal.addEventListener('click', () => {
+            aiChatModal.style.display = 'none';
+        });
+    }
+
+    // Close modal when clicking outside (guarded)
+    if (aiChatModal) {
+        window.addEventListener('click', (event) => {
+            if (event.target === aiChatModal) aiChatModal.style.display = 'none';
+        });
+    }
+
+    // Send message in AI chat (guarded)
+    if (sendMessageBtn && userInput && chatMessages) {
+        sendMessageBtn.addEventListener('click', () => {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessageToChat('user', message);
+                simulateAIResponse(message);
+                userInput.value = '';
+            }
+        });
+    }
 });

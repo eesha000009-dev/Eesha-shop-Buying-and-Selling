@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Eesha Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <!-- Centralized Supabase initializer -->
+    <script src="../js/config/supabase.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="../index.html" class="flex items-center">
+                <img src="shared/image.svg" alt="Eesha Logo" class="h-16 w-16">
+                <span class="text-2xl font-bold ml-2">Eesha Shop</span>
+            </a>
+            <a href="../index.html" class="text-primary hover:underline">Continue Shopping</a>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 mt-8">
+        <div id="cart-content">
+            <!-- Content will be dynamically inserted here -->
+        </div>
+    </main>
+
+    <script>
+        // Use centralized global Supabase client
+        const supabase = window.supabase;
+
+        // --- Local cart helpers: use 'cart' as the canonical key. ---
+        function readLocalCart() {
+            try {
+                return JSON.parse(localStorage.getItem('cart') || '[]');
+            } catch (e) {
+                console.warn('Failed to parse cart from localStorage', e);
+                return [];
+            }
+        }
+
+        function writeLocalCart(cart) {
+            try {
+                localStorage.setItem('cart', JSON.stringify(cart));
+            } catch (e) {
+                console.warn('Failed to write cart to localStorage', e);
+            }
+        }
+
+        function readGuestCart() {
+            try {
+                return JSON.parse(localStorage.getItem('guest_cart') || '[]');
+            } catch (e) {
+                console.warn('Failed to parse guest_cart', e);
+                return [];
+            }
+        }
+
+        function migrateGuestCartToCart() {
+            try {
+                const guest = readGuestCart();
+                if (!Array.isArray(guest) || guest.length === 0) return;
+
+                const existing = readLocalCart();
+                const map = {};
+                existing.forEach(i => { const pid = i.productId || i.id; if (pid) map[pid] = { ...i }; });
+                guest.forEach(g => {
+                    const pid = g.productId || g.id;
+                    if (!pid) return;
+                    if (!map[pid]) {
+                        map[pid] = { id: pid, productId: pid, name: g.name || '', price: g.price || 0, quantity: g.quantity || g.qty || 1 };
+                    } else {
+                        map[pid].quantity = (map[pid].quantity || 0) + (g.quantity || g.qty || 1);
+                    }
+                });
+                const merged = Object.values(map);
+                writeLocalCart(merged);
+                // Remove legacy key after successful migration
+                try { localStorage.removeItem('guest_cart'); } catch(e) { /* ignore */ }
+            } catch (err) {
+                console.warn('Failed to migrate guest_cart to cart', err);
+            }
+        }
+
+        const cartContent = document.getElementById('cart-content');
+        let currentUser = null;
+
+        async function checkUser() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                currentUser = session?.user || null;
+                
+                if (currentUser) {
+                    // If user just logged in, merge any local guest cart (migrated to canonical 'cart') with their user cart
+                    const guestCart = readLocalCart();
+                    if (guestCart.length > 0) {
+                        await mergeGuestCart(guestCart);
+                        // canonical cart is kept but we don't need guest_cart anymore
+                    }
+                }
+                
+                await renderCart();
+            } catch (error) {
+                console.error('Error checking user session:', error);
+            }
+        }
+
+        async function mergeGuestCart(guestCart) {
+            try {
+                for (const item of guestCart) {
+                    const { data: existingItem, error: fetchError } = await supabase
+                        .from('cart_items')
+                        .select('*')
+                        .eq('user_id', currentUser.id)
+                        .eq('product_id', item.productId)
+                        .single();
+
+                    if (fetchError && fetchError.code !== 'PGRST116') {
+                        console.error('Error checking existing cart item:', fetchError);
+                        continue;
+                    }
+
+                    if (existingItem) {
+                        // Update quantity of existing item
+                        const { error: updateError } = await supabase
+                            .from('cart_items')
+                            .update({ quantity: existingItem.quantity + item.quantity })
+                            .eq('id', existingItem.id);
+
+                        if (updateError) {
+                            console.error('Error updating cart item:', updateError);
+                        }
+                    } else {
+                        // Insert new item
+                        const { error: insertError } = await supabase
+                            .from('cart_items')
+                            .insert([{
+                                user_id: currentUser.id,
+                                product_id: item.productId,
+                                quantity: item.quantity
+                            }]);
+
+                        if (insertError) {
+                            console.error('Error adding item to cart:', insertError);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error merging guest cart:', error);
+            }
+        }
+
+        async function renderCart() {
+            try {
+                if (currentUser) {
+                    await renderUserCart();
+                } else {
+                    await renderGuestCart();
+                }
+                // If a global updateCartCount function exists elsewhere, call it to refresh header counts
+                try { if (typeof window.updateCartCount === 'function') window.updateCartCount(); } catch(e) { /* ignore */ }
+            } catch (error) {
+                console.error('Error rendering cart:', error);
+            }
+        }
+
+        async function renderGuestCart() {
+            const guestCart = readLocalCart();
+            
+            if (guestCart.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="text-center bg-white p-12 rounded-lg shadow-lg">
+                        <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-6"></i>
+                        <h2 class="text-3xl font-bold mb-4">Your Cart is Empty</h2>
+                        <p class="text-gray-600 mb-8">Looks like you haven't added anything to your cart yet.</p>
+                        <p class="text-gray-600 mb-8">Sign in to save your cart across devices!</p>
+                        <a href="login.html" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold">
+                            Sign In to Your Account
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Fetch product details for guest cart items
+            try {
+                const productIds = guestCart.map(item => item.productId || item.id).filter(Boolean);
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .in('id', productIds);
+
+                if (error) {
+                    throw error;
+                }
+
+                const cartTotal = calculateCartTotal(guestCart, products);
+
+                const itemsHtml = guestCart.map(item => {
+                    const product = products.find(p => p.id === item.productId);
+                    if (!product) return '';
+                    const discount = product.original_price ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
+                    let options = '';
+                    for (let i=1;i<=10;i++) options += '<option value="'+i+'"'+(item.quantity==i? ' selected':'')+'>Qty '+i+'</option>';
+                    return '<div class="flex items-start justify-between border-b pb-4">'
+                        + '<div class="flex items-start gap-4">'
+                            + '<input type="checkbox" class="mt-2">'
+                            + '<img src="' + (product.image || product.image_url || '') + '" alt="' + (product.name || '') + '" class="w-24 h-24 object-cover rounded">'
+                            + '<div>'
+                                + '<h3 class="font-semibold">' + (product.name || '') + '</h3>'
+                                + '<p class="text-sm text-gray-500">' + (product.category || '') + '</p>'
+                                + '<div class="mt-2 flex items-center gap-3">'
+                                    + '<span class="text-lg font-bold">$' + (product.price || 0) + '</span>'
+                                    + (product.original_price ? ('<span class="text-sm text-gray-400 line-through">$' + product.original_price + '</span>') : '')
+                                    + (discount > 0 ? ('<span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">-' + discount + '%</span>') : '')
+                                + '</div>'
+                            + '</div>'
+                        + '</div>'
+                        + '<div class="flex items-center gap-3">'
+                            + '<select onchange="updateQuantity(' + item.productId + ', parseInt(this.value))" class="border rounded px-2 py-1">' + options + '</select>'
+                            + '<button onclick="removeFromCart(' + item.productId + ')" class="text-red-500 hover:text-red-700">'
+                                + '<i class="fas fa-trash"></i>'
+                            + '</button>'
+                        + '</div>'
+                    + '</div>';
+
+                }).join('');
+
+                cartContent.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+                            <div class="flex items-center justify-between mb-4">
+                                <h1 class="text-2xl font-bold">Shopping Cart</h1>
+                                <a href="login.html" class="text-primary hover:underline">Sign in to save your cart</a>
+                            </div>
+                            <div class="space-y-4">
+                                ${itemsHtml}
+                            </div>
+                        </div>
+                        <aside class="bg-white p-6 rounded-lg shadow">
+                            <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+                            <div class="flex justify-between mb-2">
+                                <span>Subtotal</span>
+                                <span>$${cartTotal.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between mb-4 text-sm text-gray-500">
+                                <span>Item discount</span>
+                                <span>$0.00</span>
+                            </div>
+                            <div class="border-t pt-4">
+                                <div class="flex justify-between text-lg font-bold mb-4">
+                                    <span>Total</span>
+                                    <span>$${cartTotal.toFixed(2)}</span>
+                                </div>
+                                <a href="checkout.html" class="w-full inline-block bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-center">Proceed to Checkout</a>
+                            </div>
+                        </aside>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error rendering guest cart:', error);
+                cartContent.innerHTML = `
+                    <div class="text-center bg-white p-12 rounded-lg shadow-lg">
+                        <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-6"></i>
+                        <h2 class="text-3xl font-bold mb-4">Error Loading Cart</h2>
+                        <p class="text-gray-600 mb-8">There was an error loading your cart. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function renderUserCart() {
+            try {
+                const { data: cartItems, error } = await supabase
+                    .from('cart_items')
+                    .select('*, products(*)')
+                    .eq('user_id', currentUser.id);
+
+                if (error) {
+                    throw error;
+                }
+
+                if (!cartItems || cartItems.length === 0) {
+                    cartContent.innerHTML = `
+                        <div class="text-center bg-white p-12 rounded-lg shadow-lg">
+                            <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-6"></i>
+                            <h2 class="text-3xl font-bold mb-4">Your Cart is Empty</h2>
+                            <p class="text-gray-600 mb-8">Start adding products to see them here.</p>
+                            <a href="../index.html" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold">
+                                Discover Products
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const cartTotal = cartItems.reduce((total, item) => {
+                    return total + (item.quantity * (item.products?.price || 0));
+                }, 0);
+
+                // build items HTML without nested template literals
+                const itemsHtml = cartItems.map(item => {
+                    const product = item.products || {};
+                    const discount = product.original_price ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
+                    return '<div class="flex items-start justify-between border-b pb-4">'
+                        + '<div class="flex items-start gap-4">'
+                            + '<input type="checkbox" class="mt-2 item-checkbox" data-id="' + item.product_id + '">' 
+                            + '<img src="' + (product.image || product.image_url || '') + '" alt="' + (product.name || '') + '" class="w-24 h-24 object-cover rounded">'
+                            + '<div>'
+                                + '<h3 class="font-semibold">' + (product.name || '') + '</h3>'
+                                + '<p class="text-sm text-gray-500">' + (product.category || '') + '</p>'
+                                + '<div class="mt-2 flex items-center gap-3">'
+                                    + '<span class="text-lg font-bold">$' + (product.price || 0) + '</span>'
+                                    + (product.original_price ? ('<span class="text-sm text-gray-400 line-through">$' + product.original_price + '</span>') : '')
+                                    + (discount > 0 ? ('<span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">-' + discount + '%</span>') : '')
+                                + '</div>'
+                            + '</div>'
+                        + '</div>'
+                        + '<div class="flex items-center gap-3">'
+                            + '<select onchange="updateQuantity(' + item.product_id + ', parseInt(this.value))" class="border rounded px-2 py-1">'
+                                + (function(q){ let s=''; for(let i=1;i<=10;i++){ s += '<option value="'+i+'"'+(q==i?' selected':'')+'>Qty '+i+'</option>'; } return s;})(item.quantity)
+                            + '</select>'
+                            + '<button onclick="removeFromCart(' + item.product_id + ')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>'
+                        + '</div>'
+                    + '</div>';
+                }).join('');
+
+                cartContent.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+                            <div class="flex items-center justify-between mb-4">
+                                <h1 class="text-2xl font-bold">Shopping Cart</h1>
+                                <button id="selectAllBtn" class="text-sm text-gray-600">Select all (${cartItems.length})</button>
+                            </div>
+                            <div class="space-y-4">
+                                ${itemsHtml}
+                            </div>
+                        </div>
+                        <aside class="bg-white p-6 rounded-lg shadow">
+                            <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+                            <div class="flex justify-between mb-2">
+                                <span>Subtotal</span>
+                                <span>$${cartTotal.toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between mb-4 text-sm text-gray-500">
+                                <span>Item discount</span>
+                                <span>$0.00</span>
+                            </div>
+                            <div class="border-t pt-4">
+                                <div class="flex justify-between text-lg font-bold mb-4">
+                                    <span>Total</span>
+                                    <span>$${cartTotal.toFixed(2)}</span>
+                                </div>
+                                <button onclick="proceedToCheckout()" class="w-full inline-block bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-center">Proceed to Checkout</button>
+                            </div>
+                        </aside>
+                    </div>
+                `;
+                // attach select-all behavior after DOM insertion
+                const selectAllBtn = document.getElementById('selectAllBtn');
+                if (selectAllBtn) {
+                    selectAllBtn.addEventListener('click', () => {
+                        const checkboxes = document.querySelectorAll('.item-checkbox');
+                        const allSelected = Array.from(checkboxes).every(cb => cb.checked);
+                        checkboxes.forEach(cb => cb.checked = !allSelected);
+                        selectAllBtn.textContent = `Select all (${cartItems.length})`;
+                    });
+                }
+
+                // call global updateCartCount if available
+                try { if (typeof window.updateCartCount === 'function') window.updateCartCount(); } catch(e) { /* ignore */ }
+            } catch (error) {
+                console.error('Error rendering user cart:', error);
+                cartContent.innerHTML = `
+                    <div class="text-center bg-white p-12 rounded-lg shadow-lg">
+                        <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-6"></i>
+                        <h2 class="text-3xl font-bold mb-4">Error Loading Cart</h2>
+                        <p class="text-gray-600 mb-8">There was an error loading your cart. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateCartTotal(cart, products) {
+            return cart.reduce((total, item) => {
+                const product = products.find(p => p.id === item.productId);
+                if (product) {
+                    return total + (item.quantity * product.price);
+                }
+                return total;
+            }, 0);
+        }
+
+        async function updateQuantity(productId, newQuantity) {
+            try {
+                if (newQuantity < 1) {
+                    await removeFromCart(productId);
+                    return;
+                }
+
+                if (currentUser) {
+                    const { error } = await supabase
+                        .from('cart_items')
+                        .update({ quantity: newQuantity })
+                        .eq('user_id', currentUser.id)
+                        .eq('product_id', productId);
+
+                    if (error) throw error;
+                } else {
+                    const guestCart = readLocalCart();
+                    const itemIndex = guestCart.findIndex(item => (item.productId || item.id) === productId);
+                    if (itemIndex !== -1) {
+                        guestCart[itemIndex].quantity = newQuantity;
+                        writeLocalCart(guestCart);
+                    }
+                }
+
+                await renderCart();
+                try { if (typeof window.updateCartCount === 'function') window.updateCartCount(); } catch(e) { /* ignore */ }
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                alert('Failed to update quantity. Please try again.');
+            }
+        }
+
+        async function removeFromCart(productId) {
+            try {
+                if (currentUser) {
+                    const { error } = await supabase
+                        .from('cart_items')
+                        .delete()
+                        .eq('user_id', currentUser.id)
+                        .eq('product_id', productId);
+
+                    if (error) throw error;
+                } else {
+                    const guestCart = readLocalCart();
+                    const updatedCart = guestCart.filter(item => (item.productId || item.id) !== productId);
+                    writeLocalCart(updatedCart);
+                }
+
+                await renderCart();
+                try { if (typeof window.updateCartCount === 'function') window.updateCartCount(); } catch(e) { /* ignore */ }
+            } catch (error) {
+                console.error('Error removing item from cart:', error);
+                alert('Failed to remove item. Please try again.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Migrate any legacy guest cart into canonical 'cart' before rendering
+            migrateGuestCartToCart();
+            checkUser();
+        });
+
+        async function proceedToCheckout() {
+            try {
+                // Ensure user is logged in
+                if (!currentUser) {
+                    window.location.href = 'login.html?redirect=cart';
+                    return;
+                }
+                
+                let items;
+                let cartTotal = 0;
+                
+                if (currentUser) {
+                    // Get cart items with product details from database
+                    const { data: cartItems, error } = await supabase
+                        .from('cart_items')
+                        .select('*, products(*)')
+                        .eq('user_id', currentUser.id);
+                    
+                    if (error) throw error;
+                    
+                    items = cartItems.map(item => ({
+                        product_id: item.product_id,
+                        name: item.products?.name || '',
+                        quantity: item.quantity,
+                        price: item.products?.price || 0,
+                        total: (item.products?.price || 0) * item.quantity
+                    }));
+                    
+                    cartTotal = cartItems.reduce((total, item) => 
+                        total + (item.quantity * (item.products?.price || 0)), 0);
+                } else {
+                    const guestCart = readLocalCart();
+                    const productIds = guestCart.map(item => item.productId || item.id).filter(Boolean);
+                    
+                    const { data: products, error } = await supabase
+                        .from('products')
+                        .select('*')
+                        .in('id', productIds);
+                    
+                    if (error) throw error;
+                    
+                    items = guestCart.map(item => {
+                        const product = products.find(p => p.id === (item.productId || item.id)) || {};
+                        return {
+                            product_id: item.productId || item.id,
+                            name: product.name || item.name || '',
+                            quantity: item.quantity,
+                            price: product.price || item.price || 0,
+                            total: (product.price || item.price || 0) * item.quantity
+                        };
+                    });
+                    
+                    cartTotal = items.reduce((total, item) => total + item.total, 0);
+                }
+                
+                // Calculate totals
+                const shipping = 10.00;
+                const tax = cartTotal * 0.1;
+                const total = cartTotal + shipping + tax;
+                
+                // Save to pending_orders
+                const { data: pendingOrder, error } = await supabase
+                    .from('pending_orders')
+                    .insert([{
+                        user_id: currentUser.id,
+                        items: items,
+                        subtotal: cartTotal,
+                        shipping: shipping,
+                        tax: tax,
+                        total: total
+                    }])
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                
+                // Store pending order ID in localStorage and redirect
+                localStorage.setItem('pendingOrderId', pendingOrder.id);
+                window.location.href = 'checkout.html';
+                
+            } catch (error) {
+                console.error('Error creating pending order:', error);
+                alert('There was an error processing your cart. Please try again.');
+            }
+        }
+    </script>
+
+</body>
+</html>

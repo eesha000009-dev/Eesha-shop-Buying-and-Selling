@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Eesha Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f0474a',
+                        secondary: '#2c3e50'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes confetti {
+            0% { transform: translateY(0) rotateZ(0); opacity: 1; }
+            100% { transform: translateY(1000px) rotateZ(720deg); opacity: 0; }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+        }
+
+        .confirmation-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            text-align: center;
+            animation: scaleIn 0.6s ease-out;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            border-radius: 50%;
+            background: var(--success-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 1s ease-out;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            color: white;
+        }
+
+        .order-details {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--box-shadow);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 0.3s forwards;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 0.6s forwards;
+        }
+
+        .tracking-status {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            position: relative;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out 0.9s forwards;
+        }
+
+        .status-point {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .status-point::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: var(--gray-300);
+            border-radius: 50%;
+            display: block;
+            margin: 0 auto 0.5rem;
+            transition: background-color 0.3s;
+        }
+
+        .status-point.active::before {
+            background: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(240, 71, 74, 0.2);
+        }
+
+        .status-point::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: var(--gray-300);
+            top: 10px;
+            left: 50%;
+            z-index: -1;
+        }
+
+        .status-point:last-child::after {
+            display: none;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .status-point.active .status-label {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="max-w-3xl mx-auto px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div class="bg-white shadow-lg rounded-lg px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
+            <div class="flex justify-center mb-12">
+                <div class="rounded-full bg-green-100 p-4">
+                    <div class="rounded-full bg-green-600 text-white p-3">
+                        <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <h1 class="text-4xl font-bold text-center text-gray-900 sm:text-5xl">Order Confirmed!</h1>
+            <p class="mt-4 text-lg text-center text-gray-600">Thank you for shopping with Eesha Shop</p>
+
+            <div class="mt-16 bg-gray-50 rounded-lg p-6 space-y-6">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-gray-500">Order Number</p>
+                        <p class="text-lg font-semibold text-gray-900" id="order-number"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-gray-500">Order Date</p>
+                        <p class="text-lg font-semibold text-gray-900" id="order-date"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-gray-500">Total Amount</p>
+                        <p class="text-lg font-semibold text-primary" id="order-total"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-gray-500">Shipping Address</p>
+                        <p class="text-lg font-semibold text-gray-900" id="shipping-address"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-between">
+                        <div class="flex flex-col items-center">
+                            <div class="rounded-full h-12 w-12 flex items-center justify-center bg-primary text-white font-semibold">1</div>
+                            <p class="mt-2 text-sm font-medium text-gray-900">Order Confirmed</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="rounded-full h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 font-semibold">2</div>
+                            <p class="mt-2 text-sm font-medium text-gray-500">Processing</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="rounded-full h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 font-semibold">3</div>
+                            <p class="mt-2 text-sm font-medium text-gray-500">Shipping</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="rounded-full h-12 w-12 flex items-center justify-center bg-gray-200 text-gray-600 font-semibold">4</div>
+                            <p class="mt-2 text-sm font-medium text-gray-500">Delivered</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 flex justify-center space-x-4">
+                <a href="index.html" class="inline-flex items-center px-6 py-3 border-2 border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200">
+                    Continue Shopping
+                </a>
+                <a href="#" id="track-order" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200">
+                    Track Order
+                </a>
+            </div>
+    </div>
+
+    <script src="../../lib/supabaseClient.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Create confetti effect
+            function createConfetti() {
+                const colors = ['#f0474a', '#2c3e50', '#28a745', '#ffc107'];
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animation = `confetti ${Math.random() * 3 + 2}s linear`;
+                    document.body.appendChild(confetti);
+                    
+                    confetti.addEventListener('animationend', () => {
+                        confetti.remove();
+                    });
+                }
+            }
+
+            // Get order ID from URL
+            const params = new URLSearchParams(window.location.search);
+            const orderId = params.get('id');
+
+            if (!orderId) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                // Fetch order details from Supabase
+                const { data: order, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('id', orderId)
+                    .single();
+
+                if (error) throw error;
+
+                // Display order details
+                document.getElementById('order-number').textContent = `#${order.id}`;
+                document.getElementById('order-date').textContent = new Date(order.created_at).toLocaleDateString();
+                document.getElementById('order-total').textContent = `$${order.total.toFixed(2)}`;
+                document.getElementById('shipping-address').textContent = `${order.shipping_address.fullname}, ${order.shipping_address.address}, ${order.shipping_address.city}, ${order.shipping_address.state} ${order.shipping_address.zipcode}`;
+
+                // Create confetti effect
+                createConfetti();
+                setInterval(createConfetti, 3000);
+
+            } catch (error) {
+                console.error('Error fetching order:', error);
+            }
+
+            // Track order button click
+            document.getElementById('track-order').addEventListener('click', function(e) {
+                e.preventDefault();
+                // Add tracking functionality here
+                alert('Tracking feature coming soon!');
+            });
+        });
+    </script>
+</body>
+</html>
