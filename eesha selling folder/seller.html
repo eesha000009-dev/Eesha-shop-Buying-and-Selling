@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - Eesha</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f0474a',
+                        secondary: '#2c3e50',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="../Eesha buying folder/shared/image.svg" alt="Eesha Logo" class="h-12 w-12">
+                <h1 class="text-2xl font-bold ml-4">Seller Dashboard</h1>
+            </div>
+            <button id="logoutBtn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
+                Logout
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 mt-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Add Product Form -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-6">Add New Product</h2>
+                <form id="addProductForm" class="space-y-4">
+                    <div>
+                        <label for="productName" class="block text-sm font-medium text-gray-700">Product Name</label>
+                        <input type="text" id="productName" name="productName" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    </div>
+                    <div>
+                        <label for="productDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="productDescription" name="productDescription" rows="3" required
+                                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"></textarea>
+                    </div>
+                    <div>
+                        <label for="productPrice" class="block text-sm font-medium text-gray-700">Price</label>
+                        <input type="number" id="productPrice" name="productPrice" step="0.01" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    </div>
+                    <div>
+                        <label for="productImage" class="block text-sm font-medium text-gray-700">Image URL</label>
+                        <input type="url" id="productImage" name="productImage" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                    </div>
+                    <div>
+                        <label for="productCategory" class="block text-sm font-medium text-gray-700">Category</label>
+                        <select id="productCategory" name="productCategory" required
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Home & Living">Home & Living</option>
+                            <option value="Beauty">Beauty</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Books">Books</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-opacity-90">
+                        Add Product
+                    </button>
+                </form>
+            </div>
+
+            <!-- Product List -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-6">Your Products</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                <th scope="col" class="relative px-6 py-3">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="productList" class="bg-white divide-y divide-gray-200">
+                            <!-- Product rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const supabase = window.supabase.createClient(
+                'https://tcwdbokruvlizkxcpkzj.supabase.co',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjd2Rib2tydXZsaXpreGNwa3pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMDkyNjQsImV4cCI6MjA3NTY4NTI2NH0.p871FXUakrWQ7PhhZr8Ly2BxLOhwQjRJiDGd59wAhyg'
+            );
+
+            const addProductForm = document.getElementById('addProductForm');
+            const productList = document.getElementById('productList');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            // --- Authentication ---
+            const user = supabase.auth.user();
+            if (!user) {
+                // If no user is logged in, redirect to the login page
+                window.location.href = 'login.html';
+            }
+
+            logoutBtn.addEventListener('click', async () => {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    console.error('Error logging out:', error);
+                } else {
+                    // Redirect to login page after successful logout
+                    window.location.href = 'login.html';
+                }
+            });
+            // --- End Authentication ---
+
+            // Fetch and display products
+            async function fetchProducts() {
+                // For a real app, you'd filter by user_id
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error('Error fetching products:', error);
+                    return;
+                }
+
+                productList.innerHTML = ''; // Clear existing list
+                products.forEach(product => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <img class="h-10 w-10 rounded-full object-cover" src="${product.image_url}" alt="">
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">${product.name}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">$${product.price}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button data-id="${product.id}" class="text-red-600 hover:text-red-900 delete-btn">Delete</button>
+                        </td>
+                    `;
+                    productList.appendChild(row);
+                });
+            }
+
+            // Delete a product
+            productList.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('delete-btn')) {
+                    const productId = e.target.dataset.id;
+                    if (confirm('Are you sure you want to delete this product?')) {
+                        const { error } = await supabase
+                            .from('products')
+                            .delete()
+                            .eq('id', productId);
+
+                        if (error) {
+                            console.error('Error deleting product:', error);
+                        } else {
+                            fetchProducts(); // Refresh the list
+                        }
+                    }
+                }
+            });
+
+            // Add a new product
+            addProductForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(addProductForm);
+                const newProduct = {
+                    name: formData.get('productName'),
+                    description: formData.get('productDescription'),
+                    price: parseFloat(formData.get('productPrice')),
+                    image_url: formData.get('productImage'),
+                    category: formData.get('productCategory'),
+                };
+
+                const { error } = await supabase
+                    .from('products')
+                    .insert([newProduct]);
+
+                if (error) {
+                    console.error('Error adding product:', error);
+                    alert('Error adding product. Check the console for details.');
+                } else {
+                    addProductForm.reset();
+                    fetchProducts(); // Refresh the list
+                }
+            });
+
+            // Initial fetch
+            fetchProducts();
+        });
+    </script>
+
+</body>
+</html>

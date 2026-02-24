@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eesha - Your One-Stop Shopping Destination</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -25,7 +26,102 @@
     </script>
     <style>
         :root {
-            background-color: #fff1f1;
+            --primary: #f0474a;
+            --primary-dark: #c93536;
+        }
+        .category-pill {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .category-pill.active,
+        .category-pill:hover {
+            background: var(--primary);
+        }
+        .star {
+            color: #ffc107;
+            font-size: 0.875rem;
+        }
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .original-price {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            text-decoration: line-through;
+        }
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .add-to-cart-btn:hover {
+            background: var(--primary-dark);
+        }
+        @keyframes cartSlideIn {
+            0% { opacity: 0; transform: translateX(-100%) rotate(-5deg) scale(0.8); }
+            50% { opacity: 1; transform: translateX(10%) rotate(2deg) scale(1.05); }
+            75% { transform: translateX(-5%) rotate(-1deg) scale(0.98); }
+            90% { transform: translateX(2%) rotate(0.5deg) scale(1.02); }
+            100% { opacity: 1; transform: translateX(0) rotate(0) scale(1); }
+        }
+        .animate-cart-slide {
+            animation: cartSlideIn 2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes floatEffect {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .floating {
+            animation: floatEffect 3s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        .animate-bounce {
+            animation: bounce 0.5s;
+        }
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
         }
     </style>
 </head>
@@ -73,42 +169,31 @@
                     </a>
                     <a href="Eesha buying folder/cart.html" class="relative text-gray-600 hover:text-primary">
                         <i class="fas fa-shopping-cart text-xl"></i>
-                        <span class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                        <span id="cartCount" class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
                     </a>
                     <button class="md:hidden text-gray-600" id="mobileMenuBtn" aria-label="Toggle mobile menu">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
-
-            <!-- Categories Menu -->
-            <div class="hidden md:flex items-center space-x-8 mt-4">
-                <a href="#" class="text-gray-600 hover:text-primary">Electronics</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Fashion</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Home & Living</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Beauty</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Sports</a>
-                <a href="#" class="text-gray-600 hover:text-primary">Books</a>
-            </div>
-        </nav>
-
-        <!-- Mobile Menu -->
-        <div class="md:hidden hidden" id="mobileMenu">
-            <div class="px-4 py-2 bg-custom-red-50">
-                <div class="flex flex-col space-y-4">
-                    <a href="Eesha buying folder/login.html" class="text-gray-600">Login</a>
-                    <a href="Eesha buying folder/signup.html" class="text-gray-600">Sign Up</a>
-                    <div class="border-t border-gray-200 pt-2">
-                        <a href="#" class="block py-2 text-gray-600">Electronics</a>
-                        <a href="#" class="block py-2 text-gray-600">Fashion</a>
-                        <a href="#" class="block py-2 text-gray-600">Home & Living</a>
-                        <a href="#" class="block py-2 text-gray-600">Beauty</a>
-                        <a href="#" class="block py-2 text-gray-600">Sports</a>
-                        <a href="#" class="block py-2 text-gray-600">Books</a>
+             <!-- Mobile Menu -->
+            <div class="md:hidden hidden" id="mobileMenu">
+                <div class="px-4 py-2 bg-custom-red-50">
+                    <div class="flex flex-col space-y-4">
+                        <a href="Eesha buying folder/login.html" class="text-gray-600">Login</a>
+                        <a href="Eesha buying folder/signup.html" class="text-gray-600">Sign Up</a>
+                        <div class="border-t border-gray-200 pt-2">
+                            <a href="#" class="block py-2 text-gray-600">Electronics</a>
+                            <a href="#" class="block py-2 text-gray-600">Fashion</a>
+                            <a href="#" class="block py-2 text-gray-600">Home & Living</a>
+                            <a href="#" class="block py-2 text-gray-600">Beauty</a>
+                            <a href="#" class="block py-2 text-gray-600">Sports</a>
+                            <a href="#" class="block py-2 text-gray-600">Books</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </nav>
     </header>
 
     <!-- Main Content -->
@@ -126,7 +211,12 @@
         <!-- Featured Deals -->
         <section class="mb-12">
             <h2 class="text-2xl font-bold mb-6">Featured Deals</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" id="featuredProducts">
+            <div class="border-b border-gray-200 mb-4">
+                <nav class="flex space-x-4" id="categoryTabs">
+                    <!-- Category tabs will be inserted here -->
+                </nav>
+            </div>
+            <div id="categoryTabContent">
                 <!-- Product cards will be added dynamically -->
             </div>
         </section>
@@ -220,44 +310,87 @@
     </footer>
 
     <script>
+    // Cart Management Functions
+    function addToCart(productId) {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existingItem = cart.find(item => item.productId === productId);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({ productId, quantity: 1 });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        
+        // Show feedback animation
+        const cartIcon = document.querySelector('.fa-shopping-cart');
+        cartIcon.classList.add('animate-bounce');
+        setTimeout(() => cartIcon.classList.remove('animate-bounce'), 1000);
+    }
+
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartCountElement = document.getElementById('cartCount');
+        if (cartCountElement) {
+            cartCountElement.textContent = count;
+        }
+    }
+
+    // Wait for both DOM and Supabase to be ready
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(
+            'https://tcwdbokruvlizkxcpkzj.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjd2Rib2tydXZsaXpreGNwa3pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMDkyNjQsImV4cCI6MjA3NTY4NTI2NH0.p871FXUakrWQ7PhhZr8Ly2BxLOhwQjRJiDGd59wAhyg'
+        );
+
+        // Splash Screen
+        const splash = document.getElementById('splash-screen');
+        const splashText = document.getElementById('splash-text');
+        
+        setTimeout(() => {
+            splashText.style.opacity = '1';
+            document.getElementById('kaduna-text').style.opacity = '1';
+        }, 1500);
+
+        setTimeout(() => {
+            splash.style.opacity = '0';
+            splash.style.transition = 'opacity 0.8s ease';
+            setTimeout(() => {
+                splash.style.display = 'none';
+            }, 800);
+        }, 3000);
+
         // Mobile Menu Toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
-
         mobileMenuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Sample product data
-        const products = [
-            {
-                id: 1,
-                name: "Wireless Headphones",
-                price: 99.99,
-                image: "path/to/headphones.jpg",
-                description: "High-quality wireless headphones with noise cancellation"
-            },
-            // More products will be added
-        ];
-
         // Render featured products
-        function renderProducts() {
-            const productGrid = document.getElementById('featuredProducts');
-            productGrid.innerHTML = products.map(product => `
-                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">${product.name}</h3>
-                        <p class="text-gray-600 mb-2">${product.description}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-primary font-bold">$${product.price}</span>
-                            <button onclick="addToCart(${product.id})" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
-                                Add to Cart
-                            </button>
+        function renderProducts(productsToRender) {
+            const productGrid = document.getElementById('categoryTabContent');
+            if (!productGrid) return;
+            productGrid.innerHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">' +
+                productsToRender.map(product => `
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                        <img src="${product.image_url}" alt="${product.name}" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">${product.name}</h3>
+                            <p class="text-gray-600 mb-2 line-clamp-2">${product.description}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-primary font-bold">$${product.price}</span>
+                                <button onclick="addToCart(${product.id})" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
+                                    Add to Cart
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('') + '</div>';
         }
 
         // AI Chat functionality
@@ -270,7 +403,6 @@
 
         openAIChat.addEventListener('click', () => {
             aiChatModal.classList.remove('hidden');
-            // Add initial greeting message
             if (chatMessages.children.length === 0) {
                 addMessage('ai', 'Hello! I\'m your shopping assistant. How can I help you today?');
             }
@@ -280,7 +412,6 @@
             aiChatModal.classList.add('hidden');
         });
 
-        // Handle both click and Enter key for sending messages
         sendMessage.addEventListener('click', handleMessageSend);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -293,110 +424,95 @@
             if (message) {
                 addMessage('user', message);
                 userInput.value = '';
-                // Simulate AI response
                 setTimeout(() => {
                     addMessage('ai', 'I can help you find the perfect product. Could you tell me more about what you\'re looking for?');
                 }, 1000);
             }
-        });
+        }
 
         function addMessage(sender, text) {
             const messageDiv = document.createElement('div');
-            messageDiv.className = `mb-4 ${sender === 'user' ? 'text-right' : ''}`;
-            messageDiv.innerHTML = `
-                <div class="${sender === 'user' ? 'bg-primary text-white ml-auto' : 'bg-gray-200'} inline-block rounded-lg px-4 py-2 max-w-[80%]">
-                    ${text}
-                </div>
-            `;
+            messageDiv.className = 'mb-4 ' + (sender === 'user' ? 'text-right' : '');
+            messageDiv.innerHTML = 
+                '<div class="' + (sender === 'user' ? 'bg-primary text-white ml-auto' : 'bg-gray-200') + ' inline-block rounded-lg px-4 py-2 max-w-[80%]">' +
+                    text +
+                '</div>';
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         // Initialize app functionality
-        function initializeApp() {
-            renderProducts();
+        async function initializeApp() {
+            try {
+                console.log('Fetching products...');
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*');
 
-            // Handle Enter key in search bar
+                if (error) {
+                    console.error('Error fetching products:', error);
+                    return;
+                }
+
+                console.log('Products fetched:', products);
+                
+                // --- Category Tabs and Filtering Logic ---
+                const categoryTabsContainer = document.getElementById('categoryTabs');
+                const categories = ['All', ...new Set(products.map(p => p.category))];
+
+                categoryTabsContainer.innerHTML = categories.map((category, index) => `
+                    <button class="tab-btn ${index === 0 ? 'active' : ''}" data-category="${category}">
+                        ${category}
+                    </button>
+                `).join('');
+
+                function filterAndRenderProducts() {
+                    const activeTab = document.querySelector('.tab-btn.active');
+                    const selectedCategory = activeTab.dataset.category;
+
+                    const filteredProducts = selectedCategory === 'All'
+                        ? products
+                        : products.filter(p => p.category === selectedCategory);
+                    
+                    renderProducts(filteredProducts);
+                }
+
+                categoryTabsContainer.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        categoryTabsContainer.querySelector('.tab-btn.active').classList.remove('active');
+                        btn.classList.add('active');
+                        filterAndRenderProducts();
+                    });
+                });
+                // --- End Category Logic ---
+
+                filterAndRenderProducts(); // Initial render
+                updateCartCount();
+
+            } catch (err) {
+                console.error('Error in initializeApp:', err);
+            }
+
             const searchInput = document.querySelector('input[placeholder="Search products..."]');
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    // Implement search functionality
                     console.log('Searching for:', searchInput.value);
                 }
             });
         }
 
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeApp();
-        });
-    </script>
-            <p>&copy; 2025 Eesha. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <style>
-        @keyframes cartSlideIn {
-            0% {
-                opacity: 0;
-                transform: translateX(-100%) rotate(-5deg) scale(0.8);
-            }
-            50% {
-                opacity: 1;
-                transform: translateX(10%) rotate(2deg) scale(1.05);
-            }
-            75% {
-                transform: translateX(-5%) rotate(-1deg) scale(0.98);
-            }
-            90% {
-                transform: translateX(2%) rotate(0.5deg) scale(1.02);
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0) rotate(0) scale(1);
-            }
-        }
-        .animate-cart-slide {
-            animation: cartSlideIn 2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        @keyframes floatEffect {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-        .floating {
-            animation: floatEffect 3s ease-in-out infinite;
-        }
-    </style>
-
-    <script>
-        // Splash Screen
-        document.addEventListener('DOMContentLoaded', () => {
-            const splash = document.getElementById('splash-screen');
-            const splashText = document.getElementById('splash-text');
-            
-            // Show welcome text after cart animation
-            setTimeout(() => {
-                splashText.style.opacity = '1';
-                document.getElementById('kaduna-text').style.opacity = '1';
-            }, 1500);
-
-            // Hide splash screen
-            setTimeout(() => {
-                splash.style.opacity = '0';
-                splash.style.transition = 'opacity 0.8s ease';
-                setTimeout(() => {
-                    splash.style.display = 'none';
-                }, 800);
-            }, 3000);
-        });
-
-        // Initialize other functionality
         initializeApp();
+        // We need updateCartCount to be globally accessible for addToCart
+        // So we move it out of initializeApp
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const cartCountElement = document.getElementById('cartCount');
+            if (cartCountElement) {
+                cartCountElement.textContent = count;
+            }
+        }
+    });
     </script>
 </body>
 </html>
