@@ -53,8 +53,8 @@
                     <a href="#" class="text-sm text-[#f0474a] hover:underline">Forgot password?</a>
                 </div>
 
-                <button type="submit" id="loginButton"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-[#f0474a] hover:bg-[#e43d40] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f0474a]">
+                <button type="button" id="loginButton"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-[#f0474a] hover:bg-[#e43d40] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f0474a]">
                     <span>Sign in</span>
                     <i class="fas fa-spinner loading ml-2 hidden"></i>
                 </button>
@@ -93,8 +93,8 @@
     </div>
 
     <script>
-        // Use centralized Supabase client
-        const supabase = window.supabase;
+        // Use centralized Supabase client (avoid referencing bare `supabase` identifier)
+        const supabaseClient = window.supabaseClient || window.supabase || null;
 
         // Elements
         const loginForm = document.getElementById('loginForm');
@@ -126,7 +126,7 @@
             // Check if email is verified
             if (!user.email_confirmed_at) {
                 showError('Please verify your email address first. Check your inbox.');
-                await supabase.auth.signOut(); // Log out user until they verify
+                await supabaseClient.auth.signOut(); // Log out user until they verify
                 return false;
             }
 
@@ -135,8 +135,7 @@
         }
 
         // Email/Password Login
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        async function performLogin() {
             hideError();
             setLoading(true);
 
@@ -144,14 +143,12 @@
             const password = document.getElementById('password').value;
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email,
                     password
                 });
 
                 if (error) {
-                    // Supabase returns 'Invalid login credentials' for both wrong password and user not found
-                    // to prevent email enumeration attacks.
                     if (error.message === 'Invalid login credentials') {
                         showError('Incorrect email or password. New user? Please sign up.');
                     } else {
@@ -162,13 +159,23 @@
 
                 const success = await handleAuthChecks(data.user);
                 if (success) {
-                    window.location.href = '../index.html'; // Redirect to dashboard
+                    window.location.href = '../index.html';
                 }
             } catch (error) {
                 showError(error.message || 'Failed to sign in');
             } finally {
                 setLoading(false);
             }
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await performLogin();
+        });
+
+        loginButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await performLogin();
         });
 
         // Google Sign In
@@ -177,7 +184,7 @@
             setLoading(true);
 
             try {
-                const { error } = await supabase.auth.signInWithOAuth({
+                const { error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'google'
                 });
 
@@ -191,7 +198,7 @@
 
         // Check session on load (for OAuth redirect and existing sessions)
         window.addEventListener('load', async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             
             if (session?.user) {
                 const success = await handleAuthChecks(session.user);

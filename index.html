@@ -834,32 +834,68 @@
             const authButtons = document.getElementById('authButtons');
             const userMenu = document.getElementById('userMenu');
             const userEmail = document.getElementById('userEmail');
-            const logoutBtn = document.getElementById('logoutBtn');
 
             if (session?.user) {
                 window.currentUser = session.user;
                 authButtons.style.display = 'none';
                 userMenu.classList.add('visible');
                 userEmail.textContent = session.user.email;
-
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', async (e) => {
-                        e.preventDefault();
-                        try {
-                            await supabaseClient.auth.signOut();
-                            localStorage.removeItem('guest_cart');
-                            localStorage.removeItem('cart');
-                            setTimeout(() => window.location.href = 'index.html', 500);
-                        } catch (err) {
-                            console.error('Logout error:', err);
-                            alert('Error logging out. Please try again.');
-                        }
-                    });
-                }
             } else {
                 window.currentUser = null;
                 authButtons.style.display = 'flex';
                 userMenu.classList.remove('visible');
+            }
+        }
+
+        // ===== Setup Logout Handler =====
+        function setupLogoutHandler() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    try {
+                        console.log('Logout initiated...');
+                        
+                        // Check if supabaseClient is available
+                        if (!window.supabase) {
+                            console.error('Supabase not initialized');
+                            alert('Error: Supabase not initialized. Please refresh the page.');
+                            return;
+                        }
+
+                        const client = window.supabase;
+                        
+                        // Sign out from Supabase
+                        const { error } = await client.auth.signOut();
+                        
+                        if (error) {
+                            console.error('Supabase signOut error:', error);
+                            throw error;
+                        }
+
+                        console.log('Signed out successfully');
+                        
+                        // Clear local storage
+                        localStorage.removeItem('guest_cart');
+                        localStorage.removeItem('cart');
+                        localStorage.removeItem('supabase.auth.token');
+                        
+                        // Update UI and redirect
+                        await updateAuthUI();
+                        await updateCartCount();
+                        
+                        console.log('Redirecting to home...');
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 100);
+                        
+                    } catch (err) {
+                        console.error('Logout error:', err);
+                        alert('Error logging out: ' + (err.message || 'Unknown error'));
+                    }
+                };
             }
         }
 
@@ -1015,13 +1051,16 @@
 
             try { if (window.startSnow) window.startSnow(); } catch(e) { console.warn('startSnow error', e); }
 
+            setupLogoutHandler();
             await updateAuthUI();
 
             supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                console.log('Auth state changed:', event);
                 if (event === 'SIGNED_IN' && session?.user) {
                     await mergeGuestCart(session.user);
                 }
                 await updateAuthUI();
+                setupLogoutHandler(); // Re-setup in case DOM updated
                 await updateCartCount();
             });
 

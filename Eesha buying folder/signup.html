@@ -85,8 +85,8 @@
     </div>
 
     <script>
-        // Use centralized Supabase client
-        const supabase = window.supabase;
+        // Use centralized Supabase client (avoid redeclaring `supabase`)
+        const supabaseClient = window.supabaseClient || window.supabase || null;
 
         // Elements
         const signupForm = document.getElementById('signupForm');
@@ -115,38 +115,7 @@
         // Email/Password Sign Up
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            hideMessage();
-            setLoading(true);
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                // Attempt to sign up the new user directly.
-                const { data, error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                });
-
-                if (error) {
-                    // Check if the error is because the user already exists.
-                    if (error.message && error.message.includes("already registered")) {
-                        throw new Error('A user with this email already exists. Please sign in.');
-                    } else {
-                        // Throw other errors to be caught by the catch block.
-                        throw error;
-                    }
-                }
-
-                // If no error, sign-up is successful (or confirmation email was re-sent).
-                showMessage('Sign-up successful! Please check your email to verify your account.', false);
-                signupForm.reset();
-
-            } catch (error) {
-                showMessage(error.message || 'Failed to sign up');
-            } finally {
-                setLoading(false);
-            }
+            await performSignUp();
         });
 
         // Google Sign Up
@@ -154,13 +123,70 @@
             hideMessage();
             
             // No pre-check needed. Supabase handles creating the user if they don't exist.
-            const { error } = await supabase.auth.signInWithOAuth({
+            const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
             });
 
             if (error) {
                 showMessage('Failed to sign up with Google');
             }
+        });
+
+        // Defensive: use a click handler and prevent default GET submission
+        async function performSignUp() {
+            hideMessage();
+            setLoading(true);
+
+            if (!supabaseClient) {
+                showMessage('Authentication not initialized. Try reloading the page.');
+                setLoading(false);
+                return;
+            }
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            try {
+                // Step 1: Check if the user already exists by attempting to sign in
+                const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+                if (signInData?.user) {
+                    // User already exists and password is correct
+                    showMessage('You already have an account! Please log in instead.', true);
+                    return;
+                }
+
+                // If sign-in failed, it could be: user doesn't exist, wrong password, or other error
+                // Try to determine if it's a case where the user exists but password is wrong
+                const signInMsg = (signInError?.message || '').toLowerCase();
+                if (signInMsg.includes('invalid login') || signInMsg.includes('wrong password')) {
+                    // User exists with this email but password is wrong
+                    showMessage('A user with this email already exists. Please log in or reset your password.', true);
+                    return;
+                }
+
+                // Step 2: If sign-in failed for other reasons (likely user doesn't exist), proceed with signup
+                const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
+
+                if (signUpError) {
+                    throw signUpError;
+                }
+
+                // Success: New user registered, verification email should be sent
+                showMessage('Sign-up successful! Please check your email for a verification link.', false);
+                signupForm.reset();
+
+            } catch (err) {
+                showMessage(err.message || 'Failed to sign up');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        signupButton.type = 'button';
+        signupButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await performSignUp();
         });
     </script>
 </body>

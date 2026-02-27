@@ -389,6 +389,7 @@
                 if (currentStep < totalSteps) {
                     currentStep++;
                     updateFormSteps();
+                    hideMessage();
                 }
             }
         });
@@ -411,8 +412,8 @@
             });
         });
 
-        // Use centralized Supabase client
-        const supabase = window.supabase;
+        // Use centralized Supabase client (avoid redeclaring)
+        const supabaseClient = window.supabaseClient || window.supabase || null;
 
         // Elements
         const signupForm = document.getElementById('signupForm');
@@ -461,6 +462,27 @@
             const password = document.getElementById('password').value;
 
                 try {
+                    // Step 0: Check if email is already registered by attempting to sign in
+                    console.log('Checking if email already registered...');
+                    const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({ 
+                        email, 
+                        password 
+                    });
+                    
+                    if (signInData?.user) {
+                        // Email exists and password is correct
+                        showMessage('You are already registered! Please log in instead.', true);
+                        setLoading(false);
+                        return;
+                    }
+                    
+                    // If sign-in failed, it could be: user doesn't exist OR user exists with wrong password
+                    const signInMsg = (signInError?.message || '').toLowerCase();
+                    if (signInMsg.includes('invalid login') && signInMsg.includes('credentials')) {
+                        // Can't distinguish between "email not found" and "wrong password" here
+                        // So we'll proceed with signup and let Supabase tell us if it already exists
+                    }
+
                     // Get form data
                     const first_name = document.getElementById('first_name').value;
                     const last_name = document.getElementById('last_name').value;
@@ -481,18 +503,17 @@
                     };
 
                     // 1. Sign up the user
-                const { data: { user, session }, error } = await supabase.auth.signUp({
+                const { data: { user, session }, error } = await supabaseClient.auth.signUp({
                     email,
-                    password,
-                    options: {
-                        emailRedirectTo: window.location.origin + '/eesha selling folder/email-verified.html'
-                    }
+                    password
                 });                    if (error) {
                         if (error.message && error.message.includes("already registered")) {
-                            throw new Error('A user with this email already exists. Please sign in.');
+                            showMessage('A user with this email already exists. Please log in instead.', true);
                         } else {
                             throw error;
                         }
+                        setLoading(false);
+                        return;
                     }
 
                     if (!user) {
@@ -503,7 +524,7 @@
                     await new Promise(resolve => setTimeout(resolve, 1000));
 
                     // 3. Get fresh session to confirm auth
-                    const { data: { session: currentSession } } = await supabase.auth.getSession();
+                    const { data: { session: currentSession } } = await supabaseClient.auth.getSession();
 
                     if (!currentSession) {
                         // Store the seller data temporarily
@@ -527,7 +548,7 @@
                     // 4. Create seller profile with authenticated session
                     try {
                         // Debug: Log the current user ID
-                        const { data: { user: currentUser } } = await supabase.auth.getUser();
+                        const { data: { user: currentUser } } = await supabaseClient.auth.getUser();
                         console.log('Current user ID:', currentUser?.id);
                         console.log('Attempting to create seller profile with ID:', user.id);
 
@@ -536,11 +557,11 @@
                         if (profile_image_file) {
                             try {
                                 // Create a bucket for the profile image if it doesn't exist
-                                const { data: bucketData, error: bucketError } = await supabase.storage
+                                const { data: bucketData, error: bucketError } = await supabaseClient.storage
                                     .getBucket('seller-profiles');
                                 
                                 if (bucketError && bucketError.statusCode === 404) {
-                                    await supabase.storage.createBucket('seller-profiles', {
+                                    await supabaseClient.storage.createBucket('seller-profiles', {
                                         public: true,
                                         fileSizeLimit: 1024 * 1024 * 2 // 2MB limit
                                     });
@@ -552,7 +573,7 @@
                                 const fileName = `${currentUser.id}_${timestamp}.${fileExt}`;
                                 
                                 // Upload the file
-                                const { data: uploadData, error: uploadError } = await supabase.storage
+                                const { data: uploadData, error: uploadError } = await supabaseClient.storage
                                     .from('seller-profiles')
                                     .upload(fileName, profile_image_file, {
                                         cacheControl: '3600',
@@ -566,7 +587,7 @@
                                 }
 
                                 // Get the public URL
-                                const { data: { publicUrl } } = supabase.storage
+                                const { data: { publicUrl } } = supabaseClient.storage
                                     .from('seller-profiles')
                                     .getPublicUrl(fileName);
 
@@ -579,18 +600,18 @@
                         }
 
                         // Get the current user's email
-                        const { data: { user: { email: userEmail } } } = await supabase.auth.getUser();
+                        const { data: { user: { email: userEmail } } } = await supabaseClient.auth.getUser();
 
                         // Create the seller profile with all fields
-                        const { data: sellerData, error: sellerError } = await supabase
+                        const { data: sellerData, error: sellerError } = await supabaseClient
                             .from('sellers')
                             .insert([
                                 {
-                                    id: currentUser.id, // Use the authenticated user's ID
+                                    id: currentUser.id,
                                     first_name,
                                     last_name,
-                                    email: userEmail, // Use the authenticated email
-                                    phone: contact_phone,
+                                    email: userEmail,
+                                    contact_phone,
                                     business_name,
                                     business_description,
                                     business_category,
@@ -601,15 +622,20 @@
                                         darkMode: false,
                                         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
                                     },
-                                    status: 'active',
                                     address,
-                                    contact_phone
+                                    status: 'active'
                                 }
                             ])
                             .select();
 
                         if (sellerError) {
                             console.error('Detailed seller error:', sellerError);
+                            console.error('Error details:', {
+                                message: sellerError.message,
+                                code: sellerError.code,
+                                status: sellerError.status,
+                                details: sellerError.details
+                            });
                             throw new Error(`Failed to create seller profile: ${sellerError.message}`);
                         }
 
@@ -633,7 +659,7 @@
                         
                         // If seller profile creation fails, attempt to clean up
                         try {
-                            const { error: signOutError } = await supabase.auth.signOut();
+                            const { error: signOutError } = await supabaseClient.auth.signOut();
                             if (signOutError) {
                                 console.error('Error during sign out:', signOutError);
                             }
@@ -662,21 +688,21 @@
             hideMessage();
             
             try {
-                const { data, error } = await supabase.auth.signInWithOAuth({
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + '/eesha selling folder/Seller-index.html'
+                        redirectTo: window.location.origin + '/eesha%20selling%20folder/Seller-index.html'
                     }
                 });
 
                 if (error) throw error;
 
                 // The seller profile will be created when the user is redirected back
-                supabase.auth.onAuthStateChange(async (event, session) => {
+                supabaseClient.auth.onAuthStateChange(async (event, session) => {
                     if (event === 'SIGNED_IN' && session?.user) {
                         try {
                             // Check if seller profile exists
-                            const { data: existingSeller } = await supabase
+                            const { data: existingSeller } = await supabaseClient
                                 .from('sellers')
                                 .select('id')
                                 .eq('id', session.user.id)
@@ -684,7 +710,7 @@
 
                             if (!existingSeller) {
                                 // Create seller profile
-                                await supabase
+                                await supabaseClient
                                     .from('sellers')
                                     .insert([
                                         {
