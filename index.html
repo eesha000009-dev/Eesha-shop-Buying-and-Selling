@@ -88,15 +88,16 @@
         
         /* Search Bar */
         .search-container { 
-            flex: 1; 
-            max-width: 500px; 
-            margin: 0 32px; 
+            flex: 2; 
+            max-width: 600px; 
+            margin: 0 24px; 
             display: flex; 
             align-items: center; 
             background: var(--bg-light); 
-            border-radius: 8px; 
-            padding: 8px 12px; 
+            border-radius: 12px; 
+            padding: 10px 16px; 
             border: 1px solid var(--border); 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
         .search-container input { 
@@ -104,7 +105,9 @@
             background: none; 
             border: none; 
             outline: none; 
-            font-size: 14px; 
+            font-size: 16px; 
+            padding: 6px 0;
+            color: var(--text-dark);
         }
 
         .search-container button { 
@@ -112,7 +115,8 @@
             border: none; 
             color: var(--primary); 
             cursor: pointer; 
-            font-size: 16px; 
+            font-size: 20px; 
+            padding: 4px;
         }
 
         /* Header Right */
@@ -322,7 +326,12 @@
             border-bottom: 1px solid var(--border); 
             padding-bottom: 12px; 
             padding: 12px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
+        .category-tabs::-webkit-scrollbar { display: none; }
+        .category-tabs .tab-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; }
+
 
         .tab-btn { 
             background: none; 
@@ -357,6 +366,8 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.08); 
             transition: all 0.3s; 
             cursor: pointer; 
+            display: flex; 
+            flex-direction: column;
         }
 
         .product-card:hover { 
@@ -392,6 +403,36 @@
             align-items: center; 
         }
 
+        .product-rating {
+            color: #fbbf24; /* gold stars */
+            font-size: 12px;
+        }
+
+        /* Discount badge on product cards */
+        .badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #ef4444;
+            color: white;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* Hero carousel */
+        .hero-carousel { position: relative; border-radius: 12px; overflow: hidden; }
+        .hero-slide { display: none; width: 100%; height: 400px; object-fit: cover; }
+        .hero-slide.active { display: block; animation: splashSlideUp 0.6s ease; }
+        .carousel-dots { position: absolute; left: 50%; transform: translateX(-50%); bottom: 14px; display:flex; gap:8px; }
+        .carousel-dot { width:10px; height:10px; border-radius:50%; background: rgba(255,255,255,0.5); cursor:pointer; }
+        .carousel-dot.active { background: var(--primary); }
+        .carousel-control { position:absolute; top:50%; transform:translateY(-50%); background: rgba(0,0,0,0.35); color:white; border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+        .carousel-control.left { left:12px; }
+        .carousel-control.right { right:12px; }
+
         .btn-add { 
             background: var(--dark-blue); 
             color: white; 
@@ -415,6 +456,14 @@
             border-radius: 12px; 
             overflow: hidden; 
             position: relative;
+        }
+
+        .deals-banner img {
+            border-radius: 12px;
+            transition: transform 0.3s;
+        }
+        .deals-banner img:hover {
+            transform: scale(1.02);
         }
 
         .hero img { 
@@ -627,6 +676,17 @@
             margin: 0 auto; 
             padding: 0 16px; 
         }
+
+        /* header bottom categories row */
+        .header-bottom {
+            background: white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            padding: 6px 0;
+            position: sticky;
+            top: 64px; /* below header-top height */
+            z-index: 45;
+        }
+        .header-bottom .category-tabs { margin: 0 auto; }
     </style>
 </head>
 
@@ -642,8 +702,8 @@
                     </linearGradient>
                 </defs>
                 <g class="splash-coin">
-                    <circle cx="40" cy="40" r="18" fill="none" stroke="url(#splashGold)" stroke-width="3"/>
-                    <text x="32" y="48" font-size="16" fill="url(#splashGold)" font-weight="bold">₦</text>
+                    <!-- crescent moon shape instead of coin -->
+                    <path d="M40,22 A18,18 0 1,0 40,58 A12,12 0 1,1 40,22" fill="url(#splashGold)"/>
                 </g>
                 <text class="splash-text" x="80" y="65" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="950" fill="url(#splashGold)" stroke="rgba(255,255,255,0.12)" stroke-width="0.6" letter-spacing="-0.5">
                     EeshaMart
@@ -654,7 +714,7 @@
             <div class="loading-text">
                 Loading<span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span>
             </div>
-            <div class="subtitle">Your marketplace for infinite possibilities</div>
+            <div class="subtitle">Ramadan Kareem – enjoy special offers!</div>
         </div>
         <canvas id="snowCanvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:10002;"></canvas>
     </div>
@@ -695,22 +755,32 @@
                 </button>
             </div>
         </div>
+        <!-- category navigation under header for quick access -->
+        <div class="header-bottom">
+            <nav id="categoryTabs" class="category-tabs"></nav>
+        </div>
     </header>
 
     <!-- Main Content -->
     <main class="container">
-        <!-- Hero Section -->
-        <section class="hero">
-            <img src="Eesha buying folder/attached_assets/hero.jpg" alt="Welcome to Eesha Market">
-            <div class="hero-overlay">
-                <h1 class="hero-title">Welcome to Eesha Market</h1>
-                <p class="hero-subtitle">Connect, Trade, Thrive</p>
+        <!-- Hero Carousel (rotating promotional banners) -->
+        <section class="hero-carousel container">
+            <button class="carousel-control left" aria-label="Previous" id="carouselPrev">‹</button>
+            <button class="carousel-control right" aria-label="Next" id="carouselNext">›</button>
+            <img class="hero-slide active" data-src="Eesha buying folder/attached_assets/hero.jpg" src="Eesha buying folder/attached_assets/hero.jpg" alt="Hero 1">
+            <img class="hero-slide" data-src="Eesha buying folder/attached_assets/deals.jpg" src="Eesha buying folder/attached_assets/deals.jpg" alt="Hero 2">
+            <div class="carousel-dots" id="carouselDots"></div>
+        </section>
+
+        <!-- Deals Banner (inspired by large promotional banners on major marketplaces) -->
+        <section class="deals-banner my-8">
+            <div class="container">
+                <img src="Eesha buying folder/attached_assets/deals.jpg" alt="Deals of the Day" class="w-full rounded-lg h-64 object-cover object-center">
             </div>
         </section>
 
-        <!-- Category Tabs & Products -->
+        <!-- Products (tabs are rendered in header now) -->
         <section style="margin-top: 32px; margin-bottom: 60px;">
-            <div id="categoryTabs" class="category-tabs"></div>
             <div id="categoryTabContent"></div>
         </section>
     </main>
@@ -767,7 +837,7 @@
         window.currentUser = null;
         const supabaseClient = window.supabase;
 
-        // ===== Snow Effect =====
+        // ===== Ramadan crescent effect =====
         (function(){
             let canvas, ctx, w, h, flakes = [], running = false, rafId;
 
@@ -783,26 +853,34 @@
                     flakes.push({
                         x: Math.random() * w,
                         y: Math.random() * h,
-                        r: Math.random() * 3 + 1,
+                        r: Math.random() * 4 + 2,
                         d: Math.random() * 1 + 0.5,
                         vx: (Math.random() - 0.5) * 0.6
                     });
                 }
             }
 
+            function drawCrescent(x, y, r) {
+                ctx.save();
+                ctx.fillStyle = 'rgba(251,191,36,0.85)';
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0.25 * Math.PI, 1.75 * Math.PI, true);
+                ctx.arc(x + r * 0.2, y, r * 0.8, 1.25 * Math.PI, 0.75 * Math.PI, false);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+
             function draw() {
                 if (!running) return;
                 ctx.clearRect(0,0,w,h);
-                ctx.fillStyle = 'rgba(255,255,255,0.9)';
                 for (let i = 0; i < flakes.length; i++) {
                     const f = flakes[i];
-                    ctx.beginPath();
-                    ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-                    ctx.fill();
+                    drawCrescent(f.x, f.y, f.r);
                     f.y += f.d + 0.4;
                     f.x += f.vx + Math.sin(f.y * 0.01) * 0.3;
-                    if (f.y > h + 10) {
-                        f.y = -10;
+                    if (f.y > h + 20) {
+                        f.y = -20;
                         f.x = Math.random() * w;
                     }
                 }
@@ -1038,31 +1116,11 @@
                 if (!splash || splash.classList.contains('hidden')) return;
                 const minDisplay = 5000;
                 const elapsed = Date.now() - _splashStart;
-                const doHide = () => {
+                const delay = Math.max(0, minDisplay - elapsed);
+                setTimeout(() => {
                     splash.classList.add('hidden');
-                    try { if (window.stopSnow) window.stopSnow(); } catch(e) { console.warn('stopSnow error', e); }
-                };
-                if (elapsed < minDisplay) {
-                    setTimeout(doHide, minDisplay - elapsed);
-                } else {
-                    doHide();
-                }
+                }, delay);
             }
-
-            try { if (window.startSnow) window.startSnow(); } catch(e) { console.warn('startSnow error', e); }
-
-            setupLogoutHandler();
-            await updateAuthUI();
-
-            supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                console.log('Auth state changed:', event);
-                if (event === 'SIGNED_IN' && session?.user) {
-                    await mergeGuestCart(session.user);
-                }
-                await updateAuthUI();
-                setupLogoutHandler(); // Re-setup in case DOM updated
-                await updateCartCount();
-            });
 
             try {
                 const { data: products, error } = await supabaseClient.from('products').select('*');
@@ -1071,8 +1129,21 @@
                     const tabs = document.getElementById('categoryTabs');
                     const cats = ['All', ...new Set(products.map(p => p.category || 'Uncategorized'))];
 
+                    // simple helper to pick an icon based on the category name
+                    function iconForCategory(name) {
+                        const n = (name || '').toLowerCase();
+                        if (n.includes('elect')) return '<i class="fas fa-tv"></i>';
+                        if (n.includes('fashion') || n.includes('apparel')) return '<i class="fas fa-tshirt"></i>';
+                        if (n.includes('beauty')) return '<i class="fas fa-magic"></i>';
+                        if (n.includes('food')) return '<i class="fas fa-utensils"></i>';
+                        if (n.includes('home')) return '<i class="fas fa-home"></i>';
+                        if (n.includes('electronics')) return '<i class="fas fa-plug"></i>';
+                        if (n.includes('other')) return '<i class="fas fa-ellipsis-h"></i>';
+                        return '<i class="fas fa-tags"></i>';
+                    }
+
                     tabs.innerHTML = cats
-                        .map((c, i) => `<button class="tab-btn ${i === 0 ? 'active' : ''}" data-category="${c}">${c}</button>`)
+                        .map((c, i) => `<button class="tab-btn ${i === 0 ? 'active' : ''}" data-category="${c}">${iconForCategory(c)}<span>${c}</span></button>`)
                         .join('');
 
                     const render = (list) => {
@@ -1088,11 +1159,12 @@
                                 .map(
                                     (prod) => `
                                 <div class="product-card" onclick="handleProductClick(event, ${prod.id})">
-                                    <img src="${prod.image_url || prod.image || 'https://via.placeholder.com/240x200?text=No+Image'}" alt="${(prod.name || '').replace(/"/g, '')}" class="product-image">
+                                    <img src="${prod.image_url || prod.image || 'https://via.placeholder.com/240x200?text=No+Image'}" alt="${(prod.name || '').replace(/\"/g, '')}" class="product-image">
                                     <div class="product-info">
                                         <div class="product-title">${prod.name || 'Unnamed Product'}</div>
                                         <div class="product-price">$${(prod.price || 0).toFixed(2)}</div>
                                         <div class="product-footer">
+                                            <div class="product-rating">${'<i class="fas fa-star"></i>'.repeat(Math.floor(prod.rating || 4))}</div>
                                             <button class="btn-add" onclick="event.stopPropagation(); addToCart(${prod.id})" title="Add to cart">+ Add</button>
                                         </div>
                                     </div>
@@ -1130,6 +1202,42 @@
 
             await updateCartCount();
 
+            // ===== Start Ramadan crescent animation & hide splash =====
+            window.startSnow?.();
+            hideSplashScreen();
+
+            // ===== Carousel init (after DOM ready) =====
+            (function initCarousel() {
+                const slides = Array.from(document.querySelectorAll('.hero-slide'));
+                if (!slides.length) return;
+                const dotsEl = document.getElementById('carouselDots');
+                const prev = document.getElementById('carouselPrev');
+                const next = document.getElementById('carouselNext');
+                let current = 0;
+                let timer = null;
+
+                function go(i) {
+                    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+                    dotsEl.querySelectorAll('.carousel-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+                    current = i;
+                }
+
+                // dots
+                slides.forEach((s, idx) => {
+                    const d = document.createElement('div');
+                    d.className = 'carousel-dot' + (idx === 0 ? ' active' : '');
+                    d.addEventListener('click', () => { go(idx); reset(); });
+                    dotsEl.appendChild(d);
+                });
+
+                prev?.addEventListener('click', () => { go((current - 1 + slides.length) % slides.length); reset(); });
+                next?.addEventListener('click', () => { go((current + 1) % slides.length); reset(); });
+
+                function play() { timer = setInterval(() => go((current + 1) % slides.length), 5000); }
+                function reset() { if (timer) clearInterval(timer); play(); }
+                play();
+            })();
+
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('keypress', (e) => {
@@ -1149,7 +1257,6 @@
                 }
             }
 
-            hideSplashScreen();
         });
     </script>
 </body>
