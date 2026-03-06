@@ -6,14 +6,14 @@
     <title>Farmer Dashboard - EeshaMart</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="../../js/config/supabase.js"></script>
+    <script src="../js/config/supabase.js"></script>
     <script>
         // Check authentication and farmer status before page loads
         (async function checkAuth() {
             try {
                 const { data: { session }, error } = await window.supabase.auth.getSession();
                 if (error || !session) {
-                    window.location.href = '../login.html';
+                    window.location.href = 'login.html';
                     return;
                 }
                 
@@ -42,7 +42,7 @@
                 }
             } catch (error) {
                 console.error('Auth check error:', error);
-                window.location.href = '../login.html';
+                window.location.href = 'login.html';
             }
         })();
     </script>
@@ -794,7 +794,7 @@
             // Get current user
             const { data: { user }, error: userErr } = await supabase.auth.getUser();
             if (userErr || !user) {
-                window.location.href = '../login.html';
+                window.location.href = 'login.html';
                 return;
             }
 
@@ -826,7 +826,7 @@
             // Logout
             document.getElementById('logoutBtn').addEventListener('click', async () => {
                 await supabase.auth.signOut();
-                window.location.href = '../login.html';
+                window.location.href = 'login.html';
             });
         });
 

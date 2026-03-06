@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js"></script>
-    <script src="../../js/config/supabase.js"></script>
+    <script src="../js/config/supabase.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -323,7 +323,7 @@
             
             const { data: { user }, error } = await supabase.auth.getUser();
             if (error || !user) {
-                window.location.href = '../login.html';
+                window.location.href = 'login.html';
                 return;
             }
             currentUser = user;
