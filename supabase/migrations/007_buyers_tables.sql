@@ -44,7 +44,7 @@ CREATE POLICY "Buyers can update their own orders" ON buyers_orders
 CREATE TABLE IF NOT EXISTS buyers_order_items (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     order_id UUID REFERENCES buyers_orders(id) ON DELETE CASCADE,
-    product_id UUID REFERENCES products(id) ON DELETE SET NULL,
+    product_id BIGINT REFERENCES products(id) ON DELETE SET NULL,
     seller_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     quantity INTEGER DEFAULT 1,
     price DECIMAL(10,2) DEFAULT 0,
@@ -81,7 +81,7 @@ CREATE POLICY "Buyers can create order items for their orders" ON buyers_order_i
 CREATE TABLE IF NOT EXISTS buyers_wishlist (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+    product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(user_id, product_id)
 );
@@ -105,7 +105,7 @@ CREATE POLICY "Buyers can delete from their own wishlist" ON buyers_wishlist
 CREATE TABLE IF NOT EXISTS buyers_reviews (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-    product_id UUID REFERENCES products(id) ON DELETE SET NULL,
+    product_id BIGINT REFERENCES products(id) ON DELETE SET NULL,
     order_id UUID REFERENCES buyers_orders(id) ON DELETE SET NULL,
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
     title VARCHAR(255),
