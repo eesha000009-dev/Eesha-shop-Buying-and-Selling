@@ -7,7 +7,5 @@
 [build.environment]
   GIT_SUBMODULE_STRATEGY = "none"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# No catch-all redirect - this is a multi-page static site, not an SPA
+# Each HTML file should be served directly without redirects
