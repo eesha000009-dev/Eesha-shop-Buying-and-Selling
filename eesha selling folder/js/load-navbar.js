@@ -8,7 +8,7 @@ async function loadNavbarWithUserData() {
         }
 
         // Load navbar HTML
-        const navbarPromise = fetch('shared/navbar.html').then(response => response.text());
+        const navbarPromise = fetch('../shared/navbar.html').then(response => response.text());
         const html = await trackRequest(navbarPromise, {
             type: 'navbar',
             description: 'Loading navigation'
