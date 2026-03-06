@@ -651,7 +651,7 @@
                         
                         // 5. Redirect to dashboard after a brief delay
                         setTimeout(() => {
-                            window.location.href = 'Seller-index.html';
+                            window.location.href = 'index.html';
                         }, 1500);
 
                     } catch (error) {
@@ -691,7 +691,7 @@
                 const { data, error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + '/eesha%20selling%20folder/Seller-index.html'
+                        redirectTo: window.location.origin + '/eesha%20selling%20folder/merchant/index.html'
                     }
                 });
 
@@ -721,7 +721,7 @@
                                     ]);
                             }
                             
-                            window.location.href = 'Seller-index.html';
+                            window.location.href = 'index.html';
                         } catch (profileError) {
                             console.error('Error creating seller profile:', profileError);
                             showMessage('Failed to create seller profile. Please contact support.');

@@ -184,7 +184,7 @@
 
                 const success = await handleAuthChecks(data.user);
                 if (success) {
-                    window.location.href = 'Seller-index.html'; // Redirect to seller dashboard
+                    window.location.href = 'index.html';
                 }
             } catch (error) {
                 showError(error.message || 'Failed to sign in');
@@ -202,7 +202,7 @@
                 const { error } = await window.supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + '/eesha selling folder/Seller-index.html'
+                        redirectTo: window.location.origin + '/eesha selling folder/merchant/index.html'
                     }
                 });
 
@@ -221,7 +221,7 @@
             if (session?.user) {
                 const success = await handleAuthChecks(session.user);
                 if (success) {
-                    window.location.href = 'Seller-index.html';
+                    window.location.href = 'index.html';
                 }
             }
         });

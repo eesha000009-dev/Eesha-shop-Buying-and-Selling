@@ -15,8 +15,8 @@ function initializeBackButton() {
         if (window.history.length > 1) {
             window.history.back();
         } else {
-            // Fallback to Seller-index.html if no history
-            window.location.href = 'Seller-index.html';
+            // Fallback to index.html if no history
+            window.location.href = 'index.html';
         }
     });
 
