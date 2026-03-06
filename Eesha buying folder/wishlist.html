@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - Eesha Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <script src="../js/config/supabase.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f0474a',
+                        secondary: '#2c3e50',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .loading { animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="../index.html" class="flex items-center">
+                <img src="shared/image.svg" alt="Eesha Logo" class="h-12 w-12">
+                <span class="text-xl font-bold ml-2">Eesha Shop</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="../index.html" class="text-gray-600 hover:text-primary">
+                    <i class="fas fa-home text-xl"></i>
+                </a>
+                <a href="cart.html" class="text-gray-600 hover:text-primary relative">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span id="cartCount" class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Back Link -->
+        <a href="../index.html" class="inline-flex items-center text-gray-600 hover:text-primary mb-6">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Home
+        </a>
+
+        <div class="max-w-6xl mx-auto">
+            <!-- Page Title -->
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">My Wishlist</h1>
+                    <p class="text-gray-500 mt-1"><span id="wishlistCount">0</span> items saved</p>
+                </div>
+                <button id="clearAllBtn" class="px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg hidden">
+                    <i class="fas fa-trash mr-2"></i> Clear All
+                </button>
+            </div>
+
+            <!-- Wishlist Grid -->
+            <div id="wishlistGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Loading state -->
+                <div class="col-span-full bg-white rounded-lg shadow p-8 text-center">
+                    <i class="fas fa-spinner loading text-4xl text-primary mb-4"></i>
+                    <p class="text-gray-500">Loading your wishlist...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 Eesha Shop. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const supabaseClient = window.supabase;
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadWishlist();
+            await updateCartCount();
+        });
+
+        async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session?.user) {
+                window.location.href = 'login.html?redirect=wishlist';
+                return;
+            }
+            currentUser = session.user;
+        }
+
+        async function loadWishlist() {
+            if (!currentUser) return;
+
+            const { data: wishlist, error } = await supabaseClient
+                .from('wishlist')
+                .select(`
+                    id,
+                    created_at,
+                    products(id, name, price, image_url, image, category, stock)
+                `)
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error loading wishlist:', error);
+                document.getElementById('wishlistGrid').innerHTML = `
+                    <div class="col-span-full bg-white rounded-lg shadow p-8 text-center text-red-500">
+                        <i class="fas fa-exclamation-circle text-4xl mb-4"></i>
+                        <p>Failed to load wishlist. Please try again.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('wishlistCount').textContent = wishlist?.length || 0;
+            document.getElementById('clearAllBtn').classList.toggle('hidden', !wishlist?.length);
+
+            if (!wishlist || wishlist.length === 0) {
+                document.getElementById('wishlistGrid').innerHTML = `
+                    <div class="col-span-full bg-white rounded-lg shadow p-8 text-center">
+                        <i class="fas fa-heart text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">Your wishlist is empty</h3>
+                        <p class="text-gray-500 mb-6">Save items you love to buy them later!</p>
+                        <a href="../index.html" class="inline-block bg-primary text-white px-6 py-2 rounded-lg hover:bg-red-600">
+                            Start Shopping
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('wishlistGrid').innerHTML = wishlist.map(item => {
+                const product = item.products;
+                if (!product) return '';
+
+                return `
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition group">
+                        <div class="relative">
+                            <img src="${product.image_url || product.image || 'https://via.placeholder.com/300'}" 
+                                 alt="${product.name}"
+                                 class="w-full h-48 object-cover cursor-pointer"
+                                 onclick="viewProduct('${product.id}')">
+                            <button onclick="removeFromWishlist('${item.id}')" 
+                                    class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center text-red-500 hover:bg-red-50">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            ${product.stock === 0 ? `
+                                <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                    <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">Out of Stock</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="p-4">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide">${product.category || 'Category'}</p>
+                            <h3 class="font-semibold text-gray-900 mt-1 cursor-pointer hover:text-primary" onclick="viewProduct('${product.id}')">
+                                ${product.name}
+                            </h3>
+                            <div class="flex items-center justify-between mt-3">
+                                <span class="text-xl font-bold text-primary">$${(product.price || 0).toFixed(2)}</span>
+                            </div>
+                            <button onclick="addToCart('${product.id}', '${product.stock}')" 
+                                    class="w-full mt-4 py-2 rounded-lg text-center font-medium transition
+                                    ${product.stock === 0 
+                                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                        : 'bg-primary text-white hover:bg-red-600'}">
+                                <i class="fas fa-cart-plus mr-2"></i>
+                                ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewProduct(productId) {
+            window.location.href = `product.html?id=${productId}`;
+        }
+
+        async function removeFromWishlist(wishlistId) {
+            if (!confirm('Remove this item from your wishlist?')) return;
+
+            const { error } = await supabaseClient
+                .from('wishlist')
+                .delete()
+                .eq('id', wishlistId);
+
+            if (error) {
+                alert('Failed to remove item. Please try again.');
+                return;
+            }
+
+            loadWishlist();
+        }
+
+        async function addToCart(productId, stock) {
+            if (stock === '0') return;
+
+            try {
+                // Check if item already in cart
+                const { data: existingItem } = await supabaseClient
+                    .from('cart_items')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('product_id', productId)
+                    .single();
+
+                if (existingItem) {
+                    // Update quantity
+                    await supabaseClient
+                        .from('cart_items')
+                        .update({ quantity: existingItem.quantity + 1 })
+                        .eq('id', existingItem.id);
+                } else {
+                    // Insert new item
+                    await supabaseClient
+                        .from('cart_items')
+                        .insert([{
+                            user_id: currentUser.id,
+                            product_id: productId,
+                            quantity: 1
+                        }]);
+                }
+
+                alert('Added to cart!');
+                updateCartCount();
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Failed to add to cart. Please try again.');
+            }
+        }
+
+        document.getElementById('clearAllBtn').addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to clear your entire wishlist?')) return;
+
+            const { error } = await supabaseClient
+                .from('wishlist')
+                .delete()
+                .eq('user_id', currentUser.id);
+
+            if (error) {
+                alert('Failed to clear wishlist. Please try again.');
+                return;
+            }
+
+            loadWishlist();
+        });
+
+        async function updateCartCount() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            const user = session?.user;
+            let count = 0;
+
+            if (user) {
+                const { data: rows } = await supabaseClient
+                    .from('cart_items')
+                    .select('quantity')
+                    .eq('user_id', user.id);
+                if (rows) count = rows.reduce((s, r) => s + (r.quantity || 0), 0);
+            }
+
+            const el = document.getElementById('cartCount');
+            if (el) el.textContent = count;
+        }
+    </script>
+</body>
+</html>
