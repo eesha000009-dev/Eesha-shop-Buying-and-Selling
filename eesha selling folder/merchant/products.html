@@ -9,11 +9,11 @@
     <script src="https://unpkg.com/@supabase/supabase-js"></script>
     <!-- Centralized Supabase initializer -->
     <script src="../js/config/supabase.js"></script>
-    <link rel="stylesheet" href="css/loader.css">
-    <link rel="stylesheet" href="css/back-button.css">
-    <script src="js/loader.js"></script>
-    <script src="js/protect-seller-route.js"></script>
-    <script src="js/back-button.js"></script>
+    <link rel="stylesheet" href="../css/loader.css">
+    <link rel="stylesheet" href="../css/back-button.css">
+    <script src="../js/loader.js"></script>
+    <script src="../js/protect-seller-route.js"></script>
+    <script src="../js/back-button.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -112,7 +112,7 @@
         // Create a global promise that resolves when navbar is loaded and initialized
         window.navbarReady = (async function() {
             try {
-                const res = await fetch('shared/navbar.html');
+                const res = await fetch('../shared/navbar.html');
                 const html = await res.text();
                 const container = document.getElementById('navbar-container');
                 await insertHtmlAndRunScripts(container, html);

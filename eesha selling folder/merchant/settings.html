@@ -8,11 +8,11 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <!-- Centralized Supabase initializer -->
     <script src="../js/config/supabase.js"></script>
-    <link rel="stylesheet" href="css/loader.css">
-    <link rel="stylesheet" href="css/back-button.css">
-    <script src="js/loader.js"></script>
-    <script src="js/protect-seller-route.js"></script>
-    <script src="js/back-button.js"></script>
+    <link rel="stylesheet" href="../css/loader.css">
+    <link rel="stylesheet" href="../css/back-button.css">
+    <script src="../js/loader.js"></script>
+    <script src="../js/protect-seller-route.js"></script>
+    <script src="../js/back-button.js"></script>
     <style>
         :root {
             --primary-color: #f0474a;
@@ -380,7 +380,7 @@
             // create a global promise so other scripts can await navbar readiness
             window.navbarReady = (async () => {
                 try {
-                    const res = await fetch('shared/navbar.html');
+                    const res = await fetch('../shared/navbar.html');
                     const html = await res.text();
                     await insertHtmlAndRunScripts(container, html);
 
@@ -611,8 +611,8 @@
         </div>
     </div>
 
-    <script src="js/storage-config.js"></script>
-    <script src="js/settings.js"></script>
+    <script src="../js/storage-config.js"></script>
+    <script src="../js/settings.js"></script>
     <div id="statusMessage"></div>
     <script>
         // Add status message handler
