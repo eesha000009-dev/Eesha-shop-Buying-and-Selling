@@ -227,7 +227,7 @@
             try {
                 // Check if item already in cart
                 const { data: existingItem } = await supabaseClient
-                    .from('buyers_cart')
+                    .from('cart_items')
                     .select('*')
                     .eq('user_id', currentUser.id)
                     .eq('product_id', productId)
@@ -236,13 +236,13 @@
                 if (existingItem) {
                     // Update quantity
                     await supabaseClient
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .update({ quantity: existingItem.quantity + 1 })
                         .eq('id', existingItem.id);
                 } else {
                     // Insert new item
                     await supabaseClient
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .insert([{
                             user_id: currentUser.id,
                             product_id: productId,
@@ -281,7 +281,7 @@
 
             if (user) {
                 const { data: rows } = await supabaseClient
-                    .from('buyers_cart')
+                    .from('cart_items')
                     .select('quantity')
                     .eq('user_id', user.id);
                 if (rows) count = rows.reduce((s, r) => s + (r.quantity || 0), 0);

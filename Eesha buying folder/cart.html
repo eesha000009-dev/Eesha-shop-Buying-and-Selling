@@ -113,7 +113,7 @@
             try {
                 for (const item of guestCart) {
                     const { data: existingItem, error: fetchError } = await supabase
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .select('*')
                         .eq('user_id', currentUser.id)
                         .eq('product_id', item.productId)
@@ -127,7 +127,7 @@
                     if (existingItem) {
                         // Update quantity of existing item
                         const { error: updateError } = await supabase
-                            .from('buyers_cart')
+                            .from('cart_items')
                             .update({ quantity: existingItem.quantity + item.quantity })
                             .eq('id', existingItem.id);
 
@@ -137,7 +137,7 @@
                     } else {
                         // Insert new item
                         const { error: insertError } = await supabase
-                            .from('buyers_cart')
+                            .from('cart_items')
                             .insert([{
                                 user_id: currentUser.id,
                                 product_id: item.productId,
@@ -276,7 +276,7 @@
         async function renderUserCart() {
             try {
                 const { data: cartItems, error } = await supabase
-                    .from('buyers_cart')
+                    .from('cart_items')
                     .select('*, products(*)')
                     .eq('user_id', currentUser.id);
 
@@ -404,7 +404,7 @@
 
                 if (currentUser) {
                     const { error } = await supabase
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .update({ quantity: newQuantity })
                         .eq('user_id', currentUser.id)
                         .eq('product_id', productId);
@@ -431,7 +431,7 @@
             try {
                 if (currentUser) {
                     const { error } = await supabase
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .delete()
                         .eq('user_id', currentUser.id)
                         .eq('product_id', productId);
@@ -471,7 +471,7 @@
                 if (currentUser) {
                     // Get cart items with product details from database
                     const { data: cartItems, error } = await supabase
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .select('*, products(*)')
                         .eq('user_id', currentUser.id);
                     
@@ -517,9 +517,9 @@
                 const tax = cartTotal * 0.1;
                 const total = cartTotal + shipping + tax;
                 
-                // Save to buyers_pending_orders
+                // Save to pending_orders
                 const { data: pendingOrder, error } = await supabase
-                    .from('buyers_pending_orders')
+                    .from('pending_orders')
                     .insert([{
                         user_id: currentUser.id,
                         items: items,

@@ -1259,7 +1259,7 @@
                 }
 
                 const { data: existingItem, error: fetchError } = await supabaseClient
-                    .from('buyers_cart')
+                    .from('cart_items')
                     .select('*')
                     .eq('user_id', user.id)
                     .eq('product_id', productId)
@@ -1269,12 +1269,12 @@
 
                 if (existingItem) {
                     await supabaseClient
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .update({ quantity: existingItem.quantity + 1 })
                         .eq('id', existingItem.id);
                 } else {
                     await supabaseClient
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .insert([{ user_id: user.id, product_id: productId, quantity: 1 }]);
                 }
 
@@ -1294,7 +1294,7 @@
 
                 if (user) {
                     const { data: rows, error } = await supabaseClient
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .select('quantity')
                         .eq('user_id', user.id);
                     if (!error && rows) {
@@ -1319,7 +1319,7 @@
 
                 for (const item of guest) {
                     const { data: existing, error: fe } = await supabaseClient
-                        .from('buyers_cart')
+                        .from('cart_items')
                         .select('*')
                         .eq('user_id', user.id)
                         .eq('product_id', item.productId)
@@ -1332,12 +1332,12 @@
 
                     if (existing) {
                         await supabaseClient
-                            .from('buyers_cart')
+                            .from('cart_items')
                             .update({ quantity: existing.quantity + item.quantity })
                             .eq('id', existing.id);
                     } else {
                         await supabaseClient
-                            .from('buyers_cart')
+                            .from('cart_items')
                             .insert([{ user_id: user.id, product_id: item.productId, quantity: item.quantity }]);
                     }
                 }

@@ -3,11 +3,6 @@
 -- Run this in Supabase SQL Editor
 -- =====================================================
 
--- Drop existing policies and tables if they exist with old names (optional - comment out if you want to keep old tables)
--- DROP TABLE IF EXISTS order_items CASCADE;
--- DROP TABLE IF EXISTS orders CASCADE;
--- DROP TABLE IF EXISTS wishlist CASCADE;
-
 -- =====================================================
 -- 1. BUYERS_ORDERS TABLE
 -- =====================================================
@@ -105,36 +100,7 @@ CREATE POLICY "Buyers can delete from their own wishlist" ON buyers_wishlist
     FOR DELETE USING (auth.uid() = user_id);
 
 -- =====================================================
--- 4. BUYERS_CART TABLE (if not using cart_items)
--- =====================================================
-CREATE TABLE IF NOT EXISTS buyers_cart (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    product_id UUID REFERENCES products(id) ON DELETE CASCADE,
-    quantity INTEGER DEFAULT 1,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(user_id, product_id)
-);
-
--- Enable RLS
-ALTER TABLE buyers_cart ENABLE ROW LEVEL SECURITY;
-
--- Policies for buyers_cart
-CREATE POLICY "Buyers can view their own cart" ON buyers_cart 
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Buyers can add to their own cart" ON buyers_cart 
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Buyers can update their own cart" ON buyers_cart 
-    FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Buyers can delete from their own cart" ON buyers_cart 
-    FOR DELETE USING (auth.uid() = user_id);
-
--- =====================================================
--- 5. BUYERS_REVIEWS TABLE
+-- 4. BUYERS_REVIEWS TABLE (for profile stats)
 -- =====================================================
 CREATE TABLE IF NOT EXISTS buyers_reviews (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -169,7 +135,7 @@ CREATE POLICY "Buyers can delete their own reviews" ON buyers_reviews
     FOR DELETE USING (auth.uid() = user_id);
 
 -- =====================================================
--- 6. BUYERS_NOTIFICATIONS TABLE
+-- 5. BUYERS_NOTIFICATIONS TABLE (for settings page)
 -- =====================================================
 CREATE TABLE IF NOT EXISTS buyers_notifications (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -196,71 +162,7 @@ CREATE POLICY "Buyers can delete their own notifications" ON buyers_notification
     FOR DELETE USING (auth.uid() = user_id);
 
 -- =====================================================
--- 7. BUYERS_ADDRESSES TABLE
--- =====================================================
-CREATE TABLE IF NOT EXISTS buyers_addresses (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    label VARCHAR(50),
-    recipient_name VARCHAR(255),
-    phone VARCHAR(20),
-    address_line1 TEXT NOT NULL,
-    address_line2 TEXT,
-    city VARCHAR(100),
-    state VARCHAR(100),
-    zip VARCHAR(20),
-    country VARCHAR(100) DEFAULT 'United States',
-    is_default BOOLEAN DEFAULT false,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Enable RLS
-ALTER TABLE buyers_addresses ENABLE ROW LEVEL SECURITY;
-
--- Policies for buyers_addresses
-CREATE POLICY "Buyers can view their own addresses" ON buyers_addresses 
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Buyers can create their own addresses" ON buyers_addresses 
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Buyers can update their own addresses" ON buyers_addresses 
-    FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Buyers can delete their own addresses" ON buyers_addresses 
-    FOR DELETE USING (auth.uid() = user_id);
-
--- =====================================================
--- 8. BUYERS_PENDING_ORDERS TABLE (for checkout process)
--- =====================================================
-CREATE TABLE IF NOT EXISTS buyers_pending_orders (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    items JSONB NOT NULL,
-    subtotal DECIMAL(10,2) NOT NULL,
-    shipping DECIMAL(10,2) NOT NULL DEFAULT 10.00,
-    tax DECIMAL(10,2) NOT NULL,
-    total DECIMAL(10,2) NOT NULL,
-    shipping_address JSONB,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    expires_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '1 hour'
-);
-
--- Enable RLS
-ALTER TABLE buyers_pending_orders ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Buyers can view their own pending orders" ON buyers_pending_orders 
-    FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Buyers can create their own pending orders" ON buyers_pending_orders 
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Buyers can delete their own pending orders" ON buyers_pending_orders 
-    FOR DELETE USING (auth.uid() = user_id);
-
--- =====================================================
--- 9. Create indexes for better performance
+-- 6. Create indexes for better performance
 -- =====================================================
 CREATE INDEX IF NOT EXISTS idx_buyers_orders_user_id ON buyers_orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_buyers_orders_status ON buyers_orders(status);
@@ -269,15 +171,12 @@ CREATE INDEX IF NOT EXISTS idx_buyers_order_items_order_id ON buyers_order_items
 CREATE INDEX IF NOT EXISTS idx_buyers_order_items_product_id ON buyers_order_items(product_id);
 CREATE INDEX IF NOT EXISTS idx_buyers_wishlist_user_id ON buyers_wishlist(user_id);
 CREATE INDEX IF NOT EXISTS idx_buyers_wishlist_product_id ON buyers_wishlist(product_id);
-CREATE INDEX IF NOT EXISTS idx_buyers_cart_user_id ON buyers_cart(user_id);
 CREATE INDEX IF NOT EXISTS idx_buyers_reviews_user_id ON buyers_reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_buyers_reviews_product_id ON buyers_reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_buyers_notifications_user_id ON buyers_notifications(user_id);
-CREATE INDEX IF NOT EXISTS idx_buyers_addresses_user_id ON buyers_addresses(user_id);
-CREATE INDEX IF NOT EXISTS idx_buyers_pending_orders_expires_at ON buyers_pending_orders(expires_at);
 
 -- =====================================================
--- 10. Function to update updated_at timestamp
+-- 7. Function to update updated_at timestamp
 -- =====================================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -292,30 +191,9 @@ DROP TRIGGER IF EXISTS update_buyers_orders_updated_at ON buyers_orders;
 CREATE TRIGGER update_buyers_orders_updated_at BEFORE UPDATE ON buyers_orders
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_buyers_cart_updated_at ON buyers_cart;
-CREATE TRIGGER update_buyers_cart_updated_at BEFORE UPDATE ON buyers_cart
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_buyers_reviews_updated_at ON buyers_reviews;
 CREATE TRIGGER update_buyers_reviews_updated_at BEFORE UPDATE ON buyers_reviews
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-DROP TRIGGER IF EXISTS update_buyers_addresses_updated_at ON buyers_addresses;
-CREATE TRIGGER update_buyers_addresses_updated_at BEFORE UPDATE ON buyers_addresses
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- =====================================================
--- 11. Cleanup function for expired pending orders
--- =====================================================
-CREATE OR REPLACE FUNCTION cleanup_expired_buyers_pending_orders()
-RETURNS void
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    DELETE FROM buyers_pending_orders
-    WHERE expires_at < NOW();
-END;
-$$;
 
 -- =====================================================
 -- RESULT
@@ -324,8 +202,5 @@ SELECT 'Migration completed successfully! Buyer tables created:
 - buyers_orders
 - buyers_order_items  
 - buyers_wishlist
-- buyers_cart
 - buyers_reviews
-- buyers_notifications
-- buyers_addresses
-- buyers_pending_orders' as result;
+- buyers_notifications' as result;
