@@ -149,13 +149,15 @@
             if (!currentUser) return;
 
             const { data: orders, error } = await supabaseClient
-                .from('orders')
+                .from('buyers_orders')
                 .select(`
                     *,
-                    order_items(
+                    buyers_order_items(
                         id,
                         quantity,
                         price,
+                        product_name,
+                        product_image,
                         products(id, name, image_url, image)
                     )
                 `)
@@ -171,8 +173,8 @@
                         <div class="bg-white rounded-lg shadow p-8 text-center">
                             <i class="fas fa-database text-6xl text-gray-300 mb-4"></i>
                             <h3 class="text-xl font-semibold text-gray-700 mb-2">Orders Table Not Set Up</h3>
-                            <p class="text-gray-500 mb-4">The orders table needs to be created in Supabase.</p>
-                            <p class="text-sm text-gray-400 mb-6">Please run the migration SQL in your Supabase SQL Editor.</p>
+                            <p class="text-gray-500 mb-4">The buyers_orders table needs to be created in Supabase.</p>
+                            <p class="text-sm text-gray-400 mb-6">Please run the migration SQL (007_buyers_tables.sql) in your Supabase SQL Editor.</p>
                             <a href="../index.html" class="inline-block bg-primary text-white px-6 py-2 rounded-lg hover:bg-red-600">
                                 Continue Shopping
                             </a>
@@ -242,7 +244,7 @@
 
             container.innerHTML = orders.map(order => {
                 const statusClass = getStatusClass(order.status);
-                const items = order.order_items || [];
+                const items = order.buyers_order_items || [];
                 const itemPreview = items.slice(0, 3);
                 const moreItems = items.length - 3;
 
@@ -253,8 +255,8 @@
                                 <div class="flex items-center gap-4">
                                     <div class="flex -space-x-2">
                                         ${itemPreview.map(item => `
-                                            <img src="${item.products?.image_url || item.products?.image || 'https://via.placeholder.com/50'}" 
-                                                 alt="${item.products?.name || 'Product'}"
+                                            <img src="${item.product_image || item.products?.image_url || item.products?.image || 'https://via.placeholder.com/50'}" 
+                                                 alt="${item.product_name || item.products?.name || 'Product'}"
                                                  class="w-12 h-12 rounded-lg border-2 border-white object-cover">
                                         `).join('')}
                                         ${moreItems > 0 ? `
@@ -302,7 +304,7 @@
             const order = allOrders.find(o => o.id === orderId);
             if (!order) return;
 
-            const items = order.order_items || [];
+            const items = order.buyers_order_items || [];
             const statusClass = getStatusClass(order.status);
 
             document.getElementById('orderModalContent').innerHTML = `
@@ -322,11 +324,11 @@
                         <div class="space-y-3">
                             ${items.map(item => `
                                 <div class="flex items-center gap-3">
-                                    <img src="${item.products?.image_url || item.products?.image || 'https://via.placeholder.com/60'}" 
-                                         alt="${item.products?.name || 'Product'}"
+                                    <img src="${item.product_image || item.products?.image_url || item.products?.image || 'https://via.placeholder.com/60'}" 
+                                         alt="${item.product_name || item.products?.name || 'Product'}"
                                          class="w-16 h-16 rounded-lg object-cover">
                                     <div class="flex-1">
-                                        <p class="font-medium">${item.products?.name || 'Unknown Product'}</p>
+                                        <p class="font-medium">${item.product_name || item.products?.name || 'Unknown Product'}</p>
                                         <p class="text-sm text-gray-500">Qty: ${item.quantity}</p>
                                     </div>
                                     <p class="font-semibold">$${(item.price * item.quantity).toFixed(2)}</p>

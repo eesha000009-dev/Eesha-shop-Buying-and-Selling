@@ -257,31 +257,31 @@
 
             // Load orders count
             const { count: ordersCount } = await supabaseClient
-                .from('orders')
+                .from('buyers_orders')
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', currentUser.id);
             document.getElementById('totalOrders').textContent = ordersCount || 0;
 
             // Load wishlist count
             const { count: wishlistCount } = await supabaseClient
-                .from('wishlist')
+                .from('buyers_wishlist')
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', currentUser.id);
             document.getElementById('totalWishlist').textContent = wishlistCount || 0;
 
             // Load reviews count
             const { count: reviewsCount } = await supabaseClient
-                .from('reviews')
+                .from('buyers_reviews')
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', currentUser.id);
             document.getElementById('totalReviews').textContent = reviewsCount || 0;
 
             // Calculate total spent
             const { data: orders } = await supabaseClient
-                .from('orders')
+                .from('buyers_orders')
                 .select('total')
                 .eq('user_id', currentUser.id)
-                .eq('status', 'completed');
+                .eq('status', 'delivered');
             
             const totalSpent = orders?.reduce((sum, order) => sum + (order.total || 0), 0) || 0;
             document.getElementById('totalSpent').textContent = '$' + totalSpent.toFixed(0);
@@ -294,7 +294,7 @@
 
             if (user) {
                 const { data: rows } = await supabaseClient
-                    .from('cart_items')
+                    .from('buyers_cart')
                     .select('quantity')
                     .eq('user_id', user.id);
                 if (rows) count = rows.reduce((s, r) => s + (r.quantity || 0), 0);

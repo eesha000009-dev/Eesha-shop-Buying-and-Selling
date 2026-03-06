@@ -147,7 +147,7 @@ async function addToCart() {
 
         // Logged-in user: persist in Supabase
         const { data: existingItem, error: fetchError } = await supabase
-            .from('cart_items')
+            .from('buyers_cart')
             .select('*')
             .eq('user_id', user.id)
             .eq('product_id', productId)
@@ -159,13 +159,13 @@ async function addToCart() {
 
         if (existingItem) {
             const { error: updateError } = await supabase
-                .from('cart_items')
+                .from('buyers_cart')
                 .update({ quantity: existingItem.quantity + quantity })
                 .eq('id', existingItem.id);
             if (updateError) throw updateError;
         } else {
             const { error: insertError } = await supabase
-                .from('cart_items')
+                .from('buyers_cart')
                 .insert([{ user_id: user.id, product_id: productId, quantity }]);
             if (insertError) throw insertError;
         }
@@ -194,7 +194,7 @@ async function updateCartCount() {
 
     if (user) {
             const { data: cartItems, error } = await supabase
-                .from('cart_items')
+                .from('buyers_cart')
                 .select('quantity')
                 .eq('user_id', user.id);
             if (!error && Array.isArray(cartItems)) {
@@ -256,7 +256,7 @@ async function mergeGuestCartAfterSignIn(user) {
 
         for (const item of guestCart) {
             const { data: existingItem, error: fetchError } = await supabase
-                .from('cart_items')
+                .from('buyers_cart')
                 .select('*')
                 .eq('user_id', user.id)
                 .eq('product_id', item.productId)
@@ -269,13 +269,13 @@ async function mergeGuestCartAfterSignIn(user) {
 
             if (existingItem) {
                 const { error: updateError } = await supabase
-                    .from('cart_items')
+                    .from('buyers_cart')
                     .update({ quantity: existingItem.quantity + item.quantity })
                     .eq('id', existingItem.id);
                 if (updateError) console.error('Error updating existing cart item:', updateError);
             } else {
                 const { error: insertError } = await supabase
-                    .from('cart_items')
+                    .from('buyers_cart')
                     .insert([{ user_id: user.id, product_id: item.productId, quantity: item.quantity }]);
                 if (insertError) console.error('Error inserting guest cart item:', insertError);
             }

@@ -105,7 +105,7 @@
             if (!currentUser) return;
 
             const { data: wishlist, error } = await supabaseClient
-                .from('wishlist')
+                .from('buyers_wishlist')
                 .select(`
                     id,
                     created_at,
@@ -123,8 +123,8 @@
                         <div class="col-span-full bg-white rounded-lg shadow p-8 text-center">
                             <i class="fas fa-database text-6xl text-gray-300 mb-4"></i>
                             <h3 class="text-xl font-semibold text-gray-700 mb-2">Wishlist Table Not Set Up</h3>
-                            <p class="text-gray-500 mb-4">The wishlist table needs to be created in Supabase.</p>
-                            <p class="text-sm text-gray-400 mb-6">Please run the migration SQL in your Supabase SQL Editor.</p>
+                            <p class="text-gray-500 mb-4">The buyers_wishlist table needs to be created in Supabase.</p>
+                            <p class="text-sm text-gray-400 mb-6">Please run the migration SQL (007_buyers_tables.sql) in your Supabase SQL Editor.</p>
                             <a href="../index.html" class="inline-block bg-primary text-white px-6 py-2 rounded-lg hover:bg-red-600">
                                 Continue Shopping
                             </a>
@@ -209,7 +209,7 @@
             if (!confirm('Remove this item from your wishlist?')) return;
 
             const { error } = await supabaseClient
-                .from('wishlist')
+                .from('buyers_wishlist')
                 .delete()
                 .eq('id', wishlistId);
 
@@ -227,7 +227,7 @@
             try {
                 // Check if item already in cart
                 const { data: existingItem } = await supabaseClient
-                    .from('cart_items')
+                    .from('buyers_cart')
                     .select('*')
                     .eq('user_id', currentUser.id)
                     .eq('product_id', productId)
@@ -236,13 +236,13 @@
                 if (existingItem) {
                     // Update quantity
                     await supabaseClient
-                        .from('cart_items')
+                        .from('buyers_cart')
                         .update({ quantity: existingItem.quantity + 1 })
                         .eq('id', existingItem.id);
                 } else {
                     // Insert new item
                     await supabaseClient
-                        .from('cart_items')
+                        .from('buyers_cart')
                         .insert([{
                             user_id: currentUser.id,
                             product_id: productId,
@@ -262,7 +262,7 @@
             if (!confirm('Are you sure you want to clear your entire wishlist?')) return;
 
             const { error } = await supabaseClient
-                .from('wishlist')
+                .from('buyers_wishlist')
                 .delete()
                 .eq('user_id', currentUser.id);
 
@@ -281,7 +281,7 @@
 
             if (user) {
                 const { data: rows } = await supabaseClient
-                    .from('cart_items')
+                    .from('buyers_cart')
                     .select('quantity')
                     .eq('user_id', user.id);
                 if (rows) count = rows.reduce((s, r) => s + (r.quantity || 0), 0);
