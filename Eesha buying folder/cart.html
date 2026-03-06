@@ -6,404 +6,586 @@
     <title>Shopping Cart - Eesha Shop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js"></script>
-    <!-- Centralized Supabase initializer -->
     <script src="../js/config/supabase.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f0474a',
+                        secondary: '#2c3e50',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        .cart-item {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .cart-item:nth-child(1) { animation-delay: 0.05s; }
+        .cart-item:nth-child(2) { animation-delay: 0.1s; }
+        .cart-item:nth-child(3) { animation-delay: 0.15s; }
+        .cart-item:nth-child(4) { animation-delay: 0.2s; }
+        .cart-item:nth-child(5) { animation-delay: 0.25s; }
+        
+        .quantity-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .quantity-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .product-image {
+            transition: transform 0.3s ease;
+        }
+        
+        .product-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .checkout-btn {
+            background: linear-gradient(135deg, #f0474a 0%, #e03437 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(240, 71, 74, 0.3);
+        }
+        
+        .checkout-btn:active {
+            transform: translateY(0);
+        }
+        
+        .summary-card {
+            background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+        }
+        
+        .delete-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .delete-btn:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .promo-input:focus {
+            box-shadow: 0 0 0 3px rgba(240, 71, 74, 0.1);
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .empty-cart-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-
+<body class="bg-gray-50 min-h-screen">
     <!-- Header -->
-    <header class="bg-white shadow-md">
-        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="../index.html" class="flex items-center">
-                <img src="shared/image.svg" alt="Eesha Logo" class="h-16 w-16">
-                <span class="text-2xl font-bold ml-2">Eesha Shop</span>
-            </a>
-            <a href="../index.html" class="text-primary hover:underline">Continue Shopping</a>
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="../index.html" class="flex items-center space-x-3">
+                    <img src="shared/image.svg" alt="Eesha Logo" class="h-10 w-10">
+                    <span class="text-xl font-bold text-gray-900">Eesha Shop</span>
+                </a>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="fas fa-home text-xl"></i>
+                    </a>
+                    <a href="cart.html" class="relative text-primary">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cartCount" class="absolute -top-2 -right-2 bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </a>
+                </div>
+            </div>
         </nav>
     </header>
 
-    <main class="container mx-auto px-4 mt-8">
-        <div id="cart-content">
-            <!-- Content will be dynamically inserted here -->
+    <!-- Breadcrumb -->
+    <div class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <nav class="flex items-center space-x-2 text-sm text-gray-500">
+                <a href="../index.html" class="hover:text-primary transition-colors">Home</a>
+                <i class="fas fa-chevron-right text-xs"></i>
+                <span class="text-gray-900 font-medium">Shopping Cart</span>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Title -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+                <p class="text-gray-500 mt-1" id="cartSummary">Loading your cart...</p>
+            </div>
+            <a href="../index.html" class="hidden sm:flex items-center text-primary hover:text-red-600 transition-colors font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Continue Shopping
+            </a>
+        </div>
+
+        <!-- Cart Content -->
+        <div id="cartContent">
+            <!-- Loading Skeleton -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center space-x-4">
+                            <div class="skeleton w-24 h-24 rounded-xl"></div>
+                            <div class="flex-1 space-y-3">
+                                <div class="skeleton h-4 w-3/4 rounded"></div>
+                                <div class="skeleton h-3 w-1/2 rounded"></div>
+                                <div class="skeleton h-6 w-1/4 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center space-x-4">
+                            <div class="skeleton w-24 h-24 rounded-xl"></div>
+                            <div class="flex-1 space-y-3">
+                                <div class="skeleton h-4 w-3/4 rounded"></div>
+                                <div class="skeleton h-3 w-1/2 rounded"></div>
+                                <div class="skeleton h-6 w-1/4 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm">
+                        <div class="skeleton h-6 w-1/2 rounded mb-6"></div>
+                        <div class="space-y-4">
+                            <div class="skeleton h-4 w-full rounded"></div>
+                            <div class="skeleton h-4 w-3/4 rounded"></div>
+                            <div class="skeleton h-10 w-full rounded mt-6"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="bg-secondary text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p>&copy; 2025 Eesha Shop. All rights reserved.</p>
+        </div>
+    </footer>
+
     <script>
-        // Use centralized global Supabase client
-        const supabase = window.supabase;
-
-        // --- Local cart helpers: use 'cart' as the canonical key. ---
-        function readLocalCart() {
-            try {
-                return JSON.parse(localStorage.getItem('cart') || '[]');
-            } catch (e) {
-                console.warn('Failed to parse cart from localStorage', e);
-                return [];
-            }
-        }
-
-        function writeLocalCart(cart) {
-            try {
-                localStorage.setItem('cart', JSON.stringify(cart));
-            } catch (e) {
-                console.warn('Failed to write cart to localStorage', e);
-            }
-        }
-
-        function readGuestCart() {
-            try {
-                return JSON.parse(localStorage.getItem('guest_cart') || '[]');
-            } catch (e) {
-                console.warn('Failed to parse guest_cart', e);
-                return [];
-            }
-        }
-
-        function migrateGuestCartToCart() {
-            try {
-                const guest = readGuestCart();
-                if (!Array.isArray(guest) || guest.length === 0) return;
-
-                const existing = readLocalCart();
-                const map = {};
-                existing.forEach(i => { const pid = i.productId || i.id; if (pid) map[pid] = { ...i }; });
-                guest.forEach(g => {
-                    const pid = g.productId || g.id;
-                    if (!pid) return;
-                    if (!map[pid]) {
-                        map[pid] = { id: pid, productId: pid, name: g.name || '', price: g.price || 0, quantity: g.quantity || g.qty || 1 };
-                    } else {
-                        map[pid].quantity = (map[pid].quantity || 0) + (g.quantity || g.qty || 1);
-                    }
-                });
-                const merged = Object.values(map);
-                writeLocalCart(merged);
-                // Remove legacy key after successful migration
-                try { localStorage.removeItem('guest_cart'); } catch(e) { /* ignore */ }
-            } catch (err) {
-                console.warn('Failed to migrate guest_cart to cart', err);
-            }
-        }
-
-        const cartContent = document.getElementById('cart-content');
+        const supabaseClient = window.supabase;
         let currentUser = null;
 
-        async function checkUser() {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadCart();
+            await updateCartCount();
+        });
+
+        async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            currentUser = session?.user || null;
+        }
+
+        async function updateCartCount() {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-                currentUser = session?.user || null;
+                let count = 0;
                 
                 if (currentUser) {
-                    // If user just logged in, merge any local guest cart (migrated to canonical 'cart') with their user cart
-                    const guestCart = readLocalCart();
-                    if (guestCart.length > 0) {
-                        await mergeGuestCart(guestCart);
-                        // canonical cart is kept but we don't need guest_cart anymore
+                    const { data: rows, error } = await supabaseClient
+                        .from('cart_items')
+                        .select('quantity')
+                        .eq('user_id', currentUser.id);
+                    
+                    if (!error && rows) {
+                        count = rows.reduce((s, r) => s + (r.quantity || 0), 0);
                     }
+                } else {
+                    const guestCart = JSON.parse(localStorage.getItem('cart') || '[]');
+                    count = guestCart.reduce((s, i) => s + (i.quantity || 0), 0);
                 }
                 
-                await renderCart();
-            } catch (error) {
-                console.error('Error checking user session:', error);
+                const el = document.getElementById('cartCount');
+                if (el) el.textContent = count;
+            } catch (err) {
+                console.error('Error updating cart count:', err);
             }
         }
 
-        async function mergeGuestCart(guestCart) {
-            try {
-                for (const item of guestCart) {
-                    const { data: existingItem, error: fetchError } = await supabase
-                        .from('cart_items')
-                        .select('*')
-                        .eq('user_id', currentUser.id)
-                        .eq('product_id', item.productId)
-                        .single();
-
-                    if (fetchError && fetchError.code !== 'PGRST116') {
-                        console.error('Error checking existing cart item:', fetchError);
-                        continue;
-                    }
-
-                    if (existingItem) {
-                        // Update quantity of existing item
-                        const { error: updateError } = await supabase
-                            .from('cart_items')
-                            .update({ quantity: existingItem.quantity + item.quantity })
-                            .eq('id', existingItem.id);
-
-                        if (updateError) {
-                            console.error('Error updating cart item:', updateError);
-                        }
-                    } else {
-                        // Insert new item
-                        const { error: insertError } = await supabase
-                            .from('cart_items')
-                            .insert([{
-                                user_id: currentUser.id,
-                                product_id: item.productId,
-                                quantity: item.quantity
-                            }]);
-
-                        if (insertError) {
-                            console.error('Error adding item to cart:', insertError);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error merging guest cart:', error);
-            }
-        }
-
-        async function renderCart() {
+        async function loadCart() {
+            const container = document.getElementById('cartContent');
+            
             try {
                 if (currentUser) {
                     await renderUserCart();
                 } else {
                     await renderGuestCart();
                 }
-                // If a global updateCartCount function exists elsewhere, call it to refresh header counts
-                try { if (typeof window.updateCartCount === 'function') window.updateCartCount(); } catch(e) { /* ignore */ }
             } catch (error) {
-                console.error('Error rendering cart:', error);
+                console.error('Error loading cart:', error);
+                container.innerHTML = `
+                    <div class="bg-white rounded-2xl p-12 text-center shadow-sm">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Error Loading Cart</h3>
+                        <p class="text-gray-500 mb-6">There was a problem loading your cart. Please try again.</p>
+                        <button onclick="loadCart()" class="text-primary font-medium hover:underline">
+                            <i class="fas fa-redo mr-2"></i>Try Again
+                        </button>
+                    </div>
+                `;
             }
         }
 
         async function renderGuestCart() {
-            const guestCart = readLocalCart();
+            const guestCart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const container = document.getElementById('cartContent');
             
             if (guestCart.length === 0) {
-                cartContent.innerHTML = `
-                    <div class="text-center bg-white p-12 rounded-lg shadow-lg">
-                        <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-6"></i>
-                        <h2 class="text-3xl font-bold mb-4">Your Cart is Empty</h2>
-                        <p class="text-gray-600 mb-8">Looks like you haven't added anything to your cart yet.</p>
-                        <p class="text-gray-600 mb-8">Sign in to save your cart across devices!</p>
-                        <a href="login.html" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold">
-                            Sign In to Your Account
-                        </a>
-                    </div>
-                `;
+                renderEmptyCart();
                 return;
             }
 
-            // Fetch product details for guest cart items
-            try {
-                const productIds = guestCart.map(item => item.productId || item.id).filter(Boolean);
-                const { data: products, error } = await supabase
-                    .from('products')
-                    .select('*')
-                    .in('id', productIds);
+            const productIds = guestCart.map(item => item.productId || item.id).filter(Boolean);
+            const { data: products } = await supabaseClient
+                .from('products')
+                .select('*')
+                .in('id', productIds);
 
-                if (error) {
-                    throw error;
-                }
+            const cartTotal = guestCart.reduce((sum, item) => {
+                const product = products?.find(p => p.id === (item.productId || item.id));
+                return sum + ((product?.price || 0) * (item.quantity || 1));
+            }, 0);
 
-                const cartTotal = calculateCartTotal(guestCart, products);
+            document.getElementById('cartSummary').textContent = `${guestCart.length} item${guestCart.length !== 1 ? 's' : ''} in your cart`;
 
-                const itemsHtml = guestCart.map(item => {
-                    const product = products.find(p => p.id === item.productId);
-                    if (!product) return '';
-                    const discount = product.original_price ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
-                    let options = '';
-                    for (let i=1;i<=10;i++) options += '<option value="'+i+'"'+(item.quantity==i? ' selected':'')+'>Qty '+i+'</option>';
-                    return '<div class="flex items-start justify-between border-b pb-4">'
-                        + '<div class="flex items-start gap-4">'
-                            + '<input type="checkbox" class="mt-2">'
-                            + '<img src="' + (product.image || product.image_url || '') + '" alt="' + (product.name || '') + '" class="w-24 h-24 object-cover rounded">'
-                            + '<div>'
-                                + '<h3 class="font-semibold">' + (product.name || '') + '</h3>'
-                                + '<p class="text-sm text-gray-500">' + (product.category || '') + '</p>'
-                                + '<div class="mt-2 flex items-center gap-3">'
-                                    + '<span class="text-lg font-bold">$' + (product.price || 0) + '</span>'
-                                    + (product.original_price ? ('<span class="text-sm text-gray-400 line-through">$' + product.original_price + '</span>') : '')
-                                    + (discount > 0 ? ('<span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">-' + discount + '%</span>') : '')
-                                + '</div>'
-                            + '</div>'
-                        + '</div>'
-                        + '<div class="flex items-center gap-3">'
-                            + '<select onchange="updateQuantity(' + item.productId + ', parseInt(this.value))" class="border rounded px-2 py-1">' + options + '</select>'
-                            + '<button onclick="removeFromCart(' + item.productId + ')" class="text-red-500 hover:text-red-700">'
-                                + '<i class="fas fa-trash"></i>'
-                            + '</button>'
-                        + '</div>'
-                    + '</div>';
-
-                }).join('');
-
-                cartContent.innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
-                            <div class="flex items-center justify-between mb-4">
-                                <h1 class="text-2xl font-bold">Shopping Cart</h1>
-                                <a href="login.html" class="text-primary hover:underline">Sign in to save your cart</a>
-                            </div>
-                            <div class="space-y-4">
-                                ${itemsHtml}
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Cart Items -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-4 mb-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-info-circle text-amber-500 mr-3"></i>
+                                <p class="text-amber-800 text-sm">
+                                    <strong>Sign in</strong> to save your cart and access it from any device!
+                                </p>
+                                <a href="login.html?redirect=cart" class="ml-auto bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors">
+                                    Sign In
+                                </a>
                             </div>
                         </div>
-                        <aside class="bg-white p-6 rounded-lg shadow">
-                            <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
-                            <div class="flex justify-between mb-2">
-                                <span>Subtotal</span>
-                                <span>$${cartTotal.toFixed(2)}</span>
-                            </div>
-                            <div class="flex justify-between mb-4 text-sm text-gray-500">
-                                <span>Item discount</span>
-                                <span>$0.00</span>
-                            </div>
-                            <div class="border-t pt-4">
-                                <div class="flex justify-between text-lg font-bold mb-4">
-                                    <span>Total</span>
-                                    <span>$${cartTotal.toFixed(2)}</span>
-                                </div>
-                                <a href="checkout.html" class="w-full inline-block bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-center">Proceed to Checkout</a>
-                            </div>
-                        </aside>
+                        ${guestCart.map((item, index) => {
+                            const product = products?.find(p => p.id === (item.productId || item.id));
+                            if (!product) return '';
+                            return renderCartItem(product, item.quantity, index);
+                        }).join('')}
                     </div>
-                `;
-            } catch (error) {
-                console.error('Error rendering guest cart:', error);
-                cartContent.innerHTML = `
-                    <div class="text-center bg-white p-12 rounded-lg shadow-lg">
-                        <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-6"></i>
-                        <h2 class="text-3xl font-bold mb-4">Error Loading Cart</h2>
-                        <p class="text-gray-600 mb-8">There was an error loading your cart. Please try again later.</p>
-                    </div>
-                `;
-            }
+                    
+                    <!-- Order Summary -->
+                    ${renderOrderSummary(cartTotal, false)}
+                </div>
+            `;
+
+            attachEventListeners();
         }
 
         async function renderUserCart() {
-            try {
-                const { data: cartItems, error } = await supabase
-                    .from('cart_items')
-                    .select('*, products(*)')
-                    .eq('user_id', currentUser.id);
+            const { data: cartItems, error } = await supabaseClient
+                .from('cart_items')
+                .select('id, quantity, product_id, products(*)')
+                .eq('user_id', currentUser.id);
 
-                if (error) {
-                    throw error;
-                }
+            if (error) throw error;
 
-                if (!cartItems || cartItems.length === 0) {
-                    cartContent.innerHTML = `
-                        <div class="text-center bg-white p-12 rounded-lg shadow-lg">
-                            <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-6"></i>
-                            <h2 class="text-3xl font-bold mb-4">Your Cart is Empty</h2>
-                            <p class="text-gray-600 mb-8">Start adding products to see them here.</p>
-                            <a href="../index.html" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold">
-                                Discover Products
+            if (!cartItems || cartItems.length === 0) {
+                renderEmptyCart();
+                return;
+            }
+
+            const cartTotal = cartItems.reduce((sum, item) => {
+                return sum + ((item.products?.price || 0) * (item.quantity || 1));
+            }, 0);
+
+            document.getElementById('cartSummary').textContent = `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''} in your cart`;
+
+            const container = document.getElementById('cartContent');
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Cart Items -->
+                    <div class="lg:col-span-2 space-y-4">
+                        ${cartItems.map((item, index) => {
+                            if (!item.products) return '';
+                            return renderCartItem(item.products, item.quantity, index, item.id);
+                        }).join('')}
+                        
+                        <!-- Continue Shopping -->
+                        <a href="../index.html" class="flex items-center justify-center py-4 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 hover:text-primary hover:border-primary transition-colors">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add more items
+                        </a>
+                    </div>
+                    
+                    <!-- Order Summary -->
+                    ${renderOrderSummary(cartTotal, true)}
+                </div>
+            `;
+
+            attachEventListeners();
+        }
+
+        function renderCartItem(product, quantity, index, cartItemId = null) {
+            const discount = product.original_price ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
+            const image = product.image || product.image_url || 'https://via.placeholder.com/200';
+            const productId = product.id;
+            
+            return `
+                <div class="cart-item bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow" data-product-id="${productId}" data-cart-id="${cartItemId || ''}">
+                    <div class="flex items-start gap-4">
+                        <!-- Product Image -->
+                        <div class="flex-shrink-0">
+                            <a href="product.html?id=${productId}">
+                                <img src="${image}" alt="${product.name || 'Product'}" 
+                                     class="product-image w-24 h-24 sm:w-32 sm:h-32 rounded-xl object-cover cursor-pointer">
                             </a>
                         </div>
-                    `;
-                    return;
-                }
-
-                const cartTotal = cartItems.reduce((total, item) => {
-                    return total + (item.quantity * (item.products?.price || 0));
-                }, 0);
-
-                // build items HTML without nested template literals
-                const itemsHtml = cartItems.map(item => {
-                    const product = item.products || {};
-                    const discount = product.original_price ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
-                    return '<div class="flex items-start justify-between border-b pb-4">'
-                        + '<div class="flex items-start gap-4">'
-                            + '<input type="checkbox" class="mt-2 item-checkbox" data-id="' + item.product_id + '">' 
-                            + '<img src="' + (product.image || product.image_url || '') + '" alt="' + (product.name || '') + '" class="w-24 h-24 object-cover rounded">'
-                            + '<div>'
-                                + '<h3 class="font-semibold">' + (product.name || '') + '</h3>'
-                                + '<p class="text-sm text-gray-500">' + (product.category || '') + '</p>'
-                                + '<div class="mt-2 flex items-center gap-3">'
-                                    + '<span class="text-lg font-bold">$' + (product.price || 0) + '</span>'
-                                    + (product.original_price ? ('<span class="text-sm text-gray-400 line-through">$' + product.original_price + '</span>') : '')
-                                    + (discount > 0 ? ('<span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">-' + discount + '%</span>') : '')
-                                + '</div>'
-                            + '</div>'
-                        + '</div>'
-                        + '<div class="flex items-center gap-3">'
-                            + '<select onchange="updateQuantity(' + item.product_id + ', parseInt(this.value))" class="border rounded px-2 py-1">'
-                                + (function(q){ let s=''; for(let i=1;i<=10;i++){ s += '<option value="'+i+'"'+(q==i?' selected':'')+'>Qty '+i+'</option>'; } return s;})(item.quantity)
-                            + '</select>'
-                            + '<button onclick="removeFromCart(' + item.product_id + ')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>'
-                        + '</div>'
-                    + '</div>';
-                }).join('');
-
-                cartContent.innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
-                            <div class="flex items-center justify-between mb-4">
-                                <h1 class="text-2xl font-bold">Shopping Cart</h1>
-                                <button id="selectAllBtn" class="text-sm text-gray-600">Select all (${cartItems.length})</button>
+                        
+                        <!-- Product Details -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <a href="product.html?id=${productId}" class="text-gray-400 text-xs uppercase tracking-wide">${product.category || 'Category'}</a>
+                                    <h3 class="text-lg font-semibold text-gray-900 mt-1 hover:text-primary transition-colors">
+                                        <a href="product.html?id=${productId}">${product.name || 'Product Name'}</a>
+                                    </h3>
+                                </div>
+                                <button onclick="removeItem(${productId}, '${cartItemId}')" 
+                                        class="delete-btn p-2 rounded-lg text-gray-400 hover:text-red-500">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </div>
-                            <div class="space-y-4">
-                                ${itemsHtml}
+                            
+                            <!-- Price & Discount -->
+                            <div class="flex items-center gap-3 mt-2">
+                                <span class="text-xl font-bold text-gray-900">$${(product.price || 0).toFixed(2)}</span>
+                                ${product.original_price ? `
+                                    <span class="text-sm text-gray-400 line-through">$${product.original_price.toFixed(2)}</span>
+                                    <span class="bg-red-100 text-red-600 text-xs font-semibold px-2 py-1 rounded-full">-${discount}%</span>
+                                ` : ''}
+                            </div>
+                            
+                            <!-- Quantity Controls -->
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex items-center bg-gray-100 rounded-xl p-1">
+                                    <button onclick="updateQuantity(${productId}, ${quantity - 1}, '${cartItemId}')" 
+                                            class="quantity-btn w-10 h-10 flex items-center justify-center rounded-lg bg-white shadow-sm hover:bg-gray-50 ${quantity <= 1 ? 'opacity-50 cursor-not-allowed' : ''}">
+                                        <i class="fas fa-minus text-gray-600"></i>
+                                    </button>
+                                    <span class="w-14 text-center font-semibold text-gray-900">${quantity}</span>
+                                    <button onclick="updateQuantity(${productId}, ${quantity + 1}, '${cartItemId}')" 
+                                            class="quantity-btn w-10 h-10 flex items-center justify-center rounded-lg bg-white shadow-sm hover:bg-gray-50">
+                                        <i class="fas fa-plus text-gray-600"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="text-right">
+                                    <span class="text-sm text-gray-500">Subtotal</span>
+                                    <p class="text-lg font-bold text-primary">$${((product.price || 0) * quantity).toFixed(2)}</p>
+                                </div>
                             </div>
                         </div>
-                        <aside class="bg-white p-6 rounded-lg shadow">
-                            <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
-                            <div class="flex justify-between mb-2">
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderOrderSummary(cartTotal, isLoggedIn) {
+            const shipping = cartTotal > 0 ? 10.00 : 0;
+            const tax = cartTotal * 0.1;
+            const total = cartTotal + shipping + tax;
+            
+            return `
+                <div class="lg:col-span-1">
+                    <div class="summary-card bg-white rounded-2xl shadow-sm p-6 sticky top-24">
+                        <h2 class="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
+                        
+                        <!-- Promo Code -->
+                        <div class="mb-6">
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">Promo Code</label>
+                            <div class="flex gap-2">
+                                <input type="text" placeholder="Enter code" 
+                                       class="promo-input flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary transition-colors">
+                                <button class="px-4 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4 border-t pt-4">
+                            <div class="flex justify-between text-gray-600">
                                 <span>Subtotal</span>
-                                <span>$${cartTotal.toFixed(2)}</span>
+                                <span class="font-medium">$${cartTotal.toFixed(2)}</span>
                             </div>
-                            <div class="flex justify-between mb-4 text-sm text-gray-500">
-                                <span>Item discount</span>
-                                <span>$0.00</span>
+                            <div class="flex justify-between text-gray-600">
+                                <span>Shipping</span>
+                                <span class="font-medium">${shipping > 0 ? '$' + shipping.toFixed(2) : 'Free'}</span>
                             </div>
-                            <div class="border-t pt-4">
-                                <div class="flex justify-between text-lg font-bold mb-4">
-                                    <span>Total</span>
-                                    <span>$${cartTotal.toFixed(2)}</span>
+                            <div class="flex justify-between text-gray-600">
+                                <span>Tax (10%)</span>
+                                <span class="font-medium">$${tax.toFixed(2)}</span>
+                            </div>
+                            
+                            ${cartTotal > 100 ? `
+                                <div class="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-700">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    You're saving $${shipping.toFixed(2)} on shipping!
                                 </div>
-                                <button onclick="proceedToCheckout()" class="w-full inline-block bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-center">Proceed to Checkout</button>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="border-t mt-4 pt-4">
+                            <div class="flex justify-between items-center mb-6">
+                                <span class="text-lg font-bold text-gray-900">Total</span>
+                                <span class="text-2xl font-bold text-primary">$${total.toFixed(2)}</span>
                             </div>
-                        </aside>
+                            
+                            <button onclick="proceedToCheckout()" 
+                                    class="checkout-btn w-full py-4 text-white font-semibold rounded-xl flex items-center justify-center gap-2">
+                                <i class="fas fa-lock"></i>
+                                Proceed to Checkout
+                            </button>
+                            
+                            <p class="text-xs text-gray-500 text-center mt-4">
+                                <i class="fas fa-shield-alt mr-1"></i>
+                                Secure checkout powered by Stripe
+                            </p>
+                        </div>
+                        
+                        <!-- Payment Methods -->
+                        <div class="mt-6 pt-6 border-t">
+                            <p class="text-xs text-gray-500 text-center mb-3">We accept</p>
+                            <div class="flex justify-center gap-3 text-2xl text-gray-400">
+                                <i class="fab fa-cc-visa"></i>
+                                <i class="fab fa-cc-mastercard"></i>
+                                <i class="fab fa-cc-amex"></i>
+                                <i class="fab fa-cc-paypal"></i>
+                            </div>
+                        </div>
                     </div>
-                `;
-                // attach select-all behavior after DOM insertion
-                const selectAllBtn = document.getElementById('selectAllBtn');
-                if (selectAllBtn) {
-                    selectAllBtn.addEventListener('click', () => {
-                        const checkboxes = document.querySelectorAll('.item-checkbox');
-                        const allSelected = Array.from(checkboxes).every(cb => cb.checked);
-                        checkboxes.forEach(cb => cb.checked = !allSelected);
-                        selectAllBtn.textContent = `Select all (${cartItems.length})`;
-                    });
-                }
+                </div>
+            `;
+        }
 
-                // call global updateCartCount if available
-                try { if (typeof window.updateCartCount === 'function') window.updateCartCount(); } catch(e) { /* ignore */ }
-            } catch (error) {
-                console.error('Error rendering user cart:', error);
-                cartContent.innerHTML = `
-                    <div class="text-center bg-white p-12 rounded-lg shadow-lg">
-                        <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-6"></i>
-                        <h2 class="text-3xl font-bold mb-4">Error Loading Cart</h2>
-                        <p class="text-gray-600 mb-8">There was an error loading your cart. Please try again later.</p>
+        function renderEmptyCart() {
+            document.getElementById('cartSummary').textContent = 'Your cart is empty';
+            
+            document.getElementById('cartContent').innerHTML = `
+                <div class="bg-white rounded-2xl p-12 text-center shadow-sm max-w-2xl mx-auto fade-in">
+                    <div class="empty-cart-icon w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-shopping-cart text-5xl text-gray-300"></i>
                     </div>
-                `;
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
+                    <p class="text-gray-500 mb-8">Looks like you haven't added any items to your cart yet. Start shopping to fill it up!</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="../index.html" class="px-8 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-red-600 transition-colors">
+                            <i class="fas fa-shopping-bag mr-2"></i>Start Shopping
+                        </a>
+                        ${!currentUser ? `
+                            <a href="login.html?redirect=cart" class="px-8 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-gray-300 transition-colors">
+                                <i class="fas fa-user mr-2"></i>Sign In
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function updateQuantity(productId, newQuantity, cartItemId) {
+            if (newQuantity < 1) {
+                removeItem(productId, cartItemId);
+                return;
             }
-        }
 
-        function calculateCartTotal(cart, products) {
-            return cart.reduce((total, item) => {
-                const product = products.find(p => p.id === item.productId);
-                if (product) {
-                    return total + (item.quantity * product.price);
-                }
-                return total;
-            }, 0);
-        }
-
-        async function updateQuantity(productId, newQuantity) {
             try {
-                if (newQuantity < 1) {
-                    await removeFromCart(productId);
-                    return;
-                }
-
                 if (currentUser) {
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('cart_items')
                         .update({ quantity: newQuantity })
                         .eq('user_id', currentUser.id)
@@ -411,26 +593,28 @@
 
                     if (error) throw error;
                 } else {
-                    const guestCart = readLocalCart();
-                    const itemIndex = guestCart.findIndex(item => (item.productId || item.id) === productId);
+                    const guestCart = JSON.parse(localStorage.getItem('cart') || '[]');
+                    const itemIndex = guestCart.findIndex(i => (i.productId || i.id) === productId);
                     if (itemIndex !== -1) {
                         guestCart[itemIndex].quantity = newQuantity;
-                        writeLocalCart(guestCart);
+                        localStorage.setItem('cart', JSON.stringify(guestCart));
                     }
                 }
 
-                await renderCart();
-                try { if (typeof window.updateCartCount === 'function') window.updateCartCount(); } catch(e) { /* ignore */ }
+                await loadCart();
+                await updateCartCount();
             } catch (error) {
                 console.error('Error updating quantity:', error);
                 alert('Failed to update quantity. Please try again.');
             }
         }
 
-        async function removeFromCart(productId) {
+        async function removeItem(productId, cartItemId) {
+            if (!confirm('Remove this item from your cart?')) return;
+
             try {
                 if (currentUser) {
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('cart_items')
                         .delete()
                         .eq('user_id', currentUser.id)
@@ -438,87 +622,52 @@
 
                     if (error) throw error;
                 } else {
-                    const guestCart = readLocalCart();
-                    const updatedCart = guestCart.filter(item => (item.productId || item.id) !== productId);
-                    writeLocalCart(updatedCart);
+                    const guestCart = JSON.parse(localStorage.getItem('cart') || '[]');
+                    const updatedCart = guestCart.filter(i => (i.productId || i.id) !== productId);
+                    localStorage.setItem('cart', JSON.stringify(updatedCart));
                 }
 
-                await renderCart();
-                try { if (typeof window.updateCartCount === 'function') window.updateCartCount(); } catch(e) { /* ignore */ }
+                await loadCart();
+                await updateCartCount();
             } catch (error) {
-                console.error('Error removing item from cart:', error);
+                console.error('Error removing item:', error);
                 alert('Failed to remove item. Please try again.');
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Migrate any legacy guest cart into canonical 'cart' before rendering
-            migrateGuestCartToCart();
-            checkUser();
-        });
-
         async function proceedToCheckout() {
+            if (!currentUser) {
+                window.location.href = 'login.html?redirect=cart';
+                return;
+            }
+
             try {
-                // Ensure user is logged in
-                if (!currentUser) {
-                    window.location.href = 'login.html?redirect=cart';
+                const { data: cartItems, error } = await supabaseClient
+                    .from('cart_items')
+                    .select('*, products(*)')
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                if (!cartItems || cartItems.length === 0) {
+                    alert('Your cart is empty!');
                     return;
                 }
-                
-                let items;
-                let cartTotal = 0;
-                
-                if (currentUser) {
-                    // Get cart items with product details from database
-                    const { data: cartItems, error } = await supabase
-                        .from('cart_items')
-                        .select('*, products(*)')
-                        .eq('user_id', currentUser.id);
-                    
-                    if (error) throw error;
-                    
-                    items = cartItems.map(item => ({
-                        product_id: item.product_id,
-                        name: item.products?.name || '',
-                        quantity: item.quantity,
-                        price: item.products?.price || 0,
-                        total: (item.products?.price || 0) * item.quantity
-                    }));
-                    
-                    cartTotal = cartItems.reduce((total, item) => 
-                        total + (item.quantity * (item.products?.price || 0)), 0);
-                } else {
-                    const guestCart = readLocalCart();
-                    const productIds = guestCart.map(item => item.productId || item.id).filter(Boolean);
-                    
-                    const { data: products, error } = await supabase
-                        .from('products')
-                        .select('*')
-                        .in('id', productIds);
-                    
-                    if (error) throw error;
-                    
-                    items = guestCart.map(item => {
-                        const product = products.find(p => p.id === (item.productId || item.id)) || {};
-                        return {
-                            product_id: item.productId || item.id,
-                            name: product.name || item.name || '',
-                            quantity: item.quantity,
-                            price: product.price || item.price || 0,
-                            total: (product.price || item.price || 0) * item.quantity
-                        };
-                    });
-                    
-                    cartTotal = items.reduce((total, item) => total + item.total, 0);
-                }
-                
-                // Calculate totals
+
+                const items = cartItems.map(item => ({
+                    product_id: item.product_id,
+                    name: item.products?.name || '',
+                    quantity: item.quantity,
+                    price: item.products?.price || 0,
+                    total: (item.products?.price || 0) * item.quantity
+                }));
+
+                const cartTotal = items.reduce((sum, item) => sum + item.total, 0);
                 const shipping = 10.00;
                 const tax = cartTotal * 0.1;
                 const total = cartTotal + shipping + tax;
-                
-                // Save to pending_orders
-                const { data: pendingOrder, error } = await supabase
+
+                const { data: pendingOrder, error: pendingError } = await supabaseClient
                     .from('pending_orders')
                     .insert([{
                         user_id: currentUser.id,
@@ -530,19 +679,21 @@
                     }])
                     .select()
                     .single();
-                
-                if (error) throw error;
-                
-                // Store pending order ID in localStorage and redirect
+
+                if (pendingError) throw pendingError;
+
                 localStorage.setItem('pendingOrderId', pendingOrder.id);
                 window.location.href = 'checkout.html';
-                
+
             } catch (error) {
-                console.error('Error creating pending order:', error);
+                console.error('Error proceeding to checkout:', error);
                 alert('There was an error processing your cart. Please try again.');
             }
         }
-    </script>
 
+        function attachEventListeners() {
+            // Any additional event listeners can be added here
+        }
+    </script>
 </body>
 </html>
