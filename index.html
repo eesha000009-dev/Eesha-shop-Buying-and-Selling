@@ -206,25 +206,178 @@
 
         .user-menu.visible { display: flex; }
 
-        .user-email { 
-            color: var(--text-dark); 
-            font-weight: 500; 
-            font-size: 14px; 
+        .user-avatar-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, #F59E0B 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 6px 12px 6px 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
         }
 
-        .btn-logout { 
-            background: #dc2626; 
-            color: white; 
-            border: none; 
-            padding: 6px 12px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            font-size: 12px; 
-            transition: background 0.2s; 
+        .user-avatar-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4);
         }
 
-        .btn-logout:hover { background: #b91c1c; }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--dark-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 14px;
+            border: 2px solid white;
+        }
+
+        .user-greeting {
+            color: var(--dark-blue);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .user-dropdown-icon {
+            color: var(--dark-blue);
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        .user-avatar-btn:hover .user-dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        /* User Dropdown Menu */
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            min-width: 220px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown-header {
+            background: linear-gradient(135deg, var(--dark-blue) 0%, #1e3a5f 100%);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .user-dropdown-header .avatar-large {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-blue);
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .user-dropdown-header .welcome-text {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-dropdown-header .member-badge {
+            display: inline-block;
+            background: var(--primary);
+            color: var(--dark-blue);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .user-dropdown-menu {
+            padding: 8px 0;
+        }
+
+        .user-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f8fafc;
+            color: var(--primary);
+        }
+
+        .user-dropdown-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .user-dropdown-item:hover i {
+            color: var(--primary);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 16px;
+        }
+
+        .btn-logout-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            color: #dc2626;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .btn-logout-dropdown:hover {
+            background: #fef2f2;
+        }
+
+        .btn-logout-dropdown i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .user-menu-wrapper {
+            position: relative;
+        }
 
         /* Mobile Menu */
         .mobile-menu-btn { 
@@ -667,6 +820,23 @@
             .search-container { display: none; }
             .header-right { gap: 12px; }
             .auth-buttons { display: none; }
+            .user-menu.visible { display: flex; }
+            .user-greeting { display: none; }
+            .user-dropdown-icon { display: none; }
+            .user-avatar-btn {
+                padding: 4px;
+                border-radius: 50%;
+            }
+            .user-dropdown {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                margin: 0;
+                border-radius: 20px 20px 0 0;
+                max-width: 100%;
+            }
             .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
             .hero-title { font-size: 1.875rem; }
         }
@@ -741,8 +911,47 @@
                 </div>
 
                 <div class="user-menu" id="userMenu">
-                    <span class="user-email" id="userEmail"></span>
-                    <button class="btn-logout" id="logoutBtn">Logout</button>
+                    <div class="user-menu-wrapper">
+                        <button class="user-avatar-btn" id="userAvatarBtn">
+                            <div class="user-avatar" id="userAvatar">U</div>
+                            <span class="user-greeting">Hi, <span id="userFirstName">User</span></span>
+                            <i class="fas fa-chevron-down user-dropdown-icon"></i>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="user-dropdown-header">
+                                <div class="avatar-large" id="avatarLarge">U</div>
+                                <div class="welcome-text">Welcome back!</div>
+                                <span class="member-badge"><i class="fas fa-crown"></i> Member</span>
+                            </div>
+                            <div class="user-dropdown-menu">
+                                <a href="Eesha buying folder/profile.html" class="user-dropdown-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <a href="Eesha buying folder/orders.html" class="user-dropdown-item">
+                                    <i class="fas fa-box"></i>
+                                    <span>My Orders</span>
+                                </a>
+                                <a href="Eesha buying folder/wishlist.html" class="user-dropdown-item">
+                                    <i class="fas fa-heart"></i>
+                                    <span>Wishlist</span>
+                                </a>
+                                <a href="Eesha buying folder/cart.html" class="user-dropdown-item">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>My Cart</span>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="Eesha buying folder/settings.html" class="user-dropdown-item">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Settings</span>
+                                </a>
+                                <button class="btn-logout-dropdown" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <a href="Eesha buying folder/cart.html" class="cart-link" aria-label="Shopping cart">
@@ -911,17 +1120,50 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             const authButtons = document.getElementById('authButtons');
             const userMenu = document.getElementById('userMenu');
-            const userEmail = document.getElementById('userEmail');
+            const userAvatar = document.getElementById('userAvatar');
+            const avatarLarge = document.getElementById('avatarLarge');
+            const userFirstName = document.getElementById('userFirstName');
 
             if (session?.user) {
                 window.currentUser = session.user;
                 authButtons.style.display = 'none';
                 userMenu.classList.add('visible');
-                userEmail.textContent = session.user.email;
+                
+                // Get user's display name from metadata or email
+                const fullName = session.user.user_metadata?.full_name || 
+                               session.user.user_metadata?.name || 
+                               session.user.email?.split('@')[0] || 'User';
+                const firstName = fullName.split(' ')[0];
+                const initial = firstName.charAt(0).toUpperCase();
+                
+                // Update avatar and greeting
+                if (userAvatar) userAvatar.textContent = initial;
+                if (avatarLarge) avatarLarge.textContent = initial;
+                if (userFirstName) userFirstName.textContent = firstName;
             } else {
                 window.currentUser = null;
                 authButtons.style.display = 'flex';
                 userMenu.classList.remove('visible');
+            }
+        }
+
+        // ===== User Dropdown Toggle =====
+        function setupUserDropdown() {
+            const userAvatarBtn = document.getElementById('userAvatarBtn');
+            const userDropdown = document.getElementById('userDropdown');
+
+            if (userAvatarBtn && userDropdown) {
+                userAvatarBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!userAvatarBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
             }
         }
 
@@ -1200,6 +1442,10 @@
                     '<p style="text-align: center; color: #dc2626; padding: 40px;">Error loading products. Please refresh the page.</p>';
             }
 
+            // ===== Initialize Auth UI =====
+            await updateAuthUI();
+            setupUserDropdown();
+            setupLogoutHandler();
             await updateCartCount();
 
             // ===== Start Ramadan crescent animation & hide splash =====
