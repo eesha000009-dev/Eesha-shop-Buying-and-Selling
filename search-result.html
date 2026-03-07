@@ -600,12 +600,17 @@
 
         async function fetchSuggestions(query, isMobile = false) {
             try {
+                console.log('Fetching suggestions for:', query);
+                
                 // Search for products (don't filter by status since field may not exist)
+                const searchPattern = `%${query}%`;
                 const { data: products, error } = await supabaseClient
                     .from('products')
                     .select('id, name, price, images, image_url, category')
-                    .or(`name.ilike.%${query}%,category.ilike.%${query}%`)
+                    .or(`name.ilike.${searchPattern},category.ilike.${searchPattern}`)
                     .limit(5);
+                
+                console.log('Suggestions result:', products, error);
                 
                 if (error) throw error;
                 
@@ -794,12 +799,23 @@
             document.getElementById('searchSubtitle').textContent = 'Showing matching products';
             
             try {
+                console.log('Searching for:', currentQuery);
+                
+                // First try a simple query without join to check if products exist
+                const { data: allProducts, error: allError } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .limit(5);
+                
+                console.log('All products test:', allProducts, allError);
+                
+                // Build search query - use textSearch or ilike
+                const searchPattern = `%${currentQuery}%`;
+                
                 let query = supabaseClient
                     .from('products')
-                    .select('*, sellers(name, seller_type)', { count: 'exact' });
-                
-                // Search in name, description, and category (don't filter by status since field may not exist)
-                query = query.or(`name.ilike.%${currentQuery}%,description.ilike.%${currentQuery}%,category.ilike.%${currentQuery}%`);
+                    .select('*', { count: 'exact' })
+                    .or(`name.ilike.${searchPattern},description.ilike.${searchPattern},category.ilike.${searchPattern}`);
                 
                 // Price filter
                 if (currentPrice) {
@@ -833,7 +849,12 @@
                 
                 const { data, count, error } = await query;
                 
-                if (error) throw error;
+                console.log('Search results:', data, count, error);
+                
+                if (error) {
+                    console.error('Search error:', error);
+                    throw error;
+                }
                 
                 document.getElementById('resultsCount').textContent = `${count || 0} products found`;
                 
