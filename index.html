@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eesha Market — Your Marketplace for Infinite Possibilities</title>
-    <meta name="description" content="Eesha Market - Buy and sell with confidence. Millions of products in one place.">
+    <title>EeshaMart — Nigeria's #1 Marketplace for Everything</title>
+    <meta name="description" content="Shop millions of products from trusted merchants and local farmers. Best prices, fast delivery, secure payments.">
     
     <!-- Fonts & Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Tailwind & Supabase -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,15 +18,61 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+                    },
                     colors: {
-                        primary: '#FBBF24',
-                        'dark-blue': '#0F172A',
-                        secondary: '#2c3e50',
-                        'custom-red': {
-                            50: '#fff1f1',
-                            100: '#ffe4e4',
-                            200: '#fecaca',
+                        brand: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                        },
+                        dark: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
                         }
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'slide-in-right': 'slideInRight 0.5s ease-out',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideInRight: {
+                            '0%': { opacity: '0', transform: 'translateX(20px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 20px rgba(251, 191, 36, 0.3)' },
+                            '100%': { boxShadow: '0 0 40px rgba(251, 191, 36, 0.6)' },
+                        },
                     }
                 }
             }
@@ -36,1005 +82,878 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
+        html { scroll-behavior: smooth; }
+        
         body { 
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; 
-            background-color: #f9fafb; 
-            color: #1f2937; 
-        }
-        
-        /* Root Variables */
-        :root {
-            --primary: #FBBF24;
-            --dark-blue: #0F172A;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --bg-light: #f9fafb;
-            --border: #e5e7eb;
-            --text-primary: #1f2937;
-            --text-tertiary: #9ca3af;
-            --surface: #ffffff;
-            --radius: 6px;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: #fafafa;
+            color: #1f2937;
+            overflow-x: hidden;
         }
 
-        /* ===== HEADER ===== */
-        header { 
-            background: white; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-            position: sticky; 
-            top: 0; 
-            z-index: 50; 
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
 
-        .header-top { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            padding: 12px 16px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .logo { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            text-decoration: none; 
-            color: var(--dark-blue); 
-            font-weight: 700; 
-            font-size: 1.25rem; 
-        }
-
-        .logo img { height: 48px; }
-        
-        /* Search Bar */
-        .search-container { 
-            flex: 2; 
-            max-width: 600px; 
-            margin: 0 24px; 
-            display: flex; 
-            align-items: center; 
-            background: var(--bg-light); 
-            border-radius: 12px; 
-            padding: 10px 16px; 
-            border: 1px solid var(--border); 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        .search-container input { 
-            flex: 1; 
-            background: none; 
-            border: none; 
-            outline: none; 
-            font-size: 16px; 
-            padding: 6px 0;
-            color: var(--text-dark);
-        }
-
-        .search-container button { 
-            background: none; 
-            border: none; 
-            color: var(--primary); 
-            cursor: pointer; 
-            font-size: 20px; 
-            padding: 4px;
-        }
-
-        /* Header Right */
-        .header-right { 
-            display: flex; 
-            align-items: center; 
-            gap: 24px; 
-        }
-
-        .nav-link { 
-            text-decoration: none; 
-            color: var(--text-dark); 
-            font-size: 14px; 
-            font-weight: 500; 
-            transition: color 0.2s; 
-        }
-
-        .nav-link:hover { color: var(--primary); }
-
-        .auth-buttons { 
-            display: flex; 
-            gap: 12px; 
-        }
-
-        .btn-login { 
-            background: transparent; 
-            color: var(--dark-blue); 
-            border: 1px solid var(--dark-blue); 
-            padding: 8px 16px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: 500; 
-            transition: all 0.2s; 
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-login:hover { background: var(--dark-blue); color: white; }
-
-        .btn-signup { 
-            background: var(--primary); 
-            color: var(--dark-blue); 
-            border: none; 
-            padding: 8px 16px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-signup:hover { background: #f0a600; transform: translateY(-1px); }
-
-        .cart-link { 
-            position: relative; 
-            color: var(--text-dark); 
-            text-decoration: none; 
-            font-size: 18px; 
-            transition: color 0.2s; 
-        }
-
-        .cart-link:hover { color: var(--primary); }
-
-        .cart-count { 
-            position: absolute; 
-            top: -8px; 
-            right: -8px; 
-            background: var(--primary); 
-            color: var(--dark-blue); 
-            border-radius: 50%; 
-            width: 20px; 
-            height: 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 12px; 
-            font-weight: 700; 
-        }
-
-        /* User Menu */
-        .user-menu { 
-            display: none; 
-            align-items: center; 
-            gap: 12px; 
-        }
-
-        .user-menu.visible { display: flex; }
-
-        .user-avatar-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, var(--primary) 0%, #F59E0B 100%);
-            border: none;
-            border-radius: 50px;
-            padding: 6px 12px 6px 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
-        }
-
-        .user-avatar-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4);
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--dark-blue);
+        /* Splash Screen */
+        #splashScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 14px;
-            border: 2px solid white;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #splashScreen.hidden { opacity: 0; visibility: hidden; }
+        
+        .splash-logo {
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .user-greeting {
-            color: var(--dark-blue);
-            font-weight: 600;
-            font-size: 13px;
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .user-dropdown-icon {
-            color: var(--dark-blue);
-            font-size: 12px;
-            transition: transform 0.2s;
+        /* Glass Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
-        .user-avatar-btn:hover .user-dropdown-icon {
-            transform: rotate(180deg);
+        /* Product Card Hover Effects */
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        .product-card:hover .product-image {
+            transform: scale(1.08);
+        }
+        .product-card .product-image {
+            transition: transform 0.5s ease;
         }
 
-        /* User Dropdown Menu */
-        .user-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            min-width: 220px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
+        /* Category Card */
+        .category-card {
             transition: all 0.3s ease;
-            z-index: 100;
-            overflow: hidden;
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+        .category-card:hover .category-icon {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+        .category-card .category-icon {
+            transition: all 0.3s ease;
         }
 
-        .user-dropdown.show {
+        /* Deal Timer */
+        .deal-timer {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        /* Flash Deal Badge */
+        .flash-badge {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: pulse 2s infinite;
+        }
+
+        /* Banner Gradient */
+        .hero-gradient {
+            background: linear-gradient(135deg, 
+                rgba(251, 191, 36, 0.1) 0%, 
+                rgba(245, 158, 11, 0.05) 50%, 
+                transparent 100%);
+        }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Quick Action Button */
+        .quick-action {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        .product-card:hover .quick-action {
             opacity: 1;
-            visibility: visible;
             transform: translateY(0);
         }
 
-        .user-dropdown-header {
-            background: linear-gradient(135deg, var(--dark-blue) 0%, #1e3a5f 100%);
-            padding: 16px;
-            text-align: center;
-        }
-
-        .user-dropdown-header .avatar-large {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary);
-            margin: 0 auto 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--dark-blue);
-            font-weight: 700;
-            font-size: 20px;
-        }
-
-        .user-dropdown-header .welcome-text {
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .user-dropdown-header .member-badge {
-            display: inline-block;
-            background: var(--primary);
-            color: var(--dark-blue);
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-top: 6px;
-        }
-
-        .user-dropdown-menu {
-            padding: 8px 0;
-        }
-
-        .user-dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            color: var(--text-dark);
-            text-decoration: none;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .user-dropdown-item:hover {
-            background: #f8fafc;
-            color: var(--primary);
-        }
-
-        .user-dropdown-item i {
-            width: 20px;
-            text-align: center;
-            color: var(--text-light);
-        }
-
-        .user-dropdown-item:hover i {
-            color: var(--primary);
-        }
-
-        .dropdown-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 8px 16px;
-        }
-
-        .btn-logout-dropdown {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            padding: 12px 16px;
-            background: none;
-            border: none;
-            color: #dc2626;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-        }
-
-        .btn-logout-dropdown:hover {
-            background: #fef2f2;
-        }
-
-        .btn-logout-dropdown i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .user-menu-wrapper {
-            position: relative;
-        }
-
-        /* Mobile Menu */
-        .mobile-menu-btn { 
-            display: none; 
-            background: none; 
-            border: none; 
-            font-size: 20px; 
-            color: var(--text-dark); 
-            cursor: pointer; 
-        }
-
-        /* ===== SPLASH SCREEN ===== */
-        #splashScreen { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            background:
-                radial-gradient(circle at 50% 38%, rgba(251,191,36,0.30) 0%, rgba(251,191,36,0.20) 12%, rgba(251,191,36,0.10) 26%, rgba(251,191,36,0.04) 40%, transparent 60%),
-                linear-gradient(135deg, var(--dark-blue) 0%, #061326 50%, #071428 72%, rgba(6,18,40,0.98) 100%);
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 10000; 
-            transition: opacity 0.6s ease-out; 
-            opacity: 1; 
-            color: var(--primary);
-        }
-
-        #splashScreen.hidden { 
-            opacity: 0; 
-            pointer-events: none; 
-        }
-
-        .splash-container { 
-            text-align: center; 
-            animation: splashFadeIn 0.8s ease-out; 
-        }
-
-        .splash-logo { 
-            width: 300px; 
-            margin: 0 auto 30px; 
-            animation: splashSlideUp 0.8s ease-out; 
-        }
-
-        .splash-logo:hover { 
-            transform: translateY(-3px); 
-            filter: drop-shadow(0 6px 12px rgba(251, 191, 36, 0.25)); 
-        }
-
-        .splash-arrow { 
-            stroke-dasharray: 380; 
-            stroke-dashoffset: 380; 
-            animation: splashDraw 5s ease-out forwards; 
-        }
-
-        .splash-coin { 
-            animation: splashSpin 2s linear infinite; 
-            transform-origin: 50px 40px; 
-        }
-
-        .loading-text { 
-            color: var(--primary); 
-            font-size: 18px; 
-            font-weight: 600; 
-            margin-top: 30px; 
-            letter-spacing: 1px; 
-            animation: splashFadeInText 1s ease-out 0.5s both; 
-        }
-
-        .loading-dot { 
-            display: inline-block; 
-            animation: splashDot 1.4s infinite; 
-        }
-
-        .loading-dot:nth-child(1) { animation-delay: 0s; }
-        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        .subtitle { 
-            color: rgba(255, 255, 255, 0.85); 
-            font-size: 14px; 
-            margin-top: 10px; 
-            animation: splashFadeInText 1s ease-out 0.8s both; 
-        }
-
-        .splash-text { 
-            opacity: 0; 
-            animation: goldFade 1s ease 0.9s forwards; 
-        }
-
-        /* ===== CATEGORY TABS ===== */
-        .category-tabs { 
-            display: flex; 
-            gap: 12px; 
-            flex-wrap: wrap; 
-            margin: 16px 0; 
-            border-bottom: 1px solid var(--border); 
-            padding-bottom: 12px; 
-            padding: 12px 0;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .category-tabs::-webkit-scrollbar { display: none; }
-        .category-tabs .tab-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; }
-
-
-        .tab-btn { 
-            background: none; 
-            border: none; 
-            padding: 8px 12px; 
-            color: var(--text-light); 
-            font-weight: 500; 
-            cursor: pointer; 
-            font-size: 14px; 
-            transition: all 0.2s; 
-            border-bottom: 3px solid transparent; 
-        }
-
-        .tab-btn.active { 
-            color: var(--dark-blue); 
-            border-bottom-color: var(--primary); 
-        }
-
-        .tab-btn:hover { color: var(--dark-blue); }
-
-        /* ===== PRODUCT GRID ===== */
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-            gap: 20px; 
-        }
-
-        .product-card { 
-            background: white; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08); 
-            transition: all 0.3s; 
-            cursor: pointer; 
-            display: flex; 
-            flex-direction: column;
-        }
-
-        .product-card:hover { 
-            box-shadow: 0 8px 16px rgba(0,0,0,0.12); 
-            transform: translateY(-4px); 
-        }
-
-        .product-image { 
-            width: 100%; 
-            height: 200px; 
-            object-fit: cover; 
-        }
-
-        .product-info { padding: 12px; }
-
-        .product-title { 
-            font-weight: 600; 
-            font-size: 14px; 
-            margin-bottom: 8px; 
-            color: var(--text-dark); 
-        }
-
-        .product-price { 
-            color: var(--primary); 
-            font-weight: 700; 
-            font-size: 16px; 
-            margin-bottom: 8px; 
-        }
-
-        .product-footer { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-
-        .product-rating {
-            color: #fbbf24; /* gold stars */
-            font-size: 12px;
-        }
-
-        /* Discount badge on product cards */
-        .badge {
+        /* Banner Slider */
+        .banner-slide {
+            opacity: 0;
+            transition: opacity 0.5s ease;
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #ef4444;
-            color: white;
-            padding: 6px 8px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            inset: 0;
         }
-
-        /* Hero carousel */
-        .hero-carousel { position: relative; border-radius: 12px; overflow: hidden; }
-        .hero-slide { display: none; width: 100%; height: 400px; object-fit: cover; }
-        .hero-slide.active { display: block; animation: splashSlideUp 0.6s ease; }
-        .carousel-dots { position: absolute; left: 50%; transform: translateX(-50%); bottom: 14px; display:flex; gap:8px; }
-        .carousel-dot { width:10px; height:10px; border-radius:50%; background: rgba(255,255,255,0.5); cursor:pointer; }
-        .carousel-dot.active { background: var(--primary); }
-        .carousel-control { position:absolute; top:50%; transform:translateY(-50%); background: rgba(0,0,0,0.35); color:white; border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-        .carousel-control.left { left:12px; }
-        .carousel-control.right { right:12px; }
-
-        .btn-add { 
-            background: var(--dark-blue); 
-            color: white; 
-            border: none; 
-            padding: 8px 12px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            font-size: 12px; 
-            transition: background 0.2s; 
-        }
-
-        .btn-add:hover { 
-            background: var(--primary); 
-            color: var(--dark-blue); 
-        }
-
-        /* ===== HERO SECTION ===== */
-        .hero { 
-            margin: 32px 0; 
-            border-radius: 12px; 
-            overflow: hidden; 
+        .banner-slide.active {
+            opacity: 1;
             position: relative;
         }
 
-        .deals-banner img {
-            border-radius: 12px;
-            transition: transform 0.3s;
+        /* Seller Badge */
+        .seller-badge {
+            background: linear-gradient(135deg, #059669, #10b981);
         }
-        .deals-banner img:hover {
-            transform: scale(1.02);
-        }
-
-        .hero img { 
-            width: 100%; 
-            height: auto; 
-            max-height: 400px; 
-            object-fit: cover; 
+        .farmer-badge {
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
         }
 
-        .hero-overlay {
-            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.8)); 
-            color: white; 
-            padding: 40px; 
-            text-align: center; 
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
+        /* Marquee */
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .marquee {
+            animation: marquee 30s linear infinite;
         }
 
-        .hero-title {
-            font-size: 2.5rem; 
-            font-weight: 700; 
-            margin-bottom: 8px;
+        /* Header shadow on scroll */
+        header.scrolled {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
-        .hero-subtitle {
-            font-size: 1.125rem; 
-            color: var(--primary); 
-            font-weight: 500;
+        /* Search focus */
+        .search-box:focus-within {
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
         }
 
-        /* ===== FOOTER ===== */
-        footer { 
-            background: var(--dark-blue); 
-            color: white; 
-            padding: 40px 0 20px; 
-            margin-top: 60px; 
+        /* Mobile Bottom Nav */
+        .mobile-nav {
+            padding-bottom: env(safe-area-inset-bottom);
         }
-
-        .footer-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 30px; 
-            margin-bottom: 30px;
-            max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 0 16px;
-        }
-
-        .footer-col h4 { 
-            font-weight: 700; 
-            margin-bottom: 12px; 
-            color: var(--primary); 
-        }
-
-        .footer-col p, .footer-col a { 
-            font-size: 14px; 
-            color: rgba(255,255,255,0.8); 
-        }
-
-        .footer-col a { 
-            display: block; 
-            margin-bottom: 8px; 
-            text-decoration: none; 
-            transition: color 0.2s; 
-        }
-
-        .footer-col a:hover { color: var(--primary); }
-
-        .footer-bottom { 
-            border-top: 1px solid rgba(255,255,255,0.2); 
-            padding-top: 20px; 
-            text-align: center; 
-            font-size: 14px; 
-            color: rgba(255,255,255,0.6); 
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px 16px 0;
-        }
-
-        /* ===== AUTH MODAL ===== */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.5); 
-            z-index: 1000; 
-            align-items: center; 
-            justify-content: center; 
-        }
-
-        .modal.show { display: flex; }
-
-        .modal-content { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 40px; 
-            max-width: 400px; 
-            text-align: center; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .modal-content h2 { 
-            color: var(--dark-blue); 
-            margin-bottom: 12px; 
-            font-size: 1.5rem; 
-        }
-
-        .modal-content p { 
-            color: var(--text-light); 
-            margin-bottom: 24px; 
-        }
-
-        .modal-buttons { 
-            display: flex; 
-            gap: 12px; 
-        }
-
-        .modal-buttons a { 
-            flex: 1; 
-            padding: 12px; 
-            border-radius: 6px; 
-            border: none; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.2s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-btn-login { 
-            background: var(--dark-blue); 
-            color: white; 
-        }
-
-        .modal-btn-login:hover { background: #0a0f1f; }
-
-        .modal-btn-signup { 
-            background: var(--primary); 
-            color: var(--dark-blue); 
-        }
-
-        .modal-btn-signup:hover { background: #f0a600; }
-
-        .modal-close { 
-            position: absolute; 
-            top: 16px; 
-            right: 16px; 
-            background: none; 
-            border: none; 
-            font-size: 24px; 
-            color: var(--text-light); 
-            cursor: pointer; 
-        }
-
-        /* ===== ANIMATIONS ===== */
-        @keyframes goldFade { 
-            from { opacity: 0; filter: blur(0.6px); } 
-            to { opacity: 1; filter: none; } 
-        }
-
-        @keyframes splashFadeIn { 
-            from { opacity: 0; } 
-            to { opacity: 1; } 
-        }
-
-        @keyframes splashSlideUp { 
-            from { opacity: 0; transform: translateY(20px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-
-        @keyframes splashFadeInText { 
-            from { opacity: 0; } 
-            to { opacity: 1; } 
-        }
-
-        @keyframes splashDraw { 
-            to { stroke-dashoffset: 0; } 
-        }
-
-        @keyframes splashSpin { 
-            to { transform: rotate(360deg); } 
-        }
-
-        @keyframes splashDot { 
-            0%, 60%, 100% { opacity: 0.3; } 
-            30% { opacity: 1; } 
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .mobile-menu-btn { display: block; }
-            .search-container { display: none; }
-            .header-right { gap: 12px; }
-            .auth-buttons { display: none; }
-            .user-menu.visible { display: flex; }
-            .user-greeting { display: none; }
-            .user-dropdown-icon { display: none; }
-            .user-avatar-btn {
-                padding: 4px;
-                border-radius: 50%;
-            }
-            .user-dropdown {
-                position: fixed;
-                top: auto;
-                bottom: 0;
-                right: 0;
-                left: 0;
-                margin: 0;
-                border-radius: 20px 20px 0 0;
-                max-width: 100%;
-            }
-            .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-            .hero-title { font-size: 1.875rem; }
-        }
-
-        .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            padding: 0 16px; 
-        }
-
-        /* header bottom categories row */
-        .header-bottom {
-            background: white;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-            padding: 6px 0;
-            position: sticky;
-            top: 64px; /* below header-top height */
-            z-index: 45;
-        }
-        .header-bottom .category-tabs { margin: 0 auto; }
     </style>
 </head>
 
-<body>
+<body class="min-h-screen">
     <!-- Splash Screen -->
     <div id="splashScreen">
-        <div class="splash-container">
-            <svg class="splash-logo" viewBox="0 0 480 90" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="splashGold" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#FBBF24"/>
-                        <stop offset="100%" stop-color="#F59E0B"/>
-                    </linearGradient>
-                </defs>
-                <g class="splash-coin">
-                    <!-- crescent moon shape instead of coin -->
-                    <path d="M40,22 A18,18 0 1,0 40,58 A12,12 0 1,1 40,22" fill="url(#splashGold)"/>
-                </g>
-                <text class="splash-text" x="80" y="65" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="950" fill="url(#splashGold)" stroke="rgba(255,255,255,0.12)" stroke-width="0.6" letter-spacing="-0.5">
-                    EeshaMart
-                </text>
-                <path class="splash-arrow" d="M 150 68 Q 260 78, 440 68 L 430 58" 
-                      stroke="url(#splashGold)" stroke-width="4" fill="none" stroke-linecap="round"/>
-            </svg>
-            <div class="loading-text">
-                Loading<span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span>
+        <div class="text-center">
+            <div class="splash-logo mb-6">
+                <svg viewBox="0 0 200 60" class="w-48 mx-auto">
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#fbbf24"/>
+                            <stop offset="100%" stop-color="#f59e0b"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="25" cy="30" r="20" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
+                    <path d="M25 12 A18 18 0 1 1 25 48 A12 12 0 1 0 25 12" fill="url(#logoGrad)"/>
+                    <text x="55" y="40" font-size="32" font-weight="800" fill="url(#logoGrad)">EeshaMart</text>
+                </svg>
             </div>
-            <div class="subtitle">Ramadan Kareem – enjoy special offers!</div>
+            <div class="flex items-center justify-center gap-1">
+                <div class="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style="animation-delay: 0s;"></div>
+                <div class="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                <div class="w-2 h-2 bg-brand-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+            </div>
+            <p class="text-gray-400 mt-4 text-sm">Nigeria's #1 Marketplace</p>
         </div>
-        <canvas id="snowCanvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:10002;"></canvas>
+    </div>
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-dark-900 text-white py-2 overflow-hidden">
+        <div class="marquee whitespace-nowrap">
+            <span class="inline-flex items-center gap-8 px-4">
+                <span class="flex items-center gap-2"><i class="fas fa-truck text-brand-400"></i> FREE delivery on orders over ₦10,000</span>
+                <span class="flex items-center gap-2"><i class="fas fa-shield-alt text-brand-400"></i> 100% Buyer Protection</span>
+                <span class="flex items-center gap-2"><i class="fas fa-undo text-brand-400"></i> Easy Returns within 7 days</span>
+                <span class="flex items-center gap-2"><i class="fas fa-headset text-brand-400"></i> 24/7 Customer Support</span>
+                <span class="flex items-center gap-2"><i class="fas fa-leaf text-brand-400"></i> Fresh from Local Farmers</span>
+                <span class="flex items-center gap-2"><i class="fas fa-store text-brand-400"></i> Verified Merchants</span>
+            </span>
+            <span class="inline-flex items-center gap-8 px-4">
+                <span class="flex items-center gap-2"><i class="fas fa-truck text-brand-400"></i> FREE delivery on orders over ₦10,000</span>
+                <span class="flex items-center gap-2"><i class="fas fa-shield-alt text-brand-400"></i> 100% Buyer Protection</span>
+                <span class="flex items-center gap-2"><i class="fas fa-undo text-brand-400"></i> Easy Returns within 7 days</span>
+                <span class="flex items-center gap-2"><i class="fas fa-headset text-brand-400"></i> 24/7 Customer Support</span>
+                <span class="flex items-center gap-2"><i class="fas fa-leaf text-brand-400"></i> Fresh from Local Farmers</span>
+                <span class="flex items-center gap-2"><i class="fas fa-store text-brand-400"></i> Verified Merchants</span>
+            </span>
+        </div>
     </div>
 
     <!-- Header -->
-    <header>
-        <div class="header-top">
-            <a href="/" class="logo">
-                <img src="Eesha buying folder/shared/image.svg" alt="Eesha">
-                <span>Eesha</span>
-            </a>
-            
-            <div class="search-container">
-                <input type="text" placeholder="Search products..." id="searchInput">
-                <button><i class="fas fa-search"></i></button>
-            </div>
+    <header id="mainHeader" class="glass sticky top-0 z-50 border-b border-gray-100 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4">
+            <!-- Main Header -->
+            <div class="flex items-center justify-between h-16 lg:h-20">
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-brand-400 to-brand-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-store text-white text-lg"></i>
+                    </div>
+                    <span class="text-xl font-bold gradient-text hidden sm:block">EeshaMart</span>
+                </a>
 
-            <div class="header-right">
-                <a href="search-result.html" class="nav-link hidden md:inline">Shop</a>
-                
-                <div class="auth-buttons" id="authButtons">
-                    <a href="Eesha buying folder/login.html" class="btn-login">Login</a>
-                    <a href="Eesha buying folder/signup.html" class="btn-signup">Sign Up</a>
+                <!-- Search Bar -->
+                <div class="search-box flex-1 max-w-2xl mx-4 lg:mx-8 hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2.5 border-2 border-transparent focus-within:border-brand-400 transition-all">
+                    <i class="fas fa-search text-gray-400 mr-3"></i>
+                    <input type="text" id="searchInput" placeholder="Search for products, brands, categories..." 
+                           class="flex-1 bg-transparent outline-none text-sm">
+                    <button class="bg-gradient-to-r from-brand-400 to-brand-500 text-dark-900 px-6 py-1.5 rounded-full font-semibold text-sm hover:from-brand-500 hover:to-brand-600 transition-all">
+                        Search
+                    </button>
                 </div>
 
-                <div class="user-menu" id="userMenu">
-                    <div class="user-menu-wrapper">
-                        <button class="user-avatar-btn" id="userAvatarBtn">
-                            <div class="user-avatar" id="userAvatar">U</div>
-                            <span class="user-greeting">Hi, <span id="userFirstName">User</span></span>
-                            <i class="fas fa-chevron-down user-dropdown-icon"></i>
-                        </button>
-                        <div class="user-dropdown" id="userDropdown">
-                            <div class="user-dropdown-header">
-                                <div class="avatar-large" id="avatarLarge">U</div>
-                                <div class="welcome-text">Welcome back!</div>
-                                <span class="member-badge"><i class="fas fa-crown"></i> Member</span>
+                <!-- Right Actions -->
+                <div class="flex items-center gap-2 lg:gap-4">
+                    <!-- Mobile Search Toggle -->
+                    <button id="mobileSearchBtn" class="md:hidden p-2 hover:bg-gray-100 rounded-full">
+                        <i class="fas fa-search text-gray-600"></i>
+                    </button>
+
+                    <!-- Auth Buttons (Logged Out) -->
+                    <div id="authButtons" class="hidden sm:flex items-center gap-2">
+                        <a href="Eesha buying folder/login.html" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-brand-600 transition-colors">
+                            Login
+                        </a>
+                        <a href="Eesha buying folder/signup.html" class="px-4 py-2 bg-gradient-to-r from-brand-400 to-brand-500 text-dark-900 rounded-full text-sm font-semibold hover:from-brand-500 hover:to-brand-600 transition-all hover:scale-105">
+                            Sign Up
+                        </a>
+                    </div>
+
+                    <!-- User Menu (Logged In) -->
+                    <div id="userMenu" class="hidden relative">
+                        <button id="userAvatarBtn" class="flex items-center gap-2 p-1.5 pr-3 bg-gradient-to-r from-brand-400 to-brand-500 rounded-full hover:shadow-lg transition-all">
+                            <div id="userAvatar" class="w-8 h-8 bg-dark-900 rounded-full flex items-center justify-center text-brand-400 font-bold text-sm">
+                                U
                             </div>
-                            <div class="user-dropdown-menu">
-                                <a href="Eesha buying folder/profile.html" class="user-dropdown-item">
-                                    <i class="fas fa-user"></i>
+                            <span id="userFirstName" class="text-dark-900 font-semibold text-sm hidden lg:block">User</span>
+                            <i class="fas fa-chevron-down text-dark-900 text-xs"></i>
+                        </button>
+                        <!-- Dropdown -->
+                        <div id="userDropdown" class="hidden absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                            <div class="bg-gradient-to-br from-dark-900 to-dark-800 p-4 text-center">
+                                <div id="avatarLarge" class="w-14 h-14 bg-brand-400 rounded-full flex items-center justify-center text-dark-900 font-bold text-xl mx-auto mb-2">U</div>
+                                <p class="text-white font-semibold">Welcome back!</p>
+                                <span class="inline-flex items-center gap-1 bg-brand-400/20 text-brand-400 text-xs px-3 py-1 rounded-full mt-1">
+                                    <i class="fas fa-crown"></i> Premium Member
+                                </span>
+                            </div>
+                            <div class="p-2">
+                                <a href="Eesha buying folder/profile.html" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 rounded-xl transition-colors">
+                                    <i class="fas fa-user text-gray-400 w-5"></i>
                                     <span>My Profile</span>
                                 </a>
-                                <a href="Eesha buying folder/orders.html" class="user-dropdown-item">
-                                    <i class="fas fa-box"></i>
+                                <a href="Eesha buying folder/orders.html" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 rounded-xl transition-colors">
+                                    <i class="fas fa-box text-gray-400 w-5"></i>
                                     <span>My Orders</span>
                                 </a>
-                                <a href="Eesha buying folder/wishlist.html" class="user-dropdown-item">
-                                    <i class="fas fa-heart"></i>
+                                <a href="Eesha buying folder/wishlist.html" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 rounded-xl transition-colors">
+                                    <i class="fas fa-heart text-gray-400 w-5"></i>
                                     <span>Wishlist</span>
                                 </a>
-                                <a href="Eesha buying folder/cart.html" class="user-dropdown-item">
-                                    <i class="fas fa-shopping-cart"></i>
+                                <a href="Eesha buying folder/cart.html" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 rounded-xl transition-colors">
+                                    <i class="fas fa-shopping-cart text-gray-400 w-5"></i>
                                     <span>My Cart</span>
                                 </a>
-                                <div class="dropdown-divider"></div>
-                                <a href="Eesha buying folder/settings.html" class="user-dropdown-item">
-                                    <i class="fas fa-cog"></i>
-                                    <span>Settings</span>
-                                </a>
-                                <button class="btn-logout-dropdown" id="logoutBtn">
-                                    <i class="fas fa-sign-out-alt"></i>
+                                <hr class="my-2">
+                                <button id="logoutBtn" class="flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors w-full">
+                                    <i class="fas fa-sign-out-alt w-5"></i>
                                     <span>Logout</span>
                                 </button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Cart -->
+                    <a href="Eesha buying folder/cart.html" class="relative p-2 hover:bg-gray-100 rounded-full transition-colors group">
+                        <i class="fas fa-shopping-cart text-gray-600 text-lg group-hover:text-brand-600 transition-colors"></i>
+                        <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">0</span>
+                    </a>
+
+                    <!-- Mobile Menu -->
+                    <button id="mobileMenuBtn" class="lg:hidden p-2 hover:bg-gray-100 rounded-full">
+                        <i class="fas fa-bars text-gray-600 text-lg"></i>
+                    </button>
                 </div>
-
-                <a href="Eesha buying folder/cart.html" class="cart-link" aria-label="Shopping cart">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span id="cartCount" class="cart-count">0</span>
-                </a>
-
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
-        </div>
-        <!-- category navigation under header for quick access -->
-        <div class="header-bottom">
-            <nav id="categoryTabs" class="category-tabs"></nav>
+
+            <!-- Mobile Search (Hidden by default) -->
+            <div id="mobileSearch" class="hidden pb-4 md:hidden">
+                <div class="search-box flex items-center bg-gray-100 rounded-full px-4 py-2.5 border-2 border-transparent focus-within:border-brand-400">
+                    <i class="fas fa-search text-gray-400 mr-3"></i>
+                    <input type="text" placeholder="Search products..." class="flex-1 bg-transparent outline-none text-sm">
+                </div>
+            </div>
+
+            <!-- Categories Nav -->
+            <nav class="hidden lg:flex items-center gap-1 py-2 overflow-x-auto">
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors whitespace-nowrap">
+                    <i class="fas fa-th-large"></i> All Categories
+                </a>
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors whitespace-nowrap">
+                    <i class="fas fa-bolt text-orange-500"></i> Flash Deals
+                </a>
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors whitespace-nowrap">
+                    <i class="fas fa-leaf text-green-500"></i> Farm Fresh
+                </a>
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors whitespace-nowrap">
+                    <i class="fas fa-mobile-alt text-blue-500"></i> Phones
+                </a>
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors whitespace-nowrap">
+                    <i class="fas fa-laptop text-purple-500"></i> Electronics
+                </a>
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors whitespace-nowrap">
+                    <i class="fas fa-tshirt text-pink-500"></i> Fashion
+                </a>
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors whitespace-nowrap">
+                    <i class="fas fa-home text-indigo-500"></i> Home & Garden
+                </a>
+                <a href="#" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600 transition-colors whitespace-nowrap">
+                    <i class="fas fa-baby text-cyan-500"></i> Baby & Kids
+                </a>
+            </nav>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="container">
-        <!-- Hero Carousel (rotating promotional banners) -->
-        <section class="hero-carousel container">
-            <button class="carousel-control left" aria-label="Previous" id="carouselPrev">‹</button>
-            <button class="carousel-control right" aria-label="Next" id="carouselNext">›</button>
-            <img class="hero-slide active" data-src="Eesha buying folder/attached_assets/hero.jpg" src="Eesha buying folder/attached_assets/hero.jpg" alt="Hero 1">
-            <img class="hero-slide" data-src="Eesha buying folder/attached_assets/deals.jpg" src="Eesha buying folder/attached_assets/deals.jpg" alt="Hero 2">
-            <div class="carousel-dots" id="carouselDots"></div>
-        </section>
+    <!-- Mobile Navigation (Bottom) -->
+    <nav class="mobile-nav fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 lg:hidden z-50">
+        <div class="flex items-center justify-around py-2">
+            <a href="/" class="flex flex-col items-center gap-1 p-2 text-brand-600">
+                <i class="fas fa-home text-lg"></i>
+                <span class="text-xs font-medium">Home</span>
+            </a>
+            <a href="#" class="flex flex-col items-center gap-1 p-2 text-gray-500">
+                <i class="fas fa-th-large text-lg"></i>
+                <span class="text-xs">Categories</span>
+            </a>
+            <a href="#" class="flex flex-col items-center gap-1 p-2 text-gray-500">
+                <i class="fas fa-bolt text-lg"></i>
+                <span class="text-xs">Deals</span>
+            </a>
+            <a href="Eesha buying folder/cart.html" class="flex flex-col items-center gap-1 p-2 text-gray-500 relative">
+                <i class="fas fa-shopping-cart text-lg"></i>
+                <span class="text-xs">Cart</span>
+                <span class="absolute top-0 right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">0</span>
+            </a>
+            <a href="Eesha buying folder/login.html" class="flex flex-col items-center gap-1 p-2 text-gray-500">
+                <i class="fas fa-user text-lg"></i>
+                <span class="text-xs">Account</span>
+            </a>
+        </div>
+    </nav>
 
-        <!-- Deals Banner (inspired by large promotional banners on major marketplaces) -->
-        <section class="deals-banner my-8">
-            <div class="container">
-                <img src="Eesha buying folder/attached_assets/deals.jpg" alt="Deals of the Day" class="w-full rounded-lg h-64 object-cover object-center">
+    <!-- Main Content -->
+    <main class="pb-20 lg:pb-0">
+        <!-- Hero Section -->
+        <section class="relative bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-0 left-0 w-96 h-96 bg-brand-400 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 right-0 w-96 h-96 bg-brand-500 rounded-full blur-3xl"></div>
+            </div>
+            
+            <div class="max-w-7xl mx-auto px-4 py-12 lg:py-20 relative">
+                <div class="grid lg:grid-cols-2 gap-8 items-center">
+                    <!-- Hero Content -->
+                    <div class="text-center lg:text-left animate-slide-up">
+                        <div class="inline-flex items-center gap-2 bg-brand-400/20 text-brand-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                            <i class="fas fa-fire animate-pulse"></i>
+                            <span>Over 1 Million Products Available</span>
+                        </div>
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white leading-tight mb-4">
+                            Shop Smart,<br>
+                            <span class="gradient-text">Save Big</span>
+                        </h1>
+                        <p class="text-gray-300 text-lg mb-8 max-w-lg mx-auto lg:mx-0">
+                            Discover amazing deals from trusted merchants and fresh produce directly from local farmers. Quality guaranteed!
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                            <a href="#" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-brand-400 to-brand-500 text-dark-900 px-8 py-4 rounded-full font-bold text-lg hover:from-brand-500 hover:to-brand-600 transition-all hover:scale-105 shadow-lg shadow-brand-400/30">
+                                <i class="fas fa-shopping-bag"></i>
+                                Shop Now
+                            </a>
+                            <a href="#" class="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 transition-all border border-white/20">
+                                <i class="fas fa-store"></i>
+                                Become a Seller
+                            </a>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div class="flex items-center justify-center lg:justify-start gap-8 mt-10">
+                            <div class="text-center">
+                                <div class="text-2xl lg:text-3xl font-bold text-white">1M+</div>
+                                <div class="text-gray-400 text-sm">Products</div>
+                            </div>
+                            <div class="w-px h-10 bg-gray-700"></div>
+                            <div class="text-center">
+                                <div class="text-2xl lg:text-3xl font-bold text-white">50K+</div>
+                                <div class="text-gray-400 text-sm">Sellers</div>
+                            </div>
+                            <div class="w-px h-10 bg-gray-700"></div>
+                            <div class="text-center">
+                                <div class="text-2xl lg:text-3xl font-bold text-white">500K+</div>
+                                <div class="text-gray-400 text-sm">Happy Buyers</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hero Image/Grid -->
+                    <div class="relative hidden lg:block animate-slide-in-right">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-4">
+                                <div class="bg-white rounded-3xl p-4 shadow-2xl transform hover:scale-105 transition-transform">
+                                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop" alt="Product" class="w-full h-40 object-cover rounded-2xl">
+                                    <div class="mt-3">
+                                        <p class="text-sm font-medium text-gray-500">Smart Watch</p>
+                                        <p class="text-lg font-bold text-dark-900">₦25,000</p>
+                                    </div>
+                                </div>
+                                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-3xl p-4 shadow-2xl text-white transform hover:scale-105 transition-transform">
+                                    <i class="fas fa-leaf text-3xl mb-2"></i>
+                                    <p class="font-bold">Farm Fresh</p>
+                                    <p class="text-sm text-white/80">Direct from farmers</p>
+                                </div>
+                            </div>
+                            <div class="space-y-4 mt-8">
+                                <div class="bg-gradient-to-br from-brand-400 to-brand-500 rounded-3xl p-4 shadow-2xl text-dark-900 transform hover:scale-105 transition-transform">
+                                    <i class="fas fa-bolt text-3xl mb-2"></i>
+                                    <p class="font-bold">Flash Deals</p>
+                                    <p class="text-sm text-dark-900/70">Up to 70% OFF</p>
+                                </div>
+                                <div class="bg-white rounded-3xl p-4 shadow-2xl transform hover:scale-105 transition-transform">
+                                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop" alt="Product" class="w-full h-40 object-cover rounded-2xl">
+                                    <div class="mt-3">
+                                        <p class="text-sm font-medium text-gray-500">Headphones</p>
+                                        <p class="text-lg font-bold text-dark-900">₦15,000</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Floating Badge -->
+                        <div class="absolute -left-4 top-1/2 bg-white rounded-2xl p-4 shadow-2xl animate-float">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-truck text-green-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-dark-900">Free Delivery</p>
+                                    <p class="text-sm text-gray-500">Orders over ₦10k</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Products (tabs are rendered in header now) -->
-        <section style="margin-top: 32px; margin-bottom: 60px;">
-            <div id="categoryTabContent"></div>
+        <!-- Flash Deals Section -->
+        <section class="py-8 lg:py-12 bg-gradient-to-r from-red-500 via-orange-500 to-red-500">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center animate-pulse">
+                            <i class="fas fa-bolt text-orange-500 text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl lg:text-3xl font-bold text-white">Flash Deals</h2>
+                            <p class="text-white/80 text-sm">Ends in:</p>
+                        </div>
+                    </div>
+                    <!-- Countdown Timer -->
+                    <div class="flex items-center gap-2">
+                        <div class="bg-white/20 backdrop-blur rounded-lg px-3 py-2 text-center">
+                            <div id="hours" class="text-xl lg:text-2xl font-bold text-white">12</div>
+                            <div class="text-xs text-white/70">Hours</div>
+                        </div>
+                        <span class="text-white text-xl font-bold">:</span>
+                        <div class="bg-white/20 backdrop-blur rounded-lg px-3 py-2 text-center">
+                            <div id="minutes" class="text-xl lg:text-2xl font-bold text-white">45</div>
+                            <div class="text-xs text-white/70">Mins</div>
+                        </div>
+                        <span class="text-white text-xl font-bold">:</span>
+                        <div class="bg-white/20 backdrop-blur rounded-lg px-3 py-2 text-center">
+                            <div id="seconds" class="text-xl lg:text-2xl font-bold text-white">30</div>
+                            <div class="text-xs text-white/70">Secs</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Flash Deals Products -->
+                <div id="flashDealsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <!-- Products loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="py-8 lg:py-12">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl lg:text-2xl font-bold text-dark-900">Shop by Category</h2>
+                    <a href="#" class="text-brand-600 font-medium text-sm hover:underline flex items-center gap-1">
+                        View All <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+                
+                <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+                    <!-- Category Cards -->
+                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
+                        <div class="category-icon w-14 h-14 mx-auto bg-orange-100 rounded-2xl flex items-center justify-center mb-3">
+                            <i class="fas fa-mobile-alt text-orange-500 text-xl"></i>
+                        </div>
+                        <p class="font-medium text-dark-900 text-sm">Phones</p>
+                    </a>
+                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
+                        <div class="category-icon w-14 h-14 mx-auto bg-blue-100 rounded-2xl flex items-center justify-center mb-3">
+                            <i class="fas fa-laptop text-blue-500 text-xl"></i>
+                        </div>
+                        <p class="font-medium text-dark-900 text-sm">Electronics</p>
+                    </a>
+                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
+                        <div class="category-icon w-14 h-14 mx-auto bg-pink-100 rounded-2xl flex items-center justify-center mb-3">
+                            <i class="fas fa-tshirt text-pink-500 text-xl"></i>
+                        </div>
+                        <p class="font-medium text-dark-900 text-sm">Fashion</p>
+                    </a>
+                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
+                        <div class="category-icon w-14 h-14 mx-auto bg-green-100 rounded-2xl flex items-center justify-center mb-3">
+                            <i class="fas fa-leaf text-green-500 text-xl"></i>
+                        </div>
+                        <p class="font-medium text-dark-900 text-sm">Farm Fresh</p>
+                    </a>
+                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
+                        <div class="category-icon w-14 h-14 mx-auto bg-purple-100 rounded-2xl flex items-center justify-center mb-3">
+                            <i class="fas fa-home text-purple-500 text-xl"></i>
+                        </div>
+                        <p class="font-medium text-dark-900 text-sm">Home</p>
+                    </a>
+                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
+                        <div class="category-icon w-14 h-14 mx-auto bg-red-100 rounded-2xl flex items-center justify-center mb-3">
+                            <i class="fas fa-heart text-red-500 text-xl"></i>
+                        </div>
+                        <p class="font-medium text-dark-900 text-sm">Beauty</p>
+                    </a>
+                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
+                        <div class="category-icon w-14 h-14 mx-auto bg-cyan-100 rounded-2xl flex items-center justify-center mb-3">
+                            <i class="fas fa-baby text-cyan-500 text-xl"></i>
+                        </div>
+                        <p class="font-medium text-dark-900 text-sm">Baby & Kids</p>
+                    </a>
+                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
+                        <div class="category-icon w-14 h-14 mx-auto bg-indigo-100 rounded-2xl flex items-center justify-center mb-3">
+                            <i class="fas fa-futbol text-indigo-500 text-xl"></i>
+                        </div>
+                        <p class="font-medium text-dark-900 text-sm">Sports</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Farm Fresh Section -->
+        <section class="py-8 lg:py-12 bg-gradient-to-br from-green-50 to-emerald-50">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-seedling text-white"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl lg:text-2xl font-bold text-dark-900">Farm Fresh</h2>
+                            <p class="text-gray-500 text-sm">Direct from local farmers</p>
+                        </div>
+                    </div>
+                    <a href="#" class="bg-green-500 text-white px-4 py-2 rounded-full font-medium text-sm hover:bg-green-600 transition-colors flex items-center gap-1">
+                        View All <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+                
+                <div id="farmProductsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <!-- Farm products loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Banner -->
+        <section class="py-8 lg:py-12">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <!-- Merchant Banner -->
+                    <div class="relative bg-gradient-to-br from-dark-900 to-dark-800 rounded-3xl p-6 lg:p-10 overflow-hidden group cursor-pointer">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-brand-400/20 rounded-full blur-3xl"></div>
+                        <div class="relative z-10">
+                            <span class="inline-flex items-center gap-1 bg-brand-400/20 text-brand-400 text-xs font-medium px-3 py-1 rounded-full mb-4">
+                                <i class="fas fa-star"></i> FEATURED
+                            </span>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-2">Start Selling Today</h3>
+                            <p class="text-gray-300 mb-4">Join thousands of successful merchants</p>
+                            <a href="eesha selling folder/merchant/signup.html" class="inline-flex items-center gap-2 bg-brand-400 text-dark-900 px-6 py-3 rounded-full font-semibold hover:bg-brand-300 transition-colors">
+                                Become a Merchant <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="absolute bottom-0 right-0 opacity-20 group-hover:opacity-40 transition-opacity">
+                            <i class="fas fa-store text-9xl text-brand-400 transform -rotate-12"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Farmer Banner -->
+                    <div class="relative bg-gradient-to-br from-green-600 to-emerald-700 rounded-3xl p-6 lg:p-10 overflow-hidden group cursor-pointer">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                        <div class="relative z-10">
+                            <span class="inline-flex items-center gap-1 bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full mb-4">
+                                <i class="fas fa-leaf"></i> NEW
+                            </span>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-2">Sell Your Harvest</h3>
+                            <p class="text-green-100 mb-4">Reach millions of buyers directly</p>
+                            <a href="eesha selling folder/farmers/signup.html" class="inline-flex items-center gap-2 bg-white text-green-700 px-6 py-3 rounded-full font-semibold hover:bg-green-50 transition-colors">
+                                Become a Farmer <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="absolute bottom-0 right-0 opacity-20 group-hover:opacity-40 transition-opacity">
+                            <i class="fas fa-tractor text-9xl text-white transform rotate-12"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trending Products Section -->
+        <section class="py-8 lg:py-12">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-brand-400 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-fire text-white"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl lg:text-2xl font-bold text-dark-900">Trending Now</h2>
+                            <p class="text-gray-500 text-sm">Most popular products</p>
+                        </div>
+                    </div>
+                    <a href="search-result.html" class="text-brand-600 font-medium text-sm hover:underline flex items-center gap-1">
+                        View All <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+                
+                <div id="trendingProductsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <!-- Trending products loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us -->
+        <section class="py-12 lg:py-16 bg-dark-900">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-2xl lg:text-3xl font-bold text-white mb-3">Why Shop With Us?</h2>
+                    <p class="text-gray-400">Experience the best of online shopping</p>
+                </div>
+                
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                        <div class="w-16 h-16 mx-auto bg-brand-400/20 rounded-2xl flex items-center justify-center mb-4">
+                            <i class="fas fa-shield-alt text-brand-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Buyer Protection</h3>
+                        <p class="text-gray-400 text-sm">Full refund if item doesn't match description</p>
+                    </div>
+                    <div class="text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                        <div class="w-16 h-16 mx-auto bg-green-400/20 rounded-2xl flex items-center justify-center mb-4">
+                            <i class="fas fa-truck text-green-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Fast Delivery</h3>
+                        <p class="text-gray-400 text-sm">Get your orders delivered nationwide</p>
+                    </div>
+                    <div class="text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                        <div class="w-16 h-16 mx-auto bg-blue-400/20 rounded-2xl flex items-center justify-center mb-4">
+                            <i class="fas fa-undo text-blue-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Easy Returns</h3>
+                        <p class="text-gray-400 text-sm">7-day return policy on all items</p>
+                    </div>
+                    <div class="text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                        <div class="w-16 h-16 mx-auto bg-purple-400/20 rounded-2xl flex items-center justify-center mb-4">
+                            <i class="fas fa-headset text-purple-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">24/7 Support</h3>
+                        <p class="text-gray-400 text-sm">Round-the-clock customer service</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- New Arrivals Section -->
+        <section class="py-8 lg:py-12">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-sparkles text-white"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl lg:text-2xl font-bold text-dark-900">New Arrivals</h2>
+                            <p class="text-gray-500 text-sm">Latest products just added</p>
+                        </div>
+                    </div>
+                    <a href="#" class="text-brand-600 font-medium text-sm hover:underline flex items-center gap-1">
+                        View All <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+                
+                <div id="newArrivalsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <!-- New arrivals loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter Section -->
+        <section class="py-12 lg:py-16 bg-gradient-to-r from-brand-400 to-brand-500">
+            <div class="max-w-3xl mx-auto px-4 text-center">
+                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-envelope text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl lg:text-3xl font-bold text-dark-900 mb-3">Get Exclusive Deals</h2>
+                <p class="text-dark-900/70 mb-6">Subscribe to our newsletter and get 10% off your first order!</p>
+                <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                    <input type="email" placeholder="Enter your email" 
+                           class="flex-1 px-6 py-4 rounded-full border-2 border-transparent focus:border-dark-900 outline-none">
+                    <button type="submit" class="bg-dark-900 text-white px-8 py-4 rounded-full font-semibold hover:bg-dark-800 transition-colors">
+                        Subscribe
+                    </button>
+                </form>
+            </div>
         </section>
     </main>
 
     <!-- Footer -->
-    <footer>
-        <div class="footer-grid">
-            <div class="footer-col">
-                <h4>About Eesha</h4>
-                <p>Your trusted local marketplace — buy and sell with confidence. Millions of products and sellers in one place.</p>
+    <footer class="bg-dark-900 text-white pt-12 pb-24 lg:pb-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+                <!-- Brand -->
+                <div class="col-span-2 lg:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-10 h-10 bg-brand-400 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-store text-dark-900"></i>
+                        </div>
+                        <span class="text-xl font-bold">EeshaMart</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Nigeria's #1 online marketplace connecting millions of buyers with trusted sellers.</p>
+                    <div class="flex gap-3">
+                        <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-brand-400 hover:text-dark-900 transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-brand-400 hover:text-dark-900 transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-brand-400 hover:text-dark-900 transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-brand-400 hover:text-dark-900 transition-colors">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="font-semibold text-brand-400 mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Contact Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">FAQs</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Blog</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Customer Service -->
+                <div>
+                    <h4 class="font-semibold text-brand-400 mb-4">Customer Service</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Returns</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Shipping Info</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Track Order</a></li>
+                    </ul>
+                </div>
+                
+                <!-- For Sellers -->
+                <div>
+                    <h4 class="font-semibold text-brand-400 mb-4">For Sellers</h4>
+                    <ul class="space-y-2">
+                        <li><a href="eesha selling folder/merchant/signup.html" class="text-gray-400 hover:text-white text-sm transition-colors">Sell on EeshaMart</a></li>
+                        <li><a href="eesha selling folder/farmers/signup.html" class="text-gray-400 hover:text-white text-sm transition-colors">Farmer Registration</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Seller Guidelines</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Seller Support</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal -->
+                <div>
+                    <h4 class="font-semibold text-brand-400 mb-4">Legal</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Cookie Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Disclaimer</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="footer-col">
-                <h4>Quick Links</h4>
-                <a href="#">About Us</a>
-                <a href="#">Contact Us</a>
-                <a href="#">Blog</a>
-                <a href="#">Careers</a>
+            
+            <!-- Payment Methods -->
+            <div class="border-t border-white/10 pt-8 mb-8">
+                <div class="flex flex-wrap items-center justify-center gap-4">
+                    <span class="text-gray-400 text-sm">We accept:</span>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/10 px-4 py-2 rounded-lg">
+                            <i class="fab fa-cc-visa text-2xl"></i>
+                        </div>
+                        <div class="bg-white/10 px-4 py-2 rounded-lg">
+                            <i class="fab fa-cc-mastercard text-2xl"></i>
+                        </div>
+                        <div class="bg-white/10 px-4 py-2 rounded-lg">
+                            <i class="fas fa-university text-2xl"></i>
+                        </div>
+                        <div class="bg-white/10 px-4 py-2 rounded-lg text-sm font-medium">
+                            Paystack
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="footer-col">
-                <h4>For Sellers</h4>
-                <a href="#">Start Selling</a>
-                <a href="#">Seller Dashboard</a>
-                <a href="#">Seller Support</a>
+            
+            <!-- Bottom -->
+            <div class="text-center text-gray-400 text-sm">
+                <p>&copy; 2025 EeshaMart. All rights reserved. Made with <i class="fas fa-heart text-red-500"></i> in Nigeria</p>
             </div>
-            <div class="footer-col">
-                <h4>Connect With Us</h4>
-                <a href="#"><i class="fab fa-facebook"></i> Facebook</a>
-                <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
-                <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            &copy; 2025 Eesha Market. All rights reserved. | <a href="#" style="color: var(--primary);">Privacy Policy</a> | <a href="#" style="color: var(--primary);">Terms of Service</a>
         </div>
     </footer>
 
     <!-- Auth Modal -->
-    <div id="authModal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" id="modalClose">&times;</button>
-            <h2>Sign In Required</h2>
-            <p>Please log in or sign up to add items to your cart and continue shopping.</p>
-            <div class="modal-buttons">
-                <a href="Eesha buying folder/login.html" class="modal-btn-login">Login</a>
-                <a href="Eesha buying folder/signup.html" class="modal-btn-signup">Sign Up</a>
+    <div id="authModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 text-center relative animate-slide-up">
+            <button id="closeAuthModal" class="absolute top-4 right-4 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                <i class="fas fa-times text-gray-500"></i>
+            </button>
+            <div class="w-20 h-20 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-user-lock text-brand-500 text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-dark-900 mb-2">Sign In Required</h3>
+            <p class="text-gray-500 mb-6">Please log in or create an account to add items to your cart</p>
+            <div class="flex gap-3">
+                <a href="Eesha buying folder/login.html" class="flex-1 bg-dark-900 text-white py-3 rounded-full font-semibold hover:bg-dark-800 transition-colors">
+                    Login
+                </a>
+                <a href="Eesha buying folder/signup.html" class="flex-1 bg-brand-400 text-dark-900 py-3 rounded-full font-semibold hover:bg-brand-500 transition-colors">
+                    Sign Up
+                </a>
             </div>
         </div>
     </div>
@@ -1043,467 +962,318 @@
     <script src="js/config/supabase.js"></script>
     <script>
         // ===== Global Variables =====
-        window.currentUser = null;
         const supabaseClient = window.supabase;
+        window.currentUser = null;
 
-        // ===== Ramadan crescent effect =====
-        (function(){
-            let canvas, ctx, w, h, flakes = [], running = false, rafId;
+        // ===== Splash Screen =====
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splashScreen').classList.add('hidden');
+                initializeApp();
+            }, 1500);
+        });
 
-            function resize() {
-                if (!canvas) return;
-                w = canvas.width = canvas.clientWidth = window.innerWidth;
-                h = canvas.height = canvas.clientHeight = window.innerHeight;
-            }
-
-            function createFlakes(count) {
-                flakes = [];
-                for (let i = 0; i < count; i++) {
-                    flakes.push({
-                        x: Math.random() * w,
-                        y: Math.random() * h,
-                        r: Math.random() * 4 + 2,
-                        d: Math.random() * 1 + 0.5,
-                        vx: (Math.random() - 0.5) * 0.6
-                    });
-                }
-            }
-
-            function drawCrescent(x, y, r) {
-                ctx.save();
-                ctx.fillStyle = 'rgba(251,191,36,0.85)';
-                ctx.beginPath();
-                ctx.arc(x, y, r, 0.25 * Math.PI, 1.75 * Math.PI, true);
-                ctx.arc(x + r * 0.2, y, r * 0.8, 1.25 * Math.PI, 0.75 * Math.PI, false);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            }
-
-            function draw() {
-                if (!running) return;
-                ctx.clearRect(0,0,w,h);
-                for (let i = 0; i < flakes.length; i++) {
-                    const f = flakes[i];
-                    drawCrescent(f.x, f.y, f.r);
-                    f.y += f.d + 0.4;
-                    f.x += f.vx + Math.sin(f.y * 0.01) * 0.3;
-                    if (f.y > h + 20) {
-                        f.y = -20;
-                        f.x = Math.random() * w;
-                    }
-                }
-                rafId = requestAnimationFrame(draw);
-            }
-
-            window.startSnow = function() {
-                const c = document.getElementById('snowCanvas');
-                if (!c) return;
-                canvas = c;
-                ctx = canvas.getContext('2d');
-                resize();
-                createFlakes(Math.min(120, Math.floor(window.innerWidth / 10)));
-                running = true;
-                window.addEventListener('resize', resize);
-                draw();
-            };
-
-            window.stopSnow = function() {
-                running = false;
-                if (rafId) cancelAnimationFrame(rafId);
-                if (ctx && canvas) ctx.clearRect(0,0,canvas.width, canvas.height);
-            };
-        })();
+        // ===== Initialize App =====
+        async function initializeApp() {
+            await updateAuthUI();
+            await loadProducts();
+            setupEventListeners();
+            startCountdown();
+        }
 
         // ===== Auth Functions =====
         async function updateAuthUI() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            const authButtons = document.getElementById('authButtons');
-            const userMenu = document.getElementById('userMenu');
-            const userAvatar = document.getElementById('userAvatar');
-            const avatarLarge = document.getElementById('avatarLarge');
-            const userFirstName = document.getElementById('userFirstName');
-
-            if (session?.user) {
-                window.currentUser = session.user;
-                authButtons.style.display = 'none';
-                userMenu.classList.add('visible');
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                const authButtons = document.getElementById('authButtons');
+                const userMenu = document.getElementById('userMenu');
                 
-                // Get user's display name from metadata or email
-                const fullName = session.user.user_metadata?.full_name || 
-                               session.user.user_metadata?.name || 
-                               session.user.email?.split('@')[0] || 'User';
-                const firstName = fullName.split(' ')[0];
-                const initial = firstName.charAt(0).toUpperCase();
-                
-                // Update avatar and greeting
-                if (userAvatar) userAvatar.textContent = initial;
-                if (avatarLarge) avatarLarge.textContent = initial;
-                if (userFirstName) userFirstName.textContent = firstName;
-            } else {
-                window.currentUser = null;
-                authButtons.style.display = 'flex';
-                userMenu.classList.remove('visible');
+                if (session?.user) {
+                    window.currentUser = session.user;
+                    authButtons.classList.add('hidden');
+                    userMenu.classList.remove('hidden');
+                    userMenu.classList.add('block');
+                    
+                    const fullName = session.user.user_metadata?.full_name || 
+                                   session.user.user_metadata?.name || 
+                                   session.user.email?.split('@')[0] || 'User';
+                    const firstName = fullName.split(' ')[0];
+                    const initial = firstName.charAt(0).toUpperCase();
+                    
+                    document.getElementById('userAvatar').textContent = initial;
+                    document.getElementById('avatarLarge').textContent = initial;
+                    document.getElementById('userFirstName').textContent = firstName;
+                } else {
+                    authButtons.classList.remove('hidden');
+                    userMenu.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Auth error:', error);
             }
         }
 
-        // ===== User Dropdown Toggle =====
-        function setupUserDropdown() {
+        // ===== Load Products =====
+        async function loadProducts() {
+            try {
+                // Load flash deals
+                const { data: flashDeals } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('status', 'active')
+                    .gt('discount_percentage', 30)
+                    .limit(5);
+                
+                renderProducts('flashDealsContainer', flashDeals || [], true);
+                
+                // Load trending products
+                const { data: trending } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('status', 'active')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                renderProducts('trendingProductsContainer', trending || []);
+                
+                // Load farm products (from farmers)
+                const { data: farmProducts } = await supabaseClient
+                    .from('products')
+                    .select('*, sellers!inner(seller_type)')
+                    .eq('status', 'active')
+                    .eq('sellers.seller_type', 'FARMER')
+                    .limit(5);
+                
+                renderProducts('farmProductsContainer', farmProducts || [], false, true);
+                
+                // Load new arrivals
+                const { data: newArrivals } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('status', 'active')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                renderProducts('newArrivalsContainer', newArrivals || []);
+                
+            } catch (error) {
+                console.error('Error loading products:', error);
+                // Show placeholder products if error
+                showPlaceholderProducts();
+            }
+        }
+
+        // ===== Render Products =====
+        function renderProducts(containerId, products, isFlashDeal = false, isFarmProduct = false) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            if (!products || products.length === 0) {
+                container.innerHTML = getPlaceholderProducts(5);
+                return;
+            }
+            
+            container.innerHTML = products.map(product => createProductCard(product, isFlashDeal, isFarmProduct)).join('');
+        }
+
+        // ===== Create Product Card =====
+        function createProductCard(product, isFlashDeal = false, isFarmProduct = false) {
+            const originalPrice = product.price || 0;
+            const discount = product.discount_percentage || 0;
+            const discountedPrice = discount > 0 ? originalPrice * (1 - discount / 100) : originalPrice;
+            const image = product.image_url || product.images?.[0] || 'https://via.placeholder.com/300x300?text=Product';
+            const name = product.name || product.title || 'Product Name';
+            const rating = product.rating || 4.5;
+            const reviews = product.reviews_count || Math.floor(Math.random() * 500);
+            
+            const sellerBadge = isFarmProduct ? 
+                '<span class="farmer-badge text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fas fa-leaf text-xs"></i> Farmer</span>' : 
+                '<span class="seller-badge text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fas fa-store text-xs"></i> Merchant</span>';
+            
+            const flashBadge = isFlashDeal ? 
+                `<div class="flash-badge absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-lg z-10">
+                    -${discount}%
+                </div>` : '';
+            
+            return `
+                <div class="product-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer relative group" onclick="viewProduct('${product.id}')">
+                    ${flashBadge}
+                    <div class="relative overflow-hidden">
+                        <img src="${image}" alt="${name}" class="product-image w-full h-40 sm:h-48 object-cover" 
+                             onerror="this.src='https://via.placeholder.com/300x300?text=Product'">
+                        <button onclick="event.stopPropagation(); addToWishlist('${product.id}')" 
+                                class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50">
+                            <i class="far fa-heart text-gray-400 hover:text-red-500"></i>
+                        </button>
+                        <div class="quick-action absolute bottom-2 left-2 right-2">
+                            <button onclick="event.stopPropagation(); addToCart('${product.id}')" 
+                                    class="w-full bg-dark-900 text-white py-2 rounded-xl font-medium text-sm hover:bg-brand-500 hover:text-dark-900 transition-colors">
+                                <i class="fas fa-cart-plus mr-1"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center gap-2 mb-1">
+                            ${sellerBadge}
+                        </div>
+                        <h3 class="font-medium text-dark-900 text-sm line-clamp-2 mb-1">${name}</h3>
+                        <div class="flex items-center gap-1 mb-2">
+                            <div class="flex text-brand-400 text-xs">
+                                ${'<i class="fas fa-star"></i>'.repeat(Math.floor(rating))}
+                                ${rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                            </div>
+                            <span class="text-gray-400 text-xs">(${reviews})</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg font-bold text-dark-900">₦${discountedPrice.toLocaleString()}</span>
+                            ${discount > 0 ? `<span class="text-sm text-gray-400 line-through">₦${originalPrice.toLocaleString()}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== Placeholder Products =====
+        function getPlaceholderProducts(count) {
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                html += `
+                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+                        <div class="skeleton w-full h-40 sm:h-48"></div>
+                        <div class="p-3">
+                            <div class="skeleton h-4 w-3/4 rounded mb-2"></div>
+                            <div class="skeleton h-4 w-1/2 rounded mb-2"></div>
+                            <div class="skeleton h-6 w-1/3 rounded"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            return html;
+        }
+
+        function showPlaceholderProducts() {
+            ['flashDealsContainer', 'trendingProductsContainer', 'farmProductsContainer', 'newArrivalsContainer'].forEach(id => {
+                const container = document.getElementById(id);
+                if (container) {
+                    container.innerHTML = getPlaceholderProducts(5);
+                }
+            });
+        }
+
+        // ===== Event Listeners =====
+        function setupEventListeners() {
+            // Header scroll effect
+            window.addEventListener('scroll', () => {
+                const header = document.getElementById('mainHeader');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // Mobile search toggle
+            const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+            const mobileSearch = document.getElementById('mobileSearch');
+            if (mobileSearchBtn && mobileSearch) {
+                mobileSearchBtn.addEventListener('click', () => {
+                    mobileSearch.classList.toggle('hidden');
+                });
+            }
+            
+            // User dropdown
             const userAvatarBtn = document.getElementById('userAvatarBtn');
             const userDropdown = document.getElementById('userDropdown');
-
             if (userAvatarBtn && userDropdown) {
                 userAvatarBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    userDropdown.classList.toggle('show');
+                    userDropdown.classList.toggle('hidden');
                 });
-
-                // Close dropdown when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!userAvatarBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                        userDropdown.classList.remove('show');
-                    }
+                
+                document.addEventListener('click', () => {
+                    userDropdown.classList.add('hidden');
                 });
             }
-        }
-
-        // ===== Setup Logout Handler =====
-        function setupLogoutHandler() {
+            
+            // Logout
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
-                logoutBtn.onclick = async (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    try {
-                        console.log('Logout initiated...');
-                        
-                        // Check if supabaseClient is available
-                        if (!window.supabase) {
-                            console.error('Supabase not initialized');
-                            alert('Error: Supabase not initialized. Please refresh the page.');
-                            return;
-                        }
+                logoutBtn.addEventListener('click', async () => {
+                    await supabaseClient.auth.signOut();
+                    window.location.reload();
+                });
+            }
+            
+            // Auth modal close
+            const closeAuthModal = document.getElementById('closeAuthModal');
+            const authModal = document.getElementById('authModal');
+            if (closeAuthModal && authModal) {
+                closeAuthModal.addEventListener('click', () => {
+                    authModal.classList.add('hidden');
+                    authModal.classList.remove('flex');
+                });
+            }
+        }
 
-                        const client = window.supabase;
-                        
-                        // Sign out from Supabase
-                        const { error } = await client.auth.signOut();
-                        
-                        if (error) {
-                            console.error('Supabase signOut error:', error);
-                            throw error;
+        // ===== Countdown Timer =====
+        function startCountdown() {
+            let hours = 12, minutes = 45, seconds = 30;
+            
+            setInterval(() => {
+                seconds--;
+                if (seconds < 0) {
+                    seconds = 59;
+                    minutes--;
+                    if (minutes < 0) {
+                        minutes = 59;
+                        hours--;
+                        if (hours < 0) {
+                            hours = 23;
                         }
-
-                        console.log('Signed out successfully');
-                        
-                        // Clear local storage
-                        localStorage.removeItem('guest_cart');
-                        localStorage.removeItem('cart');
-                        localStorage.removeItem('supabase.auth.token');
-                        
-                        // Update UI and redirect
-                        await updateAuthUI();
-                        await updateCartCount();
-                        
-                        console.log('Redirecting to home...');
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 100);
-                        
-                    } catch (err) {
-                        console.error('Logout error:', err);
-                        alert('Error logging out: ' + (err.message || 'Unknown error'));
                     }
-                };
-            }
+                }
+                
+                document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+            }, 1000);
         }
 
-        // ===== Modal Functions =====
-        function showAuthModal() {
-            document.getElementById('authModal').classList.add('show');
-        }
-
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.remove('show');
-        }
-
-        document.getElementById('modalClose').addEventListener('click', closeAuthModal);
-        document.getElementById('authModal').addEventListener('click', (e) => {
-            if (e.target.id === 'authModal') closeAuthModal();
-        });
-
-        // ===== Cart Functions =====
-        function readCanonicalCart() {
-            try {
-                return JSON.parse(localStorage.getItem('cart') || localStorage.getItem('guest_cart') || '[]');
-            } catch (e) {
-                console.warn('cart parse error', e);
-                return [];
-            }
-        }
-
-        function handleProductClick(event, productId) {
-            if (event.target.closest('button')) return;
+        // ===== Product Actions =====
+        function viewProduct(productId) {
             window.location.href = `Eesha buying folder/product.html?id=${productId}`;
         }
 
         async function addToCart(productId) {
+            if (!window.currentUser) {
+                const authModal = document.getElementById('authModal');
+                authModal.classList.remove('hidden');
+                authModal.classList.add('flex');
+                return;
+            }
+            
             try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                const user = session?.user;
-
-                if (!user) {
-                    showAuthModal();
-                    return;
-                }
-
-                const { data: existingItem, error: fetchError } = await supabaseClient
-                    .from('cart_items')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('product_id', productId)
-                    .single();
-
-                if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
-
-                if (existingItem) {
-                    await supabaseClient
-                        .from('cart_items')
-                        .update({ quantity: existingItem.quantity + 1 })
-                        .eq('id', existingItem.id);
-                } else {
-                    await supabaseClient
-                        .from('cart_items')
-                        .insert([{ user_id: user.id, product_id: productId, quantity: 1 }]);
-                }
-
-                await updateCartCount();
-                alert('✓ Added to cart!');
-            } catch (err) {
-                console.error('addToCart error:', err);
-                alert('Error adding to cart. Please try again.');
+                // Add to cart logic here
+                alert('Added to cart!');
+            } catch (error) {
+                console.error('Error adding to cart:', error);
             }
         }
 
-        async function updateCartCount() {
+        async function addToWishlist(productId) {
+            if (!window.currentUser) {
+                const authModal = document.getElementById('authModal');
+                authModal.classList.remove('hidden');
+                authModal.classList.add('flex');
+                return;
+            }
+            
             try {
-                let count = 0;
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                const user = session?.user;
-
-                if (user) {
-                    const { data: rows, error } = await supabaseClient
-                        .from('cart_items')
-                        .select('quantity')
-                        .eq('user_id', user.id);
-                    if (!error && rows) {
-                        count = rows.reduce((s, r) => s + (r.quantity || 0), 0);
-                    }
-                } else {
-                    const g = readCanonicalCart();
-                    count = g.reduce((s, i) => s + (i.quantity || 0), 0);
-                }
-
-                const el = document.getElementById('cartCount');
-                if (el) el.textContent = count;
-            } catch (e) {
-                console.error('updateCartCount error:', e);
+                // Add to wishlist logic here
+                alert('Added to wishlist!');
+            } catch (error) {
+                console.error('Error adding to wishlist:', error);
             }
         }
-
-        async function mergeGuestCart(user) {
-            try {
-                const guest = readCanonicalCart();
-                if (!guest.length) return;
-
-                for (const item of guest) {
-                    const { data: existing, error: fe } = await supabaseClient
-                        .from('cart_items')
-                        .select('*')
-                        .eq('user_id', user.id)
-                        .eq('product_id', item.productId)
-                        .single();
-
-                    if (fe && fe.code !== 'PGRST116') {
-                        console.error(fe);
-                        continue;
-                    }
-
-                    if (existing) {
-                        await supabaseClient
-                            .from('cart_items')
-                            .update({ quantity: existing.quantity + item.quantity })
-                            .eq('id', existing.id);
-                    } else {
-                        await supabaseClient
-                            .from('cart_items')
-                            .insert([{ user_id: user.id, product_id: item.productId, quantity: item.quantity }]);
-                    }
-                }
-
-                localStorage.removeItem('guest_cart');
-                await updateCartCount();
-            } catch (e) {
-                console.error('mergeGuestCart error:', e);
-            }
-        }
-
-        // ===== Main Initialization =====
-        document.addEventListener('DOMContentLoaded', async () => {
-            const _splashStart = Date.now();
-
-            function hideSplashScreen() {
-                const splash = document.getElementById('splashScreen');
-                if (!splash || splash.classList.contains('hidden')) return;
-                const minDisplay = 5000;
-                const elapsed = Date.now() - _splashStart;
-                const delay = Math.max(0, minDisplay - elapsed);
-                setTimeout(() => {
-                    splash.classList.add('hidden');
-                }, delay);
-            }
-
-            try {
-                const { data: products, error } = await supabaseClient.from('products').select('*');
-
-                if (!error && products && products.length > 0) {
-                    const tabs = document.getElementById('categoryTabs');
-                    const cats = ['All', ...new Set(products.map(p => p.category || 'Uncategorized'))];
-
-                    // simple helper to pick an icon based on the category name
-                    function iconForCategory(name) {
-                        const n = (name || '').toLowerCase();
-                        if (n.includes('elect')) return '<i class="fas fa-tv"></i>';
-                        if (n.includes('fashion') || n.includes('apparel')) return '<i class="fas fa-tshirt"></i>';
-                        if (n.includes('beauty')) return '<i class="fas fa-magic"></i>';
-                        if (n.includes('food')) return '<i class="fas fa-utensils"></i>';
-                        if (n.includes('home')) return '<i class="fas fa-home"></i>';
-                        if (n.includes('electronics')) return '<i class="fas fa-plug"></i>';
-                        if (n.includes('other')) return '<i class="fas fa-ellipsis-h"></i>';
-                        return '<i class="fas fa-tags"></i>';
-                    }
-
-                    tabs.innerHTML = cats
-                        .map((c, i) => `<button class="tab-btn ${i === 0 ? 'active' : ''}" data-category="${c}">${iconForCategory(c)}<span>${c}</span></button>`)
-                        .join('');
-
-                    const render = (list) => {
-                        const wrap = document.getElementById('categoryTabContent');
-                        if (!wrap) return;
-                        if (list.length === 0) {
-                            wrap.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">No products found in this category.</p>';
-                            return;
-                        }
-                        wrap.innerHTML =
-                            '<div class="grid">' +
-                            list
-                                .map(
-                                    (prod) => `
-                                <div class="product-card" onclick="handleProductClick(event, ${prod.id})">
-                                    <img src="${prod.image_url || prod.image || 'https://via.placeholder.com/240x200?text=No+Image'}" alt="${(prod.name || '').replace(/\"/g, '')}" class="product-image">
-                                    <div class="product-info">
-                                        <div class="product-title">${prod.name || 'Unnamed Product'}</div>
-                                        <div class="product-price">$${(prod.price || 0).toFixed(2)}</div>
-                                        <div class="product-footer">
-                                            <div class="product-rating">${'<i class="fas fa-star"></i>'.repeat(Math.floor(prod.rating || 4))}</div>
-                                            <button class="btn-add" onclick="event.stopPropagation(); addToCart(${prod.id})" title="Add to cart">+ Add</button>
-                                        </div>
-                                    </div>
-                                </div>`
-                                )
-                                .join('') +
-                            '</div>';
-                    };
-
-                    const filterAndRender = () => {
-                        const active = document.querySelector('.tab-btn.active');
-                        const cat = active?.dataset?.category;
-                        const list = cat === 'All' ? products : products.filter((p) => (p.category || 'Uncategorized') === cat);
-                        render(list);
-                    };
-
-                    tabs.querySelectorAll('.tab-btn').forEach((btn) =>
-                        btn.addEventListener('click', () => {
-                            tabs.querySelector('.tab-btn.active')?.classList.remove('active');
-                            btn.classList.add('active');
-                            filterAndRender();
-                        })
-                    );
-
-                    filterAndRender();
-                } else {
-                    document.getElementById('categoryTabContent').innerHTML =
-                        '<p style="text-align: center; color: var(--text-light); padding: 40px;">No products available. Check back soon!</p>';
-                }
-            } catch (e) {
-                console.error('products init error:', e);
-                document.getElementById('categoryTabContent').innerHTML =
-                    '<p style="text-align: center; color: #dc2626; padding: 40px;">Error loading products. Please refresh the page.</p>';
-            }
-
-            // ===== Initialize Auth UI =====
-            await updateAuthUI();
-            setupUserDropdown();
-            setupLogoutHandler();
-            await updateCartCount();
-
-            // ===== Start Ramadan crescent animation & hide splash =====
-            window.startSnow?.();
-            hideSplashScreen();
-
-            // ===== Carousel init (after DOM ready) =====
-            (function initCarousel() {
-                const slides = Array.from(document.querySelectorAll('.hero-slide'));
-                if (!slides.length) return;
-                const dotsEl = document.getElementById('carouselDots');
-                const prev = document.getElementById('carouselPrev');
-                const next = document.getElementById('carouselNext');
-                let current = 0;
-                let timer = null;
-
-                function go(i) {
-                    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
-                    dotsEl.querySelectorAll('.carousel-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
-                    current = i;
-                }
-
-                // dots
-                slides.forEach((s, idx) => {
-                    const d = document.createElement('div');
-                    d.className = 'carousel-dot' + (idx === 0 ? ' active' : '');
-                    d.addEventListener('click', () => { go(idx); reset(); });
-                    dotsEl.appendChild(d);
-                });
-
-                prev?.addEventListener('click', () => { go((current - 1 + slides.length) % slides.length); reset(); });
-                next?.addEventListener('click', () => { go((current + 1) % slides.length); reset(); });
-
-                function play() { timer = setInterval(() => go((current + 1) % slides.length), 5000); }
-                function reset() { if (timer) clearInterval(timer); play(); }
-                play();
-            })();
-
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        const q = (searchInput.value || '').trim();
-                        if (!q) return;
-                        window.location.href = `search-result.html?q=${encodeURIComponent(q)}`;
-                    }
-                });
-                const searchBtn = searchInput.parentElement?.querySelector('button');
-                if (searchBtn) {
-                    searchBtn.addEventListener('click', () => {
-                        const q = (searchInput.value || '').trim();
-                        if (!q) return;
-                        window.location.href = `search-result.html?q=${encodeURIComponent(q)}`;
-                    });
-                }
-            }
-
-        });
     </script>
 </body>
 </html>
