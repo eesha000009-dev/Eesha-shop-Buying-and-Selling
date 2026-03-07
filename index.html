@@ -86,16 +86,16 @@
         
         body { 
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: #fafafa;
+            background: #ffffff;
             color: #1f2937;
             overflow-x: hidden;
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f5f5f5; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
         /* Splash Screen */
         #splashScreen {
@@ -367,23 +367,19 @@
     </div>
 
     <!-- Top Announcement Bar -->
-    <div class="bg-dark-900 text-white py-2 overflow-hidden">
+    <div class="bg-gray-900 text-white py-2 overflow-hidden">
         <div class="marquee whitespace-nowrap">
             <span class="inline-flex items-center gap-8 px-4">
-                <span class="flex items-center gap-2"><i class="fas fa-truck text-brand-400"></i> FREE delivery on orders over ₦10,000</span>
-                <span class="flex items-center gap-2"><i class="fas fa-shield-alt text-brand-400"></i> 100% Buyer Protection</span>
-                <span class="flex items-center gap-2"><i class="fas fa-undo text-brand-400"></i> Easy Returns within 7 days</span>
-                <span class="flex items-center gap-2"><i class="fas fa-headset text-brand-400"></i> 24/7 Customer Support</span>
-                <span class="flex items-center gap-2"><i class="fas fa-leaf text-brand-400"></i> Fresh from Local Farmers</span>
-                <span class="flex items-center gap-2"><i class="fas fa-store text-brand-400"></i> Verified Merchants</span>
+                <span class="flex items-center gap-2"><i class="fas fa-truck text-orange-400"></i> FREE delivery on orders over ₦10,000</span>
+                <span class="flex items-center gap-2"><i class="fas fa-shield-alt text-orange-400"></i> 100% Buyer Protection</span>
+                <span class="flex items-center gap-2"><i class="fas fa-undo text-orange-400"></i> Easy Returns within 7 days</span>
+                <span class="flex items-center gap-2"><i class="fas fa-headset text-orange-400"></i> 24/7 Customer Support</span>
             </span>
             <span class="inline-flex items-center gap-8 px-4">
-                <span class="flex items-center gap-2"><i class="fas fa-truck text-brand-400"></i> FREE delivery on orders over ₦10,000</span>
-                <span class="flex items-center gap-2"><i class="fas fa-shield-alt text-brand-400"></i> 100% Buyer Protection</span>
-                <span class="flex items-center gap-2"><i class="fas fa-undo text-brand-400"></i> Easy Returns within 7 days</span>
-                <span class="flex items-center gap-2"><i class="fas fa-headset text-brand-400"></i> 24/7 Customer Support</span>
-                <span class="flex items-center gap-2"><i class="fas fa-leaf text-brand-400"></i> Fresh from Local Farmers</span>
-                <span class="flex items-center gap-2"><i class="fas fa-store text-brand-400"></i> Verified Merchants</span>
+                <span class="flex items-center gap-2"><i class="fas fa-truck text-orange-400"></i> FREE delivery on orders over ₦10,000</span>
+                <span class="flex items-center gap-2"><i class="fas fa-shield-alt text-orange-400"></i> 100% Buyer Protection</span>
+                <span class="flex items-center gap-2"><i class="fas fa-undo text-orange-400"></i> Easy Returns within 7 days</span>
+                <span class="flex items-center gap-2"><i class="fas fa-headset text-orange-400"></i> 24/7 Customer Support</span>
             </span>
         </div>
     </div>
@@ -583,100 +579,86 @@
 
     <!-- Main Content -->
     <main class="pb-20 lg:pb-0">
-        <!-- Hero Section -->
-        <section class="relative bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 overflow-hidden">
-            <!-- Background Pattern -->
-            <div class="absolute inset-0 opacity-10">
-                <div class="absolute top-0 left-0 w-96 h-96 bg-brand-400 rounded-full blur-3xl"></div>
-                <div class="absolute bottom-0 right-0 w-96 h-96 bg-brand-500 rounded-full blur-3xl"></div>
-            </div>
-            
-            <div class="max-w-7xl mx-auto px-4 py-12 lg:py-20 relative">
+        <!-- Hero Section - Clean White Background -->
+        <section class="relative bg-white overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 py-8 lg:py-12">
                 <div class="grid lg:grid-cols-2 gap-8 items-center">
                     <!-- Hero Content -->
-                    <div class="text-center lg:text-left animate-slide-up">
-                        <div class="inline-flex items-center gap-2 bg-brand-400/20 text-brand-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                            <i class="fas fa-fire animate-pulse"></i>
+                    <div class="text-center lg:text-left">
+                        <div class="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                            <i class="fas fa-fire"></i>
                             <span>Over 1 Million Products Available</span>
                         </div>
-                        <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white leading-tight mb-4">
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight mb-4">
                             Shop Smart,<br>
-                            <span class="gradient-text">Save Big</span>
+                            <span class="text-orange-500">Save Big</span>
                         </h1>
-                        <p class="text-gray-300 text-lg mb-8 max-w-lg mx-auto lg:mx-0">
-                            Discover amazing deals from trusted merchants and fresh produce directly from local farmers. Quality guaranteed!
+                        <p class="text-gray-600 text-lg mb-8 max-w-lg mx-auto lg:mx-0">
+                            Discover amazing deals from trusted merchants and fresh produce directly from local farmers.
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                            <a href="#" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-brand-400 to-brand-500 text-dark-900 px-8 py-4 rounded-full font-bold text-lg hover:from-brand-500 hover:to-brand-600 transition-all hover:scale-105 shadow-lg shadow-brand-400/30">
+                            <a href="#" class="inline-flex items-center justify-center gap-2 bg-orange-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-all">
                                 <i class="fas fa-shopping-bag"></i>
                                 Shop Now
                             </a>
-                            <a href="#" class="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 transition-all border border-white/20">
+                            <a href="#" class="inline-flex items-center justify-center gap-2 bg-gray-100 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all">
                                 <i class="fas fa-store"></i>
                                 Become a Seller
                             </a>
                         </div>
                         
                         <!-- Stats -->
-                        <div class="flex items-center justify-center lg:justify-start gap-8 mt-10">
+                        <div class="flex items-center justify-center lg:justify-start gap-6 mt-8">
                             <div class="text-center">
-                                <div class="text-2xl lg:text-3xl font-bold text-white">1M+</div>
-                                <div class="text-gray-400 text-sm">Products</div>
+                                <div class="text-xl lg:text-2xl font-bold text-gray-900">1M+</div>
+                                <div class="text-gray-500 text-sm">Products</div>
                             </div>
-                            <div class="w-px h-10 bg-gray-700"></div>
+                            <div class="w-px h-8 bg-gray-200"></div>
                             <div class="text-center">
-                                <div class="text-2xl lg:text-3xl font-bold text-white">50K+</div>
-                                <div class="text-gray-400 text-sm">Sellers</div>
+                                <div class="text-xl lg:text-2xl font-bold text-gray-900">50K+</div>
+                                <div class="text-gray-500 text-sm">Sellers</div>
                             </div>
-                            <div class="w-px h-10 bg-gray-700"></div>
+                            <div class="w-px h-8 bg-gray-200"></div>
                             <div class="text-center">
-                                <div class="text-2xl lg:text-3xl font-bold text-white">500K+</div>
-                                <div class="text-gray-400 text-sm">Happy Buyers</div>
+                                <div class="text-xl lg:text-2xl font-bold text-gray-900">500K+</div>
+                                <div class="text-gray-500 text-sm">Happy Buyers</div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Hero Image/Grid -->
-                    <div class="relative hidden lg:block animate-slide-in-right">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-4">
-                                <div class="bg-white rounded-3xl p-4 shadow-2xl transform hover:scale-105 transition-transform">
-                                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop" alt="Product" class="w-full h-40 object-cover rounded-2xl">
-                                    <div class="mt-3">
+                    <!-- Hero Image Grid -->
+                    <div class="relative hidden lg:block">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-3">
+                                <div class="bg-white rounded-xl p-3 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop" alt="Product" class="w-full h-32 object-cover rounded-lg">
+                                    <div class="mt-2">
                                         <p class="text-sm font-medium text-gray-500">Smart Watch</p>
-                                        <p class="text-lg font-bold text-dark-900">₦25,000</p>
+                                        <p class="text-lg font-bold text-gray-900">₦25,000</p>
                                     </div>
                                 </div>
-                                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-3xl p-4 shadow-2xl text-white transform hover:scale-105 transition-transform">
-                                    <i class="fas fa-leaf text-3xl mb-2"></i>
-                                    <p class="font-bold">Farm Fresh</p>
-                                    <p class="text-sm text-white/80">Direct from farmers</p>
+                                <div class="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i class="fas fa-leaf text-green-500"></i>
+                                        <span class="font-medium">Farm Fresh</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">Direct from farmers</p>
                                 </div>
                             </div>
-                            <div class="space-y-4 mt-8">
-                                <div class="bg-gradient-to-br from-brand-400 to-brand-500 rounded-3xl p-4 shadow-2xl text-dark-900 transform hover:scale-105 transition-transform">
-                                    <i class="fas fa-bolt text-3xl mb-2"></i>
-                                    <p class="font-bold">Flash Deals</p>
-                                    <p class="text-sm text-dark-900/70">Up to 70% OFF</p>
+                            <div class="space-y-3 mt-6">
+                                <div class="bg-orange-50 rounded-xl p-3 border border-orange-100">
+                                    <div class="flex items-center gap-2 text-orange-600">
+                                        <i class="fas fa-bolt"></i>
+                                        <span class="font-medium">Flash Deals</span>
+                                    </div>
+                                    <p class="text-sm text-orange-500 mt-1">Up to 70% OFF</p>
                                 </div>
-                                <div class="bg-white rounded-3xl p-4 shadow-2xl transform hover:scale-105 transition-transform">
-                                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop" alt="Product" class="w-full h-40 object-cover rounded-2xl">
-                                    <div class="mt-3">
+                                <div class="bg-white rounded-xl p-3 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop" alt="Product" class="w-full h-32 object-cover rounded-lg">
+                                    <div class="mt-2">
                                         <p class="text-sm font-medium text-gray-500">Headphones</p>
-                                        <p class="text-lg font-bold text-dark-900">₦15,000</p>
+                                        <p class="text-lg font-bold text-gray-900">₦15,000</p>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Floating Badge -->
-                        <div class="absolute -left-4 top-1/2 bg-white rounded-2xl p-4 shadow-2xl animate-float">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-truck text-green-600"></i>
-                                </div>
-                                <div>
-                                    <p class="font-bold text-dark-900">Free Delivery</p>
-                                    <p class="text-sm text-gray-500">Orders over ₦10k</p>
                                 </div>
                             </div>
                         </div>
@@ -685,259 +667,250 @@
             </div>
         </section>
 
-        <!-- Flash Deals Section -->
-        <section class="py-8 lg:py-12 bg-gradient-to-r from-red-500 via-orange-500 to-red-500">
+        <!-- Flash Deals Section - Clean Design -->
+        <section class="py-6 lg:py-8 bg-gray-50">
             <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center animate-pulse">
-                            <i class="fas fa-bolt text-orange-500 text-xl"></i>
-                        </div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-bolt text-orange-500 text-xl"></i>
                         <div>
-                            <h2 class="text-2xl lg:text-3xl font-bold text-white">Flash Deals</h2>
-                            <p class="text-white/80 text-sm">Ends in:</p>
+                            <h2 class="text-lg lg:text-xl font-bold text-gray-900">Flash Deals</h2>
+                            <p class="text-gray-500 text-sm">Ends in:</p>
                         </div>
                     </div>
                     <!-- Countdown Timer -->
-                    <div class="flex items-center gap-2">
-                        <div class="bg-white/20 backdrop-blur rounded-lg px-3 py-2 text-center">
-                            <div id="hours" class="text-xl lg:text-2xl font-bold text-white">12</div>
-                            <div class="text-xs text-white/70">Hours</div>
+                    <div class="flex items-center gap-1">
+                        <div class="bg-white border border-gray-200 rounded px-2 py-1 text-center">
+                            <div id="hours" class="text-lg font-bold text-gray-900">12</div>
+                            <div class="text-xs text-gray-500">Hrs</div>
                         </div>
-                        <span class="text-white text-xl font-bold">:</span>
-                        <div class="bg-white/20 backdrop-blur rounded-lg px-3 py-2 text-center">
-                            <div id="minutes" class="text-xl lg:text-2xl font-bold text-white">45</div>
-                            <div class="text-xs text-white/70">Mins</div>
+                        <span class="text-gray-400 font-bold">:</span>
+                        <div class="bg-white border border-gray-200 rounded px-2 py-1 text-center">
+                            <div id="minutes" class="text-lg font-bold text-gray-900">45</div>
+                            <div class="text-xs text-gray-500">Min</div>
                         </div>
-                        <span class="text-white text-xl font-bold">:</span>
-                        <div class="bg-white/20 backdrop-blur rounded-lg px-3 py-2 text-center">
-                            <div id="seconds" class="text-xl lg:text-2xl font-bold text-white">30</div>
-                            <div class="text-xs text-white/70">Secs</div>
+                        <span class="text-gray-400 font-bold">:</span>
+                        <div class="bg-white border border-gray-200 rounded px-2 py-1 text-center">
+                            <div id="seconds" class="text-lg font-bold text-gray-900">30</div>
+                            <div class="text-xs text-gray-500">Sec</div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Flash Deals Products -->
-                <div id="flashDealsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div id="flashDealsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <!-- Products loaded dynamically -->
                 </div>
             </div>
         </section>
 
         <!-- Categories Section -->
-        <section class="py-8 lg:py-12">
+        <section class="py-6 lg:py-8">
             <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl lg:text-2xl font-bold text-dark-900">Shop by Category</h2>
-                    <a href="#" class="text-brand-600 font-medium text-sm hover:underline flex items-center gap-1">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg lg:text-xl font-bold text-gray-900">Shop by Category</h2>
+                    <a href="#" class="text-gray-600 font-medium text-sm hover:text-orange-500 flex items-center gap-1">
                         View All <i class="fas fa-arrow-right text-xs"></i>
                     </a>
                 </div>
                 
-                <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-                    <!-- Category Cards -->
-                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
-                        <div class="category-icon w-14 h-14 mx-auto bg-orange-100 rounded-2xl flex items-center justify-center mb-3">
-                            <i class="fas fa-mobile-alt text-orange-500 text-xl"></i>
+                <div class="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-2 lg:gap-3">
+                    <!-- Category Cards - Uniform Style -->
+                    <a href="#" class="bg-white rounded-lg p-3 text-center hover:shadow-md border border-gray-100 transition-shadow">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <i class="fas fa-mobile-alt text-gray-600 text-lg"></i>
                         </div>
-                        <p class="font-medium text-dark-900 text-sm">Phones</p>
+                        <p class="font-medium text-gray-700 text-xs lg:text-sm">Phones</p>
                     </a>
-                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
-                        <div class="category-icon w-14 h-14 mx-auto bg-blue-100 rounded-2xl flex items-center justify-center mb-3">
-                            <i class="fas fa-laptop text-blue-500 text-xl"></i>
+                    <a href="#" class="bg-white rounded-lg p-3 text-center hover:shadow-md border border-gray-100 transition-shadow">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <i class="fas fa-laptop text-gray-600 text-lg"></i>
                         </div>
-                        <p class="font-medium text-dark-900 text-sm">Electronics</p>
+                        <p class="font-medium text-gray-700 text-xs lg:text-sm">Electronics</p>
                     </a>
-                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
-                        <div class="category-icon w-14 h-14 mx-auto bg-pink-100 rounded-2xl flex items-center justify-center mb-3">
-                            <i class="fas fa-tshirt text-pink-500 text-xl"></i>
+                    <a href="#" class="bg-white rounded-lg p-3 text-center hover:shadow-md border border-gray-100 transition-shadow">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <i class="fas fa-tshirt text-gray-600 text-lg"></i>
                         </div>
-                        <p class="font-medium text-dark-900 text-sm">Fashion</p>
+                        <p class="font-medium text-gray-700 text-xs lg:text-sm">Fashion</p>
                     </a>
-                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
-                        <div class="category-icon w-14 h-14 mx-auto bg-green-100 rounded-2xl flex items-center justify-center mb-3">
-                            <i class="fas fa-leaf text-green-500 text-xl"></i>
+                    <a href="#" class="bg-white rounded-lg p-3 text-center hover:shadow-md border border-gray-100 transition-shadow">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <i class="fas fa-leaf text-gray-600 text-lg"></i>
                         </div>
-                        <p class="font-medium text-dark-900 text-sm">Farm Fresh</p>
+                        <p class="font-medium text-gray-700 text-xs lg:text-sm">Farm Fresh</p>
                     </a>
-                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
-                        <div class="category-icon w-14 h-14 mx-auto bg-purple-100 rounded-2xl flex items-center justify-center mb-3">
-                            <i class="fas fa-home text-purple-500 text-xl"></i>
+                    <a href="#" class="bg-white rounded-lg p-3 text-center hover:shadow-md border border-gray-100 transition-shadow">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <i class="fas fa-home text-gray-600 text-lg"></i>
                         </div>
-                        <p class="font-medium text-dark-900 text-sm">Home</p>
+                        <p class="font-medium text-gray-700 text-xs lg:text-sm">Home</p>
                     </a>
-                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
-                        <div class="category-icon w-14 h-14 mx-auto bg-red-100 rounded-2xl flex items-center justify-center mb-3">
-                            <i class="fas fa-heart text-red-500 text-xl"></i>
+                    <a href="#" class="bg-white rounded-lg p-3 text-center hover:shadow-md border border-gray-100 transition-shadow">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <i class="fas fa-heart text-gray-600 text-lg"></i>
                         </div>
-                        <p class="font-medium text-dark-900 text-sm">Beauty</p>
+                        <p class="font-medium text-gray-700 text-xs lg:text-sm">Beauty</p>
                     </a>
-                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
-                        <div class="category-icon w-14 h-14 mx-auto bg-cyan-100 rounded-2xl flex items-center justify-center mb-3">
-                            <i class="fas fa-baby text-cyan-500 text-xl"></i>
+                    <a href="#" class="bg-white rounded-lg p-3 text-center hover:shadow-md border border-gray-100 transition-shadow">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <i class="fas fa-baby text-gray-600 text-lg"></i>
                         </div>
-                        <p class="font-medium text-dark-900 text-sm">Baby & Kids</p>
+                        <p class="font-medium text-gray-700 text-xs lg:text-sm">Baby</p>
                     </a>
-                    <a href="#" class="category-card bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-lg border border-gray-100">
-                        <div class="category-icon w-14 h-14 mx-auto bg-indigo-100 rounded-2xl flex items-center justify-center mb-3">
-                            <i class="fas fa-futbol text-indigo-500 text-xl"></i>
+                    <a href="#" class="bg-white rounded-lg p-3 text-center hover:shadow-md border border-gray-100 transition-shadow">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <i class="fas fa-futbol text-gray-600 text-lg"></i>
                         </div>
-                        <p class="font-medium text-dark-900 text-sm">Sports</p>
+                        <p class="font-medium text-gray-700 text-xs lg:text-sm">Sports</p>
                     </a>
                 </div>
             </div>
         </section>
 
         <!-- Farm Fresh Section -->
-        <section class="py-8 lg:py-12 bg-gradient-to-br from-green-50 to-emerald-50">
+        <section class="py-6 lg:py-8 bg-gray-50">
             <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-seedling text-white"></i>
-                        </div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-seedling text-gray-600 text-lg"></i>
                         <div>
-                            <h2 class="text-xl lg:text-2xl font-bold text-dark-900">Farm Fresh</h2>
-                            <p class="text-gray-500 text-sm">Direct from local farmers</p>
+                            <h2 class="text-lg lg:text-xl font-bold text-gray-900">Farm Fresh</h2>
+                            <p class="text-gray-500 text-xs lg:text-sm">Direct from local farmers</p>
                         </div>
                     </div>
-                    <a href="#" class="bg-green-500 text-white px-4 py-2 rounded-full font-medium text-sm hover:bg-green-600 transition-colors flex items-center gap-1">
+                    <a href="#" class="text-gray-600 font-medium text-sm hover:text-orange-500 flex items-center gap-1">
                         View All <i class="fas fa-arrow-right text-xs"></i>
                     </a>
                 </div>
                 
-                <div id="farmProductsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div id="farmProductsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <!-- Farm products loaded dynamically -->
                 </div>
             </div>
         </section>
 
         <!-- Trending Products Section -->
-        <section class="py-8 lg:py-12">
+        <section class="py-6 lg:py-8">
             <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-brand-400 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-fire text-white"></i>
-                        </div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-fire text-gray-600 text-lg"></i>
                         <div>
-                            <h2 class="text-xl lg:text-2xl font-bold text-dark-900">Trending Now</h2>
-                            <p class="text-gray-500 text-sm">Most popular products</p>
+                            <h2 class="text-lg lg:text-xl font-bold text-gray-900">Trending Now</h2>
+                            <p class="text-gray-500 text-xs lg:text-sm">Most popular products</p>
                         </div>
                     </div>
-                    <a href="search-result.html" class="text-brand-600 font-medium text-sm hover:underline flex items-center gap-1">
+                    <a href="search-result.html" class="text-gray-600 font-medium text-sm hover:text-orange-500 flex items-center gap-1">
                         View All <i class="fas fa-arrow-right text-xs"></i>
                     </a>
                 </div>
                 
-                <div id="trendingProductsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div id="trendingProductsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <!-- Trending products loaded dynamically -->
                 </div>
             </div>
         </section>
 
         <!-- New Arrivals Section -->
-        <section class="py-8 lg:py-12">
+        <section class="py-6 lg:py-8 bg-gray-50">
             <div class="max-w-7xl mx-auto px-4">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-sparkles text-white"></i>
-                        </div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-sparkles text-gray-600 text-lg"></i>
                         <div>
-                            <h2 class="text-xl lg:text-2xl font-bold text-dark-900">New Arrivals</h2>
-                            <p class="text-gray-500 text-sm">Latest products just added</p>
+                            <h2 class="text-lg lg:text-xl font-bold text-gray-900">New Arrivals</h2>
+                            <p class="text-gray-500 text-xs lg:text-sm">Latest products just added</p>
                         </div>
                     </div>
-                    <a href="#" class="text-brand-600 font-medium text-sm hover:underline flex items-center gap-1">
+                    <a href="#" class="text-gray-600 font-medium text-sm hover:text-orange-500 flex items-center gap-1">
                         View All <i class="fas fa-arrow-right text-xs"></i>
                     </a>
                 </div>
                 
-                <div id="newArrivalsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div id="newArrivalsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <!-- New arrivals loaded dynamically -->
                 </div>
             </div>
         </section>
 
         <!-- Why Choose Us -->
-        <section class="py-10 lg:py-16 bg-dark-900">
+        <section class="py-8 lg:py-12 bg-white">
             <div class="max-w-7xl mx-auto px-4">
-                <div class="text-center mb-8 lg:mb-12">
-                    <h2 class="text-xl lg:text-3xl font-bold text-white mb-2">Why Shop With Us?</h2>
-                    <p class="text-gray-400 text-sm lg:text-base">Experience the best of online shopping</p>
+                <div class="text-center mb-6 lg:mb-8">
+                    <h2 class="text-lg lg:text-2xl font-bold text-gray-900 mb-1">Why Shop With Us?</h2>
+                    <p class="text-gray-500 text-sm">Experience the best of online shopping</p>
                 </div>
                 
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
-                    <div class="text-center p-4 lg:p-6 rounded-xl lg:rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                        <div class="w-12 h-12 lg:w-16 lg:h-16 mx-auto bg-brand-400/20 rounded-xl lg:rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
-                            <i class="fas fa-shield-alt text-brand-400 text-lg lg:text-2xl"></i>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                    <div class="text-center p-4 lg:p-6 rounded-xl bg-gray-50 border border-gray-100">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-200 rounded-lg flex items-center justify-center mb-3">
+                            <i class="fas fa-shield-alt text-gray-600 text-lg"></i>
                         </div>
-                        <h3 class="text-sm lg:text-lg font-bold text-white mb-1 lg:mb-2">Buyer Protection</h3>
-                        <p class="text-gray-400 text-xs lg:text-sm">Full refund if item doesn't match description</p>
+                        <h3 class="text-sm lg:text-base font-semibold text-gray-900 mb-1">Buyer Protection</h3>
+                        <p class="text-gray-500 text-xs lg:text-sm">Full refund if item doesn't match</p>
                     </div>
-                    <div class="text-center p-4 lg:p-6 rounded-xl lg:rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                        <div class="w-12 h-12 lg:w-16 lg:h-16 mx-auto bg-green-400/20 rounded-xl lg:rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
-                            <i class="fas fa-truck text-green-400 text-lg lg:text-2xl"></i>
+                    <div class="text-center p-4 lg:p-6 rounded-xl bg-gray-50 border border-gray-100">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-200 rounded-lg flex items-center justify-center mb-3">
+                            <i class="fas fa-truck text-gray-600 text-lg"></i>
                         </div>
-                        <h3 class="text-sm lg:text-lg font-bold text-white mb-1 lg:mb-2">Fast Delivery</h3>
-                        <p class="text-gray-400 text-xs lg:text-sm">Get your orders delivered nationwide</p>
+                        <h3 class="text-sm lg:text-base font-semibold text-gray-900 mb-1">Fast Delivery</h3>
+                        <p class="text-gray-500 text-xs lg:text-sm">Nationwide delivery</p>
                     </div>
-                    <div class="text-center p-4 lg:p-6 rounded-xl lg:rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                        <div class="w-12 h-12 lg:w-16 lg:h-16 mx-auto bg-blue-400/20 rounded-xl lg:rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
-                            <i class="fas fa-undo text-blue-400 text-lg lg:text-2xl"></i>
+                    <div class="text-center p-4 lg:p-6 rounded-xl bg-gray-50 border border-gray-100">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-200 rounded-lg flex items-center justify-center mb-3">
+                            <i class="fas fa-undo text-gray-600 text-lg"></i>
                         </div>
-                        <h3 class="text-sm lg:text-lg font-bold text-white mb-1 lg:mb-2">Easy Returns</h3>
-                        <p class="text-gray-400 text-xs lg:text-sm">7-day return policy on all items</p>
+                        <h3 class="text-sm lg:text-base font-semibold text-gray-900 mb-1">Easy Returns</h3>
+                        <p class="text-gray-500 text-xs lg:text-sm">7-day return policy</p>
                     </div>
-                    <div class="text-center p-4 lg:p-6 rounded-xl lg:rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                        <div class="w-12 h-12 lg:w-16 lg:h-16 mx-auto bg-purple-400/20 rounded-xl lg:rounded-2xl flex items-center justify-center mb-3 lg:mb-4">
-                            <i class="fas fa-headset text-purple-400 text-lg lg:text-2xl"></i>
+                    <div class="text-center p-4 lg:p-6 rounded-xl bg-gray-50 border border-gray-100">
+                        <div class="w-10 h-10 lg:w-12 lg:h-12 mx-auto bg-gray-200 rounded-lg flex items-center justify-center mb-3">
+                            <i class="fas fa-headset text-gray-600 text-lg"></i>
                         </div>
-                        <h3 class="text-sm lg:text-lg font-bold text-white mb-1 lg:mb-2">24/7 Support</h3>
-                        <p class="text-gray-400 text-xs lg:text-sm">Round-the-clock customer service</p>
+                        <h3 class="text-sm lg:text-base font-semibold text-gray-900 mb-1">24/7 Support</h3>
+                        <p class="text-gray-500 text-xs lg:text-sm">Round-the-clock service</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Featured Banner - Seller CTA -->
-        <section class="py-6 lg:py-12 bg-dark-900">
+        <section class="py-6 lg:py-8 bg-gray-50">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
                     <!-- Merchant Banner -->
-                    <div class="relative bg-gradient-to-br from-dark-800 to-dark-700 rounded-2xl lg:rounded-3xl p-4 lg:p-8 overflow-hidden group cursor-pointer">
-                        <div class="absolute top-0 right-0 w-32 lg:w-40 h-32 lg:h-40 bg-brand-400/20 rounded-full blur-3xl"></div>
-                        <div class="relative z-10">
-                            <span class="inline-flex items-center gap-1 bg-brand-400/20 text-brand-400 text-xs font-medium px-2 lg:px-3 py-1 rounded-full mb-2 lg:mb-4">
-                                <i class="fas fa-star"></i> FEATURED
-                            </span>
-                            <h3 class="text-lg lg:text-2xl font-bold text-white mb-1 lg:mb-2">Start Selling Today</h3>
-                            <p class="text-gray-400 text-sm lg:text-base mb-3 lg:mb-4">Join thousands of successful merchants</p>
-                            <a href="eesha selling folder/merchant/signup.html" class="inline-flex items-center gap-2 bg-brand-400 text-dark-900 px-4 lg:px-6 py-2 lg:py-3 rounded-full text-sm lg:text-base font-semibold hover:bg-brand-300 transition-colors">
-                                Become a Merchant <i class="fas fa-arrow-right"></i>
-                            </a>
-                        </div>
-                        <div class="absolute bottom-0 right-0 opacity-10 lg:opacity-20 group-hover:opacity-30 transition-opacity">
-                            <i class="fas fa-store text-6xl lg:text-9xl text-brand-400 transform -rotate-12"></i>
+                    <div class="bg-white rounded-xl p-4 lg:p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-base lg:text-lg font-bold text-gray-900 mb-1">Start Selling Today</h3>
+                                <p class="text-gray-500 text-sm mb-3">Join thousands of successful merchants</p>
+                                <a href="eesha selling folder/merchant/signup.html" class="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
+                                    Become a Merchant <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            <div class="text-gray-300">
+                                <i class="fas fa-store text-4xl lg:text-5xl"></i>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Farmer Banner -->
-                    <div class="relative bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl lg:rounded-3xl p-4 lg:p-8 overflow-hidden group cursor-pointer">
-                        <div class="absolute top-0 right-0 w-32 lg:w-40 h-32 lg:h-40 bg-white/10 rounded-full blur-3xl"></div>
-                        <div class="relative z-10">
-                            <span class="inline-flex items-center gap-1 bg-white/20 text-white text-xs font-medium px-2 lg:px-3 py-1 rounded-full mb-2 lg:mb-4">
-                                <i class="fas fa-leaf"></i> NEW
-                            </span>
-                            <h3 class="text-lg lg:text-2xl font-bold text-white mb-1 lg:mb-2">Sell Your Harvest</h3>
-                            <p class="text-green-100 text-sm lg:text-base mb-3 lg:mb-4">Reach millions of buyers directly</p>
-                            <a href="eesha selling folder/farmers/signup.html" class="inline-flex items-center gap-2 bg-white text-green-700 px-4 lg:px-6 py-2 lg:py-3 rounded-full text-sm lg:text-base font-semibold hover:bg-green-50 transition-colors">
-                                Become a Farmer <i class="fas fa-arrow-right"></i>
-                            </a>
-                        </div>
-                        <div class="absolute bottom-0 right-0 opacity-10 lg:opacity-20 group-hover:opacity-30 transition-opacity">
-                            <i class="fas fa-tractor text-6xl lg:text-9xl text-white transform rotate-12"></i>
+                    <div class="bg-white rounded-xl p-4 lg:p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full mb-2">
+                                    <i class="fas fa-leaf"></i> NEW
+                                </div>
+                                <h3 class="text-base lg:text-lg font-bold text-gray-900 mb-1">Sell Your Harvest</h3>
+                                <p class="text-gray-500 text-sm mb-3">Reach millions of buyers directly</p>
+                                <a href="eesha selling folder/farmers/signup.html" class="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
+                                    Become a Farmer <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            <div class="text-gray-300">
+                                <i class="fas fa-tractor text-4xl lg:text-5xl"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -945,17 +918,15 @@
         </section>
 
         <!-- Newsletter Section -->
-        <section class="py-10 lg:py-16 bg-gradient-to-r from-brand-400 to-brand-500">
+        <section class="py-8 lg:py-12 bg-white">
             <div class="max-w-3xl mx-auto px-4 text-center">
-                <div class="w-12 h-12 lg:w-16 lg:h-16 bg-white/20 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-4 lg:mb-6">
-                    <i class="fas fa-envelope text-white text-lg lg:text-2xl"></i>
-                </div>
-                <h2 class="text-xl lg:text-3xl font-bold text-dark-900 mb-2 lg:mb-3">Get Exclusive Deals</h2>
-                <p class="text-dark-900/70 text-sm lg:text-base mb-4 lg:mb-6">Subscribe to our newsletter and get 10% off your first order!</p>
-                <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                <i class="fas fa-envelope text-gray-400 text-2xl mb-3"></i>
+                <h2 class="text-lg lg:text-xl font-bold text-gray-900 mb-2">Get Exclusive Deals</h2>
+                <p class="text-gray-500 text-sm mb-4">Subscribe to our newsletter and get 10% off your first order!</p>
+                <form class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
                     <input type="email" placeholder="Enter your email" 
-                           class="flex-1 px-4 lg:px-6 py-3 lg:py-4 rounded-full text-sm lg:text-base border-2 border-transparent focus:border-dark-900 outline-none">
-                    <button type="submit" class="bg-dark-900 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-full text-sm lg:text-base font-semibold hover:bg-dark-800 transition-colors">
+                           class="flex-1 px-4 py-3 rounded-lg text-sm border border-gray-300 focus:border-orange-500 outline-none">
+                    <button type="submit" class="bg-orange-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
                         Subscribe
                     </button>
                 </form>
@@ -964,7 +935,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark-900 text-white pt-12 pb-24 lg:pb-12">
+    <footer class="bg-gray-900 text-white pt-10 pb-20 lg:pb-10">
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
                 <!-- Brand -->
