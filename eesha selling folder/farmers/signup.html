@@ -92,6 +92,13 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required minlength="6"
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
+                           placeholder="Confirm your password">
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Farm Type</label>
                     <select id="farmType" required
                             class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary">
@@ -183,13 +190,10 @@
             </div>
 
             <!-- Error/Success Message -->
-            <div id="errorMsg" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-            </div>
-            <div id="successMsg" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
-            </div>
+            <div id="errorMsg" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
+            <div id="successMsg" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm"></div>
         </div>
 
-        <!-- Footer -->
         <p class="text-center text-gray-500 text-sm mt-6">
             &copy; 2025 EeshaMart. All rights reserved.
         </p>
@@ -202,9 +206,10 @@
             const firstName = document.getElementById('firstName').value;
             const lastName = document.getElementById('lastName').value;
             const farmName = document.getElementById('farmName').value;
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.toLowerCase();
             const phone = document.getElementById('phone').value;
             const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
             const farmType = document.getElementById('farmType').value;
             const state = document.getElementById('state').value;
             
@@ -215,6 +220,13 @@
             // Clear previous messages
             errorMsg.classList.add('hidden');
             successMsg.classList.add('hidden');
+
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorMsg.textContent = 'Passwords do not match!';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
             
             // Disable button
             submitBtn.disabled = true;
@@ -222,54 +234,78 @@
 
             try {
                 const supabase = window.supabase;
-                
-                // Create auth user
-                const { data: { user }, error: authError } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: {
-                            first_name: firstName,
-                            last_name: lastName
-                        }
-                    }
-                });
 
-                if (authError) throw authError;
+                // Check if email already exists
+                const { data: existingSeller } = await supabase
+                    .from('sellers')
+                    .select('id')
+                    .eq('email', email)
+                    .single();
 
-                // Create seller profile
-                const { error: sellerError } = await supabase
+                if (existingSeller) {
+                    errorMsg.textContent = 'An account with this email already exists. Please login instead.';
+                    errorMsg.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>Create Farmer Account</span><i class="fas fa-arrow-right"></i>';
+                    return;
+                }
+
+                // Hash the password using SHA-256
+                const encoder = new TextEncoder();
+                const data = encoder.encode(password + 'eesha_salt_2024');
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                // Insert into sellers table
+                const { data: sellerData, error: insertError } = await supabase
                     .from('sellers')
                     .insert([{
-                        id: user.id,
                         email: email,
+                        password_hash: passwordHash,
                         first_name: firstName,
                         last_name: lastName,
                         business_name: farmName,
                         farm_name: farmName,
-                        phone: phone,
+                        contact_phone: phone,
                         business_type: 'FARMER',
                         farm_type: farmType,
+                        business_location: state,
                         state: state,
+                        status: 'active',
+                        email_verified: false,
                         created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
-                    }]);
+                    }])
+                    .select();
 
-                if (sellerError) {
-                    console.error('Error creating seller profile:', sellerError);
+                if (insertError) {
+                    console.error('Error creating seller profile:', insertError);
+                    throw insertError;
                 }
+
+                // Store seller session in localStorage
+                const sellerSession = {
+                    id: sellerData[0].id,
+                    email: email,
+                    first_name: firstName,
+                    last_name: lastName,
+                    business_name: farmName,
+                    business_type: 'FARMER'
+                };
+                localStorage.setItem('sellerSession', JSON.stringify(sellerSession));
 
                 // Show success message
                 successMsg.innerHTML = `
                     <strong>Registration successful!</strong><br>
-                    Please check your email (${email}) to verify your account before logging in.
+                    Your farmer account has been created. Redirecting to dashboard...
                 `;
                 successMsg.classList.remove('hidden');
 
-                // Redirect to login after 3 seconds
+                // Redirect to dashboard after 2 seconds
                 setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 3000);
+                    window.location.href = 'index.html';
+                }, 2000);
 
             } catch (err) {
                 console.error('Registration error:', err);

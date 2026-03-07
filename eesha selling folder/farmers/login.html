@@ -112,13 +112,24 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // Hash password using SHA-256 (same as signup)
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password + 'eesha_salt_2024');
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.toLowerCase();
             const password = document.getElementById('password').value;
-            const submitBtn = document.getElementById('submitBtn');
-            const errorMsg = document.getElementById('errorMsg');
             
             // Clear previous errors
             errorMsg.classList.add('hidden');
@@ -130,18 +141,59 @@
             try {
                 const supabase = window.supabase;
                 
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password
-                });
+                // Hash the password
+                const passwordHash = await hashPassword(password);
 
-                if (error) throw error;
+                // Query the sellers table directly
+                const { data: seller, error } = await supabase
+                    .from('sellers')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password_hash', passwordHash)
+                    .single();
 
-                // Update seller profile to farmer type
+                if (error || !seller) {
+                    errorMsg.textContent = 'Invalid email or password. Please try again.';
+                    errorMsg.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>Login to Dashboard</span><i class="fas fa-arrow-right"></i>';
+                    return;
+                }
+
+                // Check if account is active
+                if (seller.status === 'suspended') {
+                    errorMsg.textContent = 'Your account has been suspended. Please contact support.';
+                    errorMsg.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>Login to Dashboard</span><i class="fas fa-arrow-right"></i>';
+                    return;
+                }
+
+                // Check if this is a farmer account
+                if (seller.business_type && seller.business_type !== 'FARMER') {
+                    errorMsg.textContent = 'This email is registered as a ' + seller.business_type + '. Please use the correct login page.';
+                    errorMsg.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>Login to Dashboard</span><i class="fas fa-arrow-right"></i>';
+                    return;
+                }
+
+                // Update last login time
                 await supabase
                     .from('sellers')
-                    .update({ business_type: 'FARMER' })
-                    .eq('id', data.user.id);
+                    .update({ last_login_at: new Date().toISOString() })
+                    .eq('id', seller.id);
+
+                // Store seller session in localStorage
+                const sellerSession = {
+                    id: seller.id,
+                    email: seller.email,
+                    first_name: seller.first_name,
+                    last_name: seller.last_name,
+                    business_name: seller.business_name || seller.farm_name,
+                    business_type: 'FARMER'
+                };
+                localStorage.setItem('sellerSession', JSON.stringify(sellerSession));
 
                 // Redirect to dashboard
                 window.location.href = 'index.html';
@@ -170,6 +222,17 @@
                 icon.classList.add('fa-eye');
             }
         }
+
+        // Check if already logged in
+        window.addEventListener('load', () => {
+            const session = localStorage.getItem('sellerSession');
+            if (session) {
+                const seller = JSON.parse(session);
+                if (seller.business_type === 'FARMER') {
+                    window.location.href = 'index.html';
+                }
+            }
+        });
     </script>
 </body>
 </html>
