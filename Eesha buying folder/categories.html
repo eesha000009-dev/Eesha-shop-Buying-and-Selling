@@ -336,6 +336,7 @@
     <script>
         const supabaseClient = window.supabase;
         let currentCategory = '';
+        let currentSearch = '';
         let currentSort = 'newest';
         let currentPrice = '';
         let currentSeller = '';
@@ -347,15 +348,45 @@
         document.addEventListener('DOMContentLoaded', async () => {
             checkAuthState();
             
-            // Get category from URL
+            // Get parameters from URL
             const params = new URLSearchParams(window.location.search);
             const cat = params.get('category');
+            const search = params.get('search');
+            
+            // Set search input value if search param exists
+            if (search) {
+                currentSearch = search;
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.value = search;
+                updatePageTitle(search, '');
+            }
+            
             if (cat) {
                 filterByCategory(cat);
             } else {
                 loadProducts();
             }
         });
+        
+        // Update page title based on filters
+        function updatePageTitle(search, category) {
+            const titleEl = document.querySelector('main h1');
+            const descEl = document.querySelector('main h1 + p');
+            
+            if (search && category) {
+                titleEl.textContent = `"${search}" in ${category}`;
+                descEl.textContent = 'Search results';
+            } else if (search) {
+                titleEl.textContent = `Search: "${search}"`;
+                descEl.textContent = 'Showing search results';
+            } else if (category) {
+                titleEl.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                descEl.textContent = 'Browse products in this category';
+            } else {
+                titleEl.textContent = 'All Categories';
+                descEl.textContent = 'Browse products by category';
+            }
+        }
 
         // Auth State
         async function checkAuthState() {
@@ -383,6 +414,11 @@
             page = 0;
             products = [];
             
+            // Clear search when changing category
+            currentSearch = '';
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.value = '';
+            
             // Update active button
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -398,7 +434,11 @@
             } else {
                 url.searchParams.delete('category');
             }
+            url.searchParams.delete('search');
             window.history.replaceState({}, '', url);
+            
+            // Update page title
+            updatePageTitle('', category);
             
             loadProducts();
         }
@@ -427,6 +467,11 @@
                     .from('products')
                     .select('*, sellers(name, seller_type)', { count: 'exact' })
                     .eq('status', 'active');
+                
+                // Search filter - search in name and description
+                if (currentSearch) {
+                    query = query.or(`name.ilike.%${currentSearch}%,description.ilike.%${currentSearch}%,category.ilike.%${currentSearch}%`);
+                }
                 
                 // Category filter
                 if (currentCategory) {
@@ -642,6 +687,46 @@
             document.body.appendChild(notification);
             
             setTimeout(() => notification.remove(), 2000);
+        }
+        
+        // ===== Search Functions =====
+        function handleSearchKeypress(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        }
+        
+        function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const query = searchInput.value.trim();
+            
+            currentSearch = query;
+            currentCategory = '';
+            page = 0;
+            products = [];
+            
+            // Update URL
+            const url = new URL(window.location);
+            if (query) {
+                url.searchParams.set('search', query);
+            } else {
+                url.searchParams.delete('search');
+            }
+            url.searchParams.delete('category');
+            window.history.replaceState({}, '', url);
+            
+            // Update title
+            updatePageTitle(query, '');
+            
+            // Reset category buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (!btn.dataset.category) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            loadProducts();
         }
     </script>
 </body>
