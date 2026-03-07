@@ -101,8 +101,7 @@
             </div>
 
             <!-- Error Message -->
-            <div id="errorMsg" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-            </div>
+            <div id="errorMsg" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
         </div>
 
         <!-- Footer -->
@@ -112,6 +111,7 @@
     </div>
 
     <script>
+        const supabaseClient = window.supabase;
         const loginForm = document.getElementById('loginForm');
         const submitBtn = document.getElementById('submitBtn');
         const errorMsg = document.getElementById('errorMsg');
@@ -123,6 +123,21 @@
             const hashBuffer = await crypto.subtle.digest('SHA-256', data);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
         }
 
         loginForm.addEventListener('submit', async (e) => {
@@ -139,13 +154,11 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging in...';
 
             try {
-                const supabase = window.supabase;
-                
                 // Hash the password
                 const passwordHash = await hashPassword(password);
 
                 // Query the sellers table directly
-                const { data: seller, error } = await supabase
+                const { data: seller, error } = await supabaseClient
                     .from('sellers')
                     .select('*')
                     .eq('email', email)
@@ -178,24 +191,18 @@
                     return;
                 }
 
-                // Update last login time
-                await supabase
+                // Update last login time in Supabase
+                await supabaseClient
                     .from('sellers')
                     .update({ last_login_at: new Date().toISOString() })
                     .eq('id', seller.id);
 
-                // Store seller session in localStorage
-                const sellerSession = {
-                    id: seller.id,
-                    email: seller.email,
-                    first_name: seller.first_name,
-                    last_name: seller.last_name,
-                    business_name: seller.business_name || seller.farm_name,
-                    business_type: 'FARMER'
-                };
-                localStorage.setItem('sellerSession', JSON.stringify(sellerSession));
+                // Store ONLY the seller ID in localStorage (as a reference)
+                // All actual data will be fetched from Supabase
+                localStorage.setItem('sellerId', seller.id);
+                localStorage.setItem('isLoggedIn', 'true');
 
-                // Redirect to dashboard
+                // Redirect to dashboard (dashboard will fetch data from Supabase)
                 window.location.href = 'index.html';
 
             } catch (err) {
@@ -208,27 +215,20 @@
             }
         });
 
-        function togglePassword() {
-            const input = document.getElementById('password');
-            const icon = document.getElementById('eyeIcon');
+        // Check if already logged in - verify against Supabase
+        window.addEventListener('load', async () => {
+            const sellerId = localStorage.getItem('sellerId');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
             
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-
-        // Check if already logged in
-        window.addEventListener('load', () => {
-            const session = localStorage.getItem('sellerSession');
-            if (session) {
-                const seller = JSON.parse(session);
-                if (seller.business_type === 'FARMER') {
+            if (sellerId && isLoggedIn === 'true') {
+                // Verify the seller exists in Supabase
+                const { data: seller } = await supabaseClient
+                    .from('sellers')
+                    .select('id, seller_type')
+                    .eq('id', sellerId)
+                    .single();
+                
+                if (seller && seller.seller_type === 'FARMER') {
                     window.location.href = 'index.html';
                 }
             }

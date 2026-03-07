@@ -200,6 +200,8 @@
     </div>
 
     <script>
+        const supabaseClient = window.supabase;
+        
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -233,10 +235,8 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating account...';
 
             try {
-                const supabase = window.supabase;
-
-                // Check if email already exists
-                const { data: existingSeller } = await supabase
+                // Check if email already exists in Supabase
+                const { data: existingSeller } = await supabaseClient
                     .from('sellers')
                     .select('id')
                     .eq('email', email)
@@ -250,15 +250,15 @@
                     return;
                 }
 
-                // Hash the password using SHA-256
+                // Hash the password using SHA-256 (same as other pages)
                 const encoder = new TextEncoder();
                 const data = encoder.encode(password + 'eesha_salt_2024');
                 const hashBuffer = await crypto.subtle.digest('SHA-256', data);
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
                 const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-                // Insert into sellers table
-                const { data: sellerData, error: insertError } = await supabase
+                // Insert into Supabase sellers table
+                const { data: sellerData, error: insertError } = await supabaseClient
                     .from('sellers')
                     .insert([{
                         email: email,
@@ -284,16 +284,10 @@
                     throw insertError;
                 }
 
-                // Store seller session in localStorage
-                const sellerSession = {
-                    id: sellerData[0].id,
-                    email: email,
-                    first_name: firstName,
-                    last_name: lastName,
-                    business_name: farmName,
-                    seller_type: 'FARMER'
-                };
-                localStorage.setItem('sellerSession', JSON.stringify(sellerSession));
+                // Store ONLY the seller ID in localStorage (as a reference)
+                // All actual data will be fetched from Supabase
+                localStorage.setItem('sellerId', sellerData[0].id);
+                localStorage.setItem('isLoggedIn', 'true');
 
                 // Show success message
                 successMsg.innerHTML = `

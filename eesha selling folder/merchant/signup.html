@@ -188,7 +188,7 @@
     </div>
 
     <script>
-        // Form navigation
+        const supabaseClient = window.supabase;
         let currentStep = 1;
         const totalSteps = 3;
         
@@ -199,7 +199,6 @@
         const signupButton = document.getElementById('signupButton');
         const messageArea = document.getElementById('messageArea');
         const loadingIcon = signupButton.querySelector('.loading');
-        const supabaseClient = window.supabase;
 
         function togglePasswordVisibility(inputId) {
             const input = document.getElementById(inputId);
@@ -271,7 +270,7 @@
         // Hash password using SHA-256
         async function hashPassword(password) {
             const encoder = new TextEncoder();
-            const data = encoder.encode(password + 'eesha_salt_2024'); // Add salt
+            const data = encoder.encode(password + 'eesha_salt_2024');
             const hashBuffer = await crypto.subtle.digest('SHA-256', data);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -294,10 +293,9 @@
         updateFormSteps();
 
         // Form submission
-        signupForm.addEventListener('submit', async (e) => {
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Validate all steps
             for (let i = 1; i <= totalSteps; i++) {
                 if (!validateStep(i)) {
                     currentStep = i;
@@ -320,8 +318,8 @@
                 const contact_phone = '+234' + document.getElementById('contact_phone').value;
                 const address = document.getElementById('address').value;
 
-                // Check if email already exists
-                const { data: existingSeller, error: checkError } = await supabaseClient
+                // Check if email already exists in Supabase
+                const { data: existingSeller } = await supabaseClient
                     .from('sellers')
                     .select('id')
                     .eq('email', email)
@@ -336,7 +334,7 @@
                 // Hash the password
                 const passwordHash = await hashPassword(password);
 
-                // Insert into sellers table
+                // Insert into Supabase sellers table
                 const { data: sellerData, error: insertError } = await supabaseClient
                     .from('sellers')
                     .insert([{
@@ -362,16 +360,10 @@
                     throw new Error(insertError.message);
                 }
 
-                // Store seller session in localStorage
-                const sellerSession = {
-                    id: sellerData[0].id,
-                    email: email,
-                    first_name: first_name,
-                    last_name: last_name,
-                    business_name: business_name,
-                    seller_type: 'MERCHANT'
-                };
-                localStorage.setItem('sellerSession', JSON.stringify(sellerSession));
+                // Store ONLY the seller ID in localStorage (as a reference)
+                // All actual data will be fetched from Supabase
+                localStorage.setItem('sellerId', sellerData[0].id);
+                localStorage.setItem('isLoggedIn', 'true');
 
                 showMessage('Account created successfully! Redirecting...', false);
                 
