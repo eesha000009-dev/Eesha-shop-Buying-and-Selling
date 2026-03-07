@@ -553,11 +553,11 @@
     <!-- Mobile Navigation (Bottom) -->
     <nav class="mobile-nav fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 lg:hidden z-50">
         <div class="flex items-center justify-around py-2">
-            <a href="/" class="flex flex-col items-center gap-1 p-2 text-brand-600">
+            <a href="/" class="flex flex-col items-center gap-1 p-2 text-orange-500">
                 <i class="fas fa-home text-lg"></i>
                 <span class="text-xs font-medium">Home</span>
             </a>
-            <a href="#" class="flex flex-col items-center gap-1 p-2 text-gray-500">
+            <a href="Eesha buying folder/search-result.html" class="flex flex-col items-center gap-1 p-2 text-gray-500">
                 <i class="fas fa-th-large text-lg"></i>
                 <span class="text-xs">Categories</span>
             </a>
@@ -568,10 +568,13 @@
             <a href="Eesha buying folder/cart.html" class="flex flex-col items-center gap-1 p-2 text-gray-500 relative">
                 <i class="fas fa-shopping-cart text-lg"></i>
                 <span class="text-xs">Cart</span>
-                <span class="absolute top-0 right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">0</span>
+                <span id="mobileCartCount" class="absolute top-0 right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">0</span>
             </a>
-            <a href="Eesha buying folder/login.html" class="flex flex-col items-center gap-1 p-2 text-gray-500">
-                <i class="fas fa-user text-lg"></i>
+            <a id="mobileAccountBtn" href="Eesha buying folder/login.html" class="flex flex-col items-center gap-1 p-2 text-gray-500">
+                <div class="relative">
+                    <i class="fas fa-user text-lg"></i>
+                    <i id="loggedInCheck" class="fas fa-check-circle text-green-500 text-xs absolute -bottom-0.5 -right-0.5 hidden"></i>
+                </div>
                 <span class="text-xs">Account</span>
             </a>
         </div>
@@ -1107,6 +1110,8 @@
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 const authButtons = document.getElementById('authButtons');
                 const userMenu = document.getElementById('userMenu');
+                const mobileAccountBtn = document.getElementById('mobileAccountBtn');
+                const loggedInCheck = document.getElementById('loggedInCheck');
                 
                 if (session?.user) {
                     window.currentUser = session.user;
@@ -1123,9 +1128,25 @@
                     document.getElementById('userAvatar').textContent = initial;
                     document.getElementById('avatarLarge').textContent = initial;
                     document.getElementById('userFirstName').textContent = firstName;
+                    
+                    // Mobile account button - show checkmark and link to profile
+                    if (mobileAccountBtn) {
+                        mobileAccountBtn.href = 'Eesha buying folder/profile.html';
+                        loggedInCheck.classList.remove('hidden');
+                        mobileAccountBtn.classList.add('text-green-600');
+                        mobileAccountBtn.classList.remove('text-gray-500');
+                    }
                 } else {
                     authButtons.classList.remove('hidden');
                     userMenu.classList.add('hidden');
+                    
+                    // Mobile account button - hide checkmark and link to login
+                    if (mobileAccountBtn) {
+                        mobileAccountBtn.href = 'Eesha buying folder/login.html';
+                        loggedInCheck.classList.add('hidden');
+                        mobileAccountBtn.classList.remove('text-green-600');
+                        mobileAccountBtn.classList.add('text-gray-500');
+                    }
                 }
             } catch (error) {
                 console.error('Auth error:', error);
