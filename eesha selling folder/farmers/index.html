@@ -8,41 +8,14 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="../js/config/supabase.js"></script>
     <script>
-        // Check authentication and farmer status before page loads
+        // Check custom authentication before page loads
         (async function checkAuth() {
-            try {
-                const { data: { session }, error } = await window.supabase.auth.getSession();
-                if (error || !session) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-                
-                // Check if seller profile exists and is a farmer
-                const { data: seller, error: sellerError } = await window.supabase
-                    .from('sellers')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single();
-
-                if (!seller) {
-                    // Create farmer profile if it doesn't exist
-                    const { error: createError } = await window.supabase
-                        .from('sellers')
-                        .insert([{
-                            id: session.user.id,
-                            email: session.user.email,
-                            business_type: 'FARMER',
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                        }]);
-
-                    if (createError) {
-                        console.error('Error creating farmer profile:', createError);
-                    }
-                }
-            } catch (error) {
-                console.error('Auth check error:', error);
+            const sellerId = localStorage.getItem('sellerId');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            
+            if (!sellerId || isLoggedIn !== 'true') {
                 window.location.href = 'login.html';
+                return;
             }
         })();
     </script>
@@ -791,105 +764,139 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const supabase = window.supabase;
 
-            // Get current user
-            const { data: { user }, error: userErr } = await supabase.auth.getUser();
-            if (userErr || !user) {
+            // Get seller ID from localStorage (custom auth)
+            const sellerId = localStorage.getItem('sellerId');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            
+            if (!sellerId || isLoggedIn !== 'true') {
                 window.location.href = 'login.html';
                 return;
             }
 
-            // Load seller profile
-            const { data: seller, error: sellerErr } = await supabase
-                .from('sellers')
-                .select('*')
-                .eq('id', user.id)
-                .single();
+            // Show loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
 
-            if (seller) {
-                document.getElementById('businessName').textContent = seller.business_name || seller.farm_name || 'My Farm';
+            try {
+                // Load seller profile from Supabase
+                const { data: seller, error: sellerErr } = await supabase
+                    .from('sellers')
+                    .select('*')
+                    .eq('id', sellerId)
+                    .single();
+
+                if (sellerErr) {
+                    console.error('Error loading seller:', sellerErr);
+                    localStorage.removeItem('sellerId');
+                    localStorage.removeItem('isLoggedIn');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Update business/farm name in sidebar
+                document.getElementById('businessName').textContent = seller.farm_name || seller.business_name || 'My Farm';
+
+                // Load stats from Supabase
+                await loadStats(sellerId);
+
+                // Load recent orders from Supabase
+                await loadRecentOrders(sellerId);
+
+                // Set greeting based on time
+                setGreeting();
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
             }
-
-            // Load stats
-            await loadStats(user.id);
-
-            // Load recent orders
-            await loadRecentOrders(user.id);
-
-            // Set greeting based on time
-            setGreeting();
 
             // Setup sidebar toggle for mobile
             document.getElementById('sidebarToggle').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('active');
             });
 
-            // Logout
+            // Logout - clear localStorage
             document.getElementById('logoutBtn').addEventListener('click', async () => {
-                await supabase.auth.signOut();
+                localStorage.removeItem('sellerId');
+                localStorage.removeItem('isLoggedIn');
                 window.location.href = 'login.html';
             });
         });
 
-        async function loadStats(userId) {
+        async function loadStats(sellerId) {
             const supabase = window.supabase;
 
-            // Count products
-            const { count: productCount } = await supabase
+            // Count products from Supabase
+            const { count: productCount, error: productErr } = await supabase
                 .from('products')
                 .select('*', { count: 'exact', head: true })
-                .eq('seller_id', userId);
+                .eq('seller_id', sellerId);
 
+            if (productErr) console.error('Error loading products:', productErr);
+            
             document.getElementById('totalProducts').textContent = productCount || 0;
             document.getElementById('productCount').textContent = productCount || 0;
 
-            // Count pending orders
-            const { data: orders } = await supabase
+            // Get orders from Supabase
+            const { data: orders, error: ordersErr } = await supabase
                 .from('orders')
                 .select('id, status, total')
-                .eq('seller_id', userId);
+                .eq('seller_id', sellerId);
 
-            const pendingOrders = orders?.filter(o => o.status === 'PENDING' || o.status === 'CONFIRMED') || [];
+            if (ordersErr) console.error('Error loading orders:', ordersErr);
+
+            // Count pending orders
+            const pendingOrders = orders?.filter(o => o.status === 'PENDING' || o.status === 'CONFIRMED' || o.status === 'pending' || o.status === 'confirmed') || [];
             document.getElementById('pendingOrders').textContent = pendingOrders.length;
             document.getElementById('orderCount').textContent = pendingOrders.length;
 
-            // Calculate revenue
-            const deliveredOrders = orders?.filter(o => o.status === 'DELIVERED') || [];
+            // Calculate revenue from delivered orders
+            const deliveredOrders = orders?.filter(o => o.status === 'DELIVERED' || o.status === 'delivered') || [];
             const revenue = deliveredOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
             document.getElementById('totalRevenue').textContent = '₦' + revenue.toLocaleString();
 
-            // Get rating
-            const { data: seller } = await supabase
+            // Get seller rating from Supabase
+            const { data: seller, error: ratingErr } = await supabase
                 .from('sellers')
                 .select('rating')
-                .eq('id', userId)
+                .eq('id', sellerId)
                 .single();
 
+            if (ratingErr) console.error('Error loading rating:', ratingErr);
             document.getElementById('avgRating').textContent = (seller?.rating || 0).toFixed(1);
         }
 
-        async function loadRecentOrders(userId) {
+        async function loadRecentOrders(sellerId) {
             const supabase = window.supabase;
 
-            const { data: orders } = await supabase
+            const { data: orders, error: ordersErr } = await supabase
                 .from('orders')
                 .select('id, order_number, total, status, created_at, order_items(product_id, quantity, products(name))')
-                .eq('seller_id', userId)
+                .eq('seller_id', sellerId)
                 .order('created_at', { ascending: false })
                 .limit(5);
 
-            if (!orders || orders.length === 0) return;
+            if (ordersErr) {
+                console.error('Error loading recent orders:', ordersErr);
+                return;
+            }
+
+            if (!orders || orders.length === 0) {
+                // Keep the default "No orders yet" message
+                return;
+            }
 
             const tbody = document.getElementById('ordersTable');
             tbody.innerHTML = orders.map(order => {
                 const item = order.order_items?.[0];
-                const statusClass = `status-${order.status.toLowerCase()}`;
+                const statusClass = `status-${(order.status || 'pending').toLowerCase()}`;
                 return `
                     <tr>
                         <td><strong>${order.order_number || order.id.substring(0, 8)}</strong></td>
                         <td>${item?.products?.name || 'N/A'}</td>
                         <td>${item?.quantity || 0}</td>
                         <td>₦${parseFloat(order.total || 0).toLocaleString()}</td>
-                        <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+                        <td><span class="status-badge ${statusClass}">${order.status || 'PENDING'}</span></td>
                     </tr>
                 `;
             }).join('');

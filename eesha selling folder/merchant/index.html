@@ -9,42 +9,14 @@
     <!-- Centralized Supabase initializer -->
     <script src="../js/config/supabase.js"></script>
     <script>
-        // Check authentication before page loads
+        // Check custom authentication before page loads
         (async function checkAuth() {
-            try {
-                const { data: { session }, error } = await window.supabase.auth.getSession();
-                if (error || !session) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-                
-                // Check if seller profile exists
-                const { data: seller, error: sellerError } = await window.supabase
-                    .from('sellers')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single();
-
-                if (!seller) {
-                    // Create seller profile if it doesn't exist
-                    const { error: createError } = await window.supabase
-                        .from('sellers')
-                        .insert([{
-                            id: session.user.id,
-                            email: session.user.email,
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                        }]);
-
-                    if (createError) {
-                        console.error('Error creating seller profile:', createError);
-                        window.location.href = 'signup.html';
-                        return;
-                    }
-                }
-            } catch (error) {
-                console.error('Auth check error:', error);
+            const sellerId = localStorage.getItem('sellerId');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            
+            if (!sellerId || isLoggedIn !== 'true') {
                 window.location.href = 'login.html';
+                return;
             }
         })();
     </script>
@@ -1776,22 +1748,18 @@
 
         // Fetch dashboard data
         async function fetchDashboardData() {
-            const userPromise = window.supabase.auth.getUser();
-            const { data: { user } } = await trackRequest(userPromise, {
-                type: 'auth',
-                description: 'Verifying authentication'
-            });
-            
-            if (!user) {
+            // Get seller ID from localStorage (custom auth)
+            const sellerId = localStorage.getItem('sellerId');
+            if (!sellerId) {
                 window.location.href = 'login.html';
                 return;
             }
 
-            // Fetch seller profile
+            // Fetch seller profile from Supabase
             const sellerPromise = window.supabase
                 .from('sellers')
                 .select('*')
-                .eq('id', user.id)
+                .eq('id', sellerId)
                 .single();
                 
             const { data: seller } = await trackRequest(sellerPromise, {
@@ -1803,10 +1771,7 @@
 
             // Update seller name in modal and header
             const sellerNameElements = document.querySelectorAll('#sellerName');
-            // Prefer seller.business_name, then auth user full name, then email local-part, then fallback
-            const authUser = user || {};
-            const fallbackName = authUser.user_metadata?.full_name || (authUser.email ? authUser.email.split('@')[0] : null) || 'Seller';
-            const displayName = seller?.business_name || fallbackName;
+            const displayName = seller?.business_name || seller?.farm_name || 'Seller';
             sellerNameElements.forEach(el => {
                 el.textContent = displayName;
             });
@@ -1815,7 +1780,7 @@
             const productsPromise = supabase
                 .from('products')
                 .select('*', { count: 'exact', head: true })
-                .eq('seller_id', user.id);
+                .eq('seller_id', sellerId);
                 
             const { count: productCount } = await trackRequest(productsPromise, {
                 type: 'data',
@@ -1832,7 +1797,7 @@
             const ordersPromise = supabase
                 .from('orders')
                 .select('*', { count: 'exact' })
-                .eq('seller_id', user.id)
+                .eq('seller_id', sellerId)
                 .eq('status', 'active');
                 
             const { data: orders, count: orderCount } = await trackRequest(ordersPromise, {
@@ -1849,7 +1814,7 @@
             const salesPromise = supabase
                 .from('orders')
                 .select('total_amount')
-                .eq('seller_id', user.id)
+                .eq('seller_id', sellerId)
                 .eq('status', 'completed')
                 .gte('created_at', new Date(new Date().getFullYear(), currentMonth, 1).toISOString());
                 
@@ -1886,7 +1851,7 @@
             const recentActivityPromise = supabase
                 .from('products')
                 .select('*')
-                .eq('seller_id', user.id)
+                .eq('seller_id', sellerId)
                 .order('created_at', { ascending: false })
                 .limit(5);
                 
@@ -1916,7 +1881,7 @@
                     event: '*', 
                     schema: 'public', 
                     table: 'products',
-                    filter: `seller_id=eq.${user.id}`
+                    filter: `seller_id=eq.${sellerId}`
                 }, payload => {
                     updateDashboard(payload);
                 })
@@ -2030,19 +1995,15 @@
 
         // Update sidebar data
         async function updateSidebarData() {
-            const userPromise = supabase.auth.getUser();
-            const { data: { user } } = await trackRequest(userPromise, {
-                type: 'auth',
-                description: 'Verifying authentication'
-            });
-            
-            if (!user) return;
+            // Get seller ID from localStorage (custom auth)
+            const sellerId = localStorage.getItem('sellerId');
+            if (!sellerId) return;
 
-            // Fetch seller profile
+            // Fetch seller profile from Supabase
             const sellerPromise = supabase
                 .from('sellers')
                 .select('*')
-                .eq('id', user.id)
+                .eq('id', sellerId)
                 .single();
                 
             const { data: seller } = await trackRequest(sellerPromise, {
@@ -2051,10 +2012,7 @@
             });
 
             if (seller) {
-                // Prefer seller.business_name, then auth user full name, then email local-part, then fallback
-                const authUser = user || {};
-                const fallbackName = authUser.user_metadata?.full_name || (authUser.email ? authUser.email.split('@')[0] : null) || 'My Business';
-                document.getElementById('sellerBusinessName').textContent = seller.business_name || fallbackName;
+                document.getElementById('sellerBusinessName').textContent = seller.business_name || seller.farm_name || 'My Business';
             }
 
             // Update counts in parallel
@@ -2064,7 +2022,7 @@
                     supabase
                         .from('products')
                         .select('*', { count: 'exact', head: true })
-                        .eq('seller_id', user.id),
+                        .eq('seller_id', sellerId),
                     {
                         type: 'data',
                         description: 'Loading product count'
@@ -2076,7 +2034,7 @@
                     supabase
                         .from('orders')
                         .select('*', { count: 'exact', head: true })
-                        .eq('seller_id', user.id)
+                        .eq('seller_id', sellerId)
                         .eq('status', 'pending'),
                     {
                         type: 'data',
@@ -2089,7 +2047,7 @@
                     supabase
                         .from('offers')
                         .select('*', { count: 'exact', head: true })
-                        .eq('seller_id', user.id)
+                        .eq('seller_id', sellerId)
                         .eq('status', 'active'),
                     {
                         type: 'data',
@@ -2106,18 +2064,14 @@
 
         // Update notification count
         async function updateNotificationCount() {
-            const userPromise = supabase.auth.getUser();
-            const { data: { user } } = await trackRequest(userPromise, {
-                type: 'auth',
-                description: 'Verifying authentication'
-            });
-            
-            if (!user) return;
+            // Get seller ID from localStorage (custom auth)
+            const sellerId = localStorage.getItem('sellerId');
+            if (!sellerId) return;
 
             const notificationsPromise = supabase
                 .from('notifications')
                 .select('*', { count: 'exact' })
-                .eq('seller_id', user.id)
+                .eq('seller_id', sellerId)
                 .eq('read', false);
                 
             const { count } = await trackRequest(notificationsPromise, {
@@ -2132,16 +2086,11 @@
             }
         }
 
-        // Logout function
+        // Logout function - clear localStorage
         async function handleLogout() {
-            try {
-                const { error } = await supabase.auth.signOut();
-                if (error) throw error;
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error('Error logging out:', error);
-                alert('Error logging out. Please try again.');
-            }
+            localStorage.removeItem('sellerId');
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
         }
 
         // Add logout button event listener
@@ -2170,17 +2119,20 @@
         initializeAll();
 
         // Set up real-time notification updates
-        const notificationSubscription = supabase
-            .channel('notifications')
-            .on('postgres_changes', { 
-                event: '*', 
-                schema: 'public', 
-                table: 'notifications',
-                filter: `seller_id=eq.${user?.id}`
-            }, () => {
-                updateNotificationCount();
-            })
-            .subscribe();
+        const sellerIdForNotifications = localStorage.getItem('sellerId');
+        if (sellerIdForNotifications) {
+            const notificationSubscription = supabase
+                .channel('notifications')
+                .on('postgres_changes', { 
+                    event: '*', 
+                    schema: 'public', 
+                    table: 'notifications',
+                    filter: `seller_id=eq.${sellerIdForNotifications}`
+                }, () => {
+                    updateNotificationCount();
+                })
+                .subscribe();
+        }
 });
     </script>
 </body>
