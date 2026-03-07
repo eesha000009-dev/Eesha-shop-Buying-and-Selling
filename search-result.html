@@ -600,11 +600,10 @@
 
         async function fetchSuggestions(query, isMobile = false) {
             try {
-                // Search for products
+                // Search for products (don't filter by status since field may not exist)
                 const { data: products, error } = await supabaseClient
                     .from('products')
-                    .select('id, name, price, images, category')
-                    .eq('status', 'active')
+                    .select('id, name, price, images, image_url, category')
                     .or(`name.ilike.%${query}%,category.ilike.%${query}%`)
                     .limit(5);
                 
@@ -625,7 +624,7 @@
             
             if (products.length > 0) {
                 products.forEach(product => {
-                    const image = product.images?.[0] || 'https://via.placeholder.com/50';
+                    const image = product.images?.[0] || product.image_url || 'https://via.placeholder.com/50';
                     html += `
                         <div class="suggestion-item" onclick="selectSuggestion('${product.name}')">
                             <img src="${image}" alt="${product.name}" class="w-10 h-10 object-cover rounded-lg">
@@ -797,10 +796,9 @@
             try {
                 let query = supabaseClient
                     .from('products')
-                    .select('*, sellers(name, seller_type)', { count: 'exact' })
-                    .eq('status', 'active');
+                    .select('*, sellers(name, seller_type)', { count: 'exact' });
                 
-                // Search in name, description, and category
+                // Search in name, description, and category (don't filter by status since field may not exist)
                 query = query.or(`name.ilike.%${currentQuery}%,description.ilike.%${currentQuery}%,category.ilike.%${currentQuery}%`);
                 
                 // Price filter

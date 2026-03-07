@@ -1157,11 +1157,10 @@
         // ===== Load Products =====
         async function loadProducts() {
             try {
-                // Load flash deals
+                // Load flash deals (don't filter by status since field may not exist)
                 const { data: flashDeals } = await supabaseClient
                     .from('products')
                     .select('*')
-                    .eq('status', 'active')
                     .gt('discount_percentage', 30)
                     .limit(5);
                 
@@ -1171,7 +1170,6 @@
                 const { data: trending } = await supabaseClient
                     .from('products')
                     .select('*')
-                    .eq('status', 'active')
                     .order('created_at', { ascending: false })
                     .limit(10);
                 
@@ -1181,7 +1179,6 @@
                 const { data: farmProducts } = await supabaseClient
                     .from('products')
                     .select('*, sellers!inner(seller_type)')
-                    .eq('status', 'active')
                     .eq('sellers.seller_type', 'FARMER')
                     .limit(5);
                 
@@ -1191,7 +1188,6 @@
                 const { data: newArrivals } = await supabaseClient
                     .from('products')
                     .select('*')
-                    .eq('status', 'active')
                     .order('created_at', { ascending: false })
                     .limit(5);
                 

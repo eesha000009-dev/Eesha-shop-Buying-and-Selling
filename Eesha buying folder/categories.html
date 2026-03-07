@@ -465,8 +465,7 @@
             try {
                 let query = supabaseClient
                     .from('products')
-                    .select('*, sellers(name, seller_type)', { count: 'exact' })
-                    .eq('status', 'active');
+                    .select('*, sellers(name, seller_type)', { count: 'exact' });
                 
                 // Search filter - search in name and description
                 if (currentSearch) {
