@@ -1,74 +1,43 @@
 -- =====================================================
--- MIGRATION: Sellers Authentication Table
--- This table stores seller accounts separately from buyer accounts
+-- MIGRATION: Add Authentication Columns to Sellers Table
+-- This ONLY adds new columns, does NOT modify existing ones
 -- Run this in Supabase SQL Editor
 -- =====================================================
 
--- Create the sellers table if it doesn't exist
-CREATE TABLE IF NOT EXISTS sellers (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    business_name VARCHAR(255),
-    business_description TEXT,
-    business_category VARCHAR(100),
-    business_location VARCHAR(255),
-    business_type VARCHAR(50) DEFAULT 'MERCHANT', -- MERCHANT or FARMER
-    contact_phone VARCHAR(20),
-    address TEXT,
-    profile_image TEXT,
-    farm_name VARCHAR(255),
-    farm_type VARCHAR(50),
-    state VARCHAR(100),
-    
-    -- Account status
-    status VARCHAR(20) DEFAULT 'active', -- active, suspended, pending
-    email_verified BOOLEAN DEFAULT false,
-    
-    -- Preferences
-    preferences JSONB DEFAULT '{}',
-    
-    -- Timestamps
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    last_login_at TIMESTAMPTZ
-);
+-- Add password_hash column for custom authentication
+ALTER TABLE sellers ADD COLUMN IF NOT EXISTS password_hash TEXT;
 
--- Enable RLS
-ALTER TABLE sellers ENABLE ROW LEVEL SECURITY;
+-- Add seller_type column to distinguish between MERCHANT and FARMER
+ALTER TABLE sellers ADD COLUMN IF NOT EXISTS seller_type VARCHAR(50) DEFAULT 'MERCHANT';
 
--- Policies for sellers table
-CREATE POLICY "Sellers can view their own data" ON sellers 
-    FOR SELECT USING (true); -- Allow public read for login verification
+-- Add farm-specific columns (for farmers)
+ALTER TABLE sellers ADD COLUMN IF NOT EXISTS farm_name VARCHAR(255);
+ALTER TABLE sellers ADD COLUMN IF NOT EXISTS farm_type VARCHAR(50);
+ALTER TABLE sellers ADD COLUMN IF NOT EXISTS state VARCHAR(100);
 
-CREATE POLICY "Anyone can insert seller" ON sellers 
-    FOR INSERT WITH CHECK (true); -- Allow signup
+-- Add email verification status
+ALTER TABLE sellers ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT false;
 
-CREATE POLICY "Sellers can update their own data" ON sellers 
-    FOR UPDATE USING (true); -- Simplified for now
+-- Add last login tracking
+ALTER TABLE sellers ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ;
 
--- Create indexes
+-- Create index on email for faster login queries
 CREATE INDEX IF NOT EXISTS idx_sellers_email ON sellers(email);
-CREATE INDEX IF NOT EXISTS idx_sellers_business_type ON sellers(business_type);
+
+-- Create index on seller_type for filtering
+CREATE INDEX IF NOT EXISTS idx_sellers_seller_type ON sellers(seller_type);
+
+-- Create index on status
 CREATE INDEX IF NOT EXISTS idx_sellers_status ON sellers(status);
-
--- Function to update updated_at timestamp
-DROP TRIGGER IF EXISTS update_sellers_updated_at ON sellers;
-CREATE TRIGGER update_sellers_updated_at BEFORE UPDATE ON sellers
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Create the function if it doesn't exist
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
 
 -- =====================================================
 -- RESULT
 -- =====================================================
-SELECT 'Migration completed successfully! Sellers table created with password authentication.' as result;
+SELECT 'Migration completed! New columns added to sellers table:
+- password_hash (for authentication)
+- seller_type (MERCHANT or FARMER)
+- farm_name (for farmers)
+- farm_type (for farmers)
+- state (location)
+- email_verified
+- last_login_at' as result;

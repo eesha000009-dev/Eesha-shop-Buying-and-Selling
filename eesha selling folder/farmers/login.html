@@ -170,8 +170,8 @@
                 }
 
                 // Check if this is a farmer account
-                if (seller.business_type && seller.business_type !== 'FARMER') {
-                    errorMsg.textContent = 'This email is registered as a ' + seller.business_type + '. Please use the correct login page.';
+                if (seller.seller_type && seller.seller_type !== 'FARMER') {
+                    errorMsg.textContent = 'This email is registered as a ' + seller.seller_type + '. Please use the correct login page.';
                     errorMsg.classList.remove('hidden');
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<span>Login to Dashboard</span><i class="fas fa-arrow-right"></i>';

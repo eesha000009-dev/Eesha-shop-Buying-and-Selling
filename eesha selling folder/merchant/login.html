@@ -150,8 +150,8 @@
                 }
 
                 // Check if this is a merchant account
-                if (seller.business_type && seller.business_type !== 'MERCHANT') {
-                    showError('This email is registered as a ' + seller.business_type + '. Please use the correct login page.');
+                if (seller.seller_type && seller.seller_type !== 'MERCHANT') {
+                    showError('This email is registered as a ' + seller.seller_type + '. Please use the correct login page.');
                     setLoading(false);
                     return;
                 }
@@ -169,7 +169,7 @@
                     first_name: seller.first_name,
                     last_name: seller.last_name,
                     business_name: seller.business_name,
-                    business_type: seller.business_type || 'MERCHANT'
+                    seller_type: seller.seller_type || 'MERCHANT'
                 };
                 localStorage.setItem('sellerSession', JSON.stringify(sellerSession));
 
