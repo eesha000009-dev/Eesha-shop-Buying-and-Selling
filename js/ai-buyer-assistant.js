@@ -354,9 +354,48 @@ I understand natural language - just talk to me:<br>
 
     async function updateContext() {
         try {
-            context.user = await window.Cart?.getCurrentUser() || null;
-            context.cartItems = context.user ? (await window.Cart?.getCartItems() || []) : [];
-        } catch (e) {}
+            console.log('[Eesha AI] Checking login status...');
+            console.log('[Eesha AI] window.Cart exists:', !!window.Cart);
+            console.log('[Eesha AI] window.supabaseClient exists:', !!window.supabaseClient);
+            console.log('[Eesha AI] window.supabase exists:', !!window.supabase);
+            
+            // Check if Cart module exists
+            if (!window.Cart) {
+                console.error('[Eesha AI] Cart module not loaded!');
+                // Try to wait a bit and check again
+                await new Promise(resolve => setTimeout(resolve, 500));
+                if (!window.Cart) {
+                    console.error('[Eesha AI] Cart module still not loaded after waiting');
+                    context.user = null;
+                    context.cartItems = [];
+                    return;
+                }
+            }
+            
+            context.user = await window.Cart.getCurrentUser();
+            console.log('[Eesha AI] User object:', context.user ? `ID: ${context.user.id}` : 'null');
+            
+            if (context.user) {
+                console.log('[Eesha AI] Fetching cart items for user...');
+                const items = await window.Cart.getCartItems();
+                context.cartItems = items || [];
+                console.log('[Eesha AI] Cart items fetched:', context.cartItems.length);
+                console.log('[Eesha AI] Cart items raw:', JSON.stringify(context.cartItems, null, 2));
+            } else {
+                context.cartItems = [];
+                console.log('[Eesha AI] No user logged in - cart empty');
+                
+                // Try to get session directly from supabase as fallback
+                const client = window.supabaseClient || window.supabase;
+                if (client) {
+                    const { data: { session } } = await client.auth.getSession();
+                    console.log('[Eesha AI] Direct supabase session check:', session ? `User: ${session.user?.id}` : 'No session');
+                }
+            }
+        } catch (e) {
+            console.error('[Eesha AI] Error updating context:', e);
+            console.error('[Eesha AI] Error stack:', e.stack);
+        }
     }
 
     async function sendMessage() {
@@ -380,13 +419,15 @@ I understand natural language - just talk to me:<br>
                     id: p.id, name: p.name, price: p.price, category: p.category
                 })),
                 cartItems: context.cartItems.map(i => ({
-                    product_name: i.products?.name, quantity: i.quantity, price: i.products?.price
+                    product_name: i.products?.name || i.product_name || 'Unknown', 
+                    quantity: i.quantity || 1, 
+                    price: i.products?.price || i.price || 0
                 })),
-                cartTotal: context.cartItems.reduce((s, i) => s + ((i.products?.price || 0) * i.quantity), 0),
+                cartTotal: context.cartItems.reduce((s, i) => s + ((i.products?.price || i.price || 0) * (i.quantity || 1)), 0),
                 isLoggedIn: !!context.user
             };
 
-            if (CONFIG.debug) console.log('Sending to HF Space:', contextForAI);
+            console.log('[Eesha AI] Context being sent:', JSON.stringify(contextForAI, null, 2));
 
             // Call HuggingFace Space AI
             const response = await fetch(CONFIG.apiUrl, {
@@ -482,8 +523,19 @@ I understand natural language - just talk to me:<br>
         }
 
         if (type === 'view_cart') {
+            console.log('[Eesha AI] view_cart action - fetching items...');
             const items = await Cart.getCartItems();
-            if (!items.length) return { success: true, message: 'Your cart is empty. Would you like to browse some products?' };
+            console.log('[Eesha AI] view_cart items:', items?.length || 0, items);
+            
+            if (!items || !items.length) {
+                // Check if user is logged in first
+                const user = await Cart.getCurrentUser();
+                console.log('[Eesha AI] view_cart - user check:', user ? user.id : 'not logged in');
+                if (!user) {
+                    return { success: false, requiresAuth: true, message: 'Please login to view your cart.' };
+                }
+                return { success: true, message: 'Your cart is empty. Would you like to browse some products?' };
+            }
             
             let cartDetails = '🛒 Your Cart:\n';
             let total = 0;

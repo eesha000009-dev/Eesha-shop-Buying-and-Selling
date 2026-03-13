@@ -18,11 +18,22 @@
     async function getCurrentUser() {
         const client = supabaseClient();
         if (!client) {
-            console.error('Supabase client not initialized');
+            console.error('[Cart] Supabase client not initialized');
             return null;
         }
-        const { data: { session } } = await client.auth.getSession();
-        return session?.user || null;
+        
+        try {
+            const { data, error } = await client.auth.getSession();
+            if (error) {
+                console.error('[Cart] Error getting session:', error);
+                return null;
+            }
+            console.log('[Cart] Session check:', data.session ? `User: ${data.session.user.id}` : 'No session');
+            return data.session?.user || null;
+        } catch (e) {
+            console.error('[Cart] Exception in getCurrentUser:', e);
+            return null;
+        }
     }
 
     /**
@@ -85,10 +96,18 @@
      */
     async function getCartItems() {
         const client = supabaseClient();
-        if (!client) return [];
+        if (!client) {
+            console.error('[Cart] getCartItems: No client');
+            return [];
+        }
 
         const user = await getCurrentUser();
-        if (!user) return [];
+        if (!user) {
+            console.log('[Cart] getCartItems: No user logged in');
+            return [];
+        }
+        
+        console.log('[Cart] getCartItems: Fetching for user', user.id);
 
         try {
             const { data: cartItems, error } = await client
@@ -111,13 +130,14 @@
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('Error fetching cart items:', error);
+                console.error('[Cart] Error fetching cart items:', error);
                 return [];
             }
-
+            
+            console.log('[Cart] getCartItems: Found', cartItems?.length || 0, 'items');
             return cartItems || [];
         } catch (err) {
-            console.error('Error getting cart items:', err);
+            console.error('[Cart] Error getting cart items:', err);
             return [];
         }
     }
