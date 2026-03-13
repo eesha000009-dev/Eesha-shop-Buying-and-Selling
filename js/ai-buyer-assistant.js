@@ -403,6 +403,61 @@ I understand natural language - just talk to me:<br>
         const text = input.value.trim();
         if ((!text && !selectedImage) || isLoading) return;
 
+        // DEBUG COMMAND - Type "debug" to see cart status
+        if (text.toLowerCase() === 'debug' || text.toLowerCase() === '/debug') {
+            addMessage('user', text);
+            input.value = '';
+            
+            let debugInfo = '🔧 **DEBUG INFO:**\n\n';
+            debugInfo += `• window.Cart: ${window.Cart ? '✅ Loaded' : '❌ NOT LOADED'}\n`;
+            debugInfo += `• window.supabase: ${window.supabase ? '✅ Loaded' : '❌ NOT LOADED'}\n`;
+            debugInfo += `• window.supabaseClient: ${window.supabaseClient ? '✅ Loaded' : '❌ NOT LOADED'}\n`;
+            
+            if (window.Cart) {
+                try {
+                    const user = await window.Cart.getCurrentUser();
+                    debugInfo += `\n**Login Status:**\n`;
+                    debugInfo += `• Logged in: ${user ? '✅ YES' : '❌ NO'}\n`;
+                    if (user) {
+                        debugInfo += `• User ID: ${user.id}\n`;
+                    }
+                    
+                    const items = await window.Cart.getCartItems();
+                    debugInfo += `\n**Cart Data:**\n`;
+                    debugInfo += `• Items count: ${items ? items.length : 0}\n`;
+                    if (items && items.length > 0) {
+                        debugInfo += `• Items:\n`;
+                        items.forEach((item, i) => {
+                            debugInfo += `  ${i+1}. ${item.products?.name || 'Unknown'} x${item.quantity}\n`;
+                        });
+                    }
+                    
+                    const count = await window.Cart.getCartCount();
+                    debugInfo += `• Cart count badge: ${count}\n`;
+                } catch (e) {
+                    debugInfo += `\n❌ Error: ${e.message}\n`;
+                }
+            }
+            
+            // Check supabase directly
+            const client = window.supabaseClient || window.supabase;
+            if (client) {
+                try {
+                    const { data: { session } } = await client.auth.getSession();
+                    debugInfo += `\n**Direct Supabase Check:**\n`;
+                    debugInfo += `• Has session: ${session ? '✅ YES' : '❌ NO'}\n`;
+                    if (session) {
+                        debugInfo += `• User ID: ${session.user?.id}\n`;
+                    }
+                } catch (e) {
+                    debugInfo += `\n❌ Supabase error: ${e.message}\n`;
+                }
+            }
+            
+            addMessage('assistant', debugInfo);
+            return;
+        }
+
         addMessage('user', text);
         input.value = '';
         const imageToSend = selectedImage;
