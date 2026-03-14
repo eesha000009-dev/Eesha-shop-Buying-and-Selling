@@ -469,8 +469,9 @@ Just talk to me naturally!<br>
         // Store image before clearing
         const imageToSend = selectedImage;
         
-        // Show user message with image if provided
-        addMessage('user', text, { image: imageToSend });
+        // Show user message with image if provided (handle image-only messages)
+        const displayText = text || '📷 Shared an image';
+        addMessage('user', displayText, { image: imageToSend });
         input.value = '';
         removeSelectedImage();
 
