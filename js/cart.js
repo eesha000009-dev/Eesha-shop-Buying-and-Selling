@@ -110,24 +110,11 @@
         console.log('[Cart] getCartItems: Fetching for user', user.id);
 
         try {
+            // Use simpler select like cart.html does - this works!
             const { data: cartItems, error } = await client
                 .from('cart_items')
-                .select(`
-                    id,
-                    quantity,
-                    created_at,
-                    products (
-                        id,
-                        name,
-                        price,
-                        original_price,
-                        image_url,
-                        stock,
-                        seller_id
-                    )
-                `)
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
+                .select('id, quantity, product_id, products(*)')
+                .eq('user_id', user.id);
 
             if (error) {
                 console.error('[Cart] Error fetching cart items:', error);
