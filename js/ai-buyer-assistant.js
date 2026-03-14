@@ -212,64 +212,14 @@
         }
     }
 
-    async function showWelcomeMessage() {
-        // Build debug info
-        let debugHtml = '';
-        try {
-            const hasCart = !!window.Cart;
-            const hasSupabase = !!(window.supabaseClient || window.supabase);
-            let userInfo = 'Not logged in';
-            let cartCount = 0;
-            let cartError = '';
-            
-            if (hasCart && hasSupabase) {
-                const user = await window.Cart.getCurrentUser();
-                if (user) {
-                    userInfo = `Logged in: ${user.id.substring(0, 8)}...`;
-                    
-                    // Try direct query to see what's happening
-                    const client = window.supabaseClient || window.supabase;
-                    
-                    // First try the Cart module
-                    const items = await window.Cart.getCartItems();
-                    cartCount = items ? items.length : 0;
-                    
-                    // If 0 items, try direct query to debug
-                    if (cartCount === 0) {
-                        const { data, error, count } = await client
-                            .from('cart_items')
-                            .select('*', { count: 'exact' })
-                            .eq('user_id', user.id);
-                        
-                        if (error) {
-                            cartError = `<br>Direct query error: ${error.message}`;
-                        } else {
-                            cartError = `<br>Direct query found: ${data?.length || 0} items (count: ${count})`;
-                            if (data && data.length > 0) {
-                                cartError += `<br>Sample: ${JSON.stringify(data[0]).substring(0, 100)}...`;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            debugHtml = `<div style="font-size:10px;background:#f1f5f9;padding:8px;border-radius:6px;margin-top:10px;color:#64748b;">
-                <strong>Debug Info:</strong> Cart module: ${hasCart ? '✅' : '❌'} | Supabase: ${hasSupabase ? '✅' : '❌'}<br>
-                ${userInfo} | Cart items: ${cartCount}${cartError}
-            </div>`;
-        } catch (e) {
-            debugHtml = `<div style="font-size:10px;background:#fee2e2;padding:8px;border-radius:6px;margin-top:10px;color:#991b1b;">
-                Debug error: ${e.message}
-            </div>`;
-        }
-        
+    function showWelcomeMessage() {
         addMessage('assistant', `<strong>👋 Hi! I'm Eesha, your AI shopping assistant!</strong><br><br>
-I understand natural language - just talk to me:<br>
-• "Show me phones under ₦50,000"<br>
-• "Add the first one to my cart"<br>
-• "What's in my cart?"<br><br>
-<strong>100% FREE & Open Source!</strong>
-${debugHtml}`);
+I can help you with:<br>
+• Finding products within your budget<br>
+• Planning your shopping list<br>
+• Answering any questions<br><br>
+Just talk to me naturally!<br>
+<strong>100% FREE & Open Source!</strong>`);
     }
 
     function addMessage(role, content, data = {}) {
@@ -528,10 +478,15 @@ ${debugHtml}`);
                     price: i.products?.price || i.price || 0
                 })),
                 cartTotal: context.cartItems.reduce((s, i) => s + ((i.products?.price || i.price || 0) * (i.quantity || 1)), 0),
-                isLoggedIn: !!context.user
+                isLoggedIn: !!context.user,
+                // Add conversation history for memory
+                conversationHistory: conversationHistory.slice(-10) // Last 10 messages
             };
 
-            console.log('[Eesha AI] Context being sent:', JSON.stringify(contextForAI, null, 2));
+            // Add image if selected (for VLM)
+            if (imageToSend) {
+                contextForAI.image = imageToSend;
+            }
 
             // Call HuggingFace Space AI
             const response = await fetch(CONFIG.apiUrl, {
@@ -545,6 +500,15 @@ ${debugHtml}`);
             removeLoading();
 
             if (data.success) {
+                // Store in conversation history
+                conversationHistory.push({ role: 'user', content: text });
+                conversationHistory.push({ role: 'assistant', content: data.response });
+                
+                // Keep only last 20 messages (10 exchanges)
+                if (conversationHistory.length > 20) {
+                    conversationHistory = conversationHistory.slice(-20);
+                }
+
                 if (data.products?.length > 0) {
                     context.lastShownProducts = data.products;
                 }
