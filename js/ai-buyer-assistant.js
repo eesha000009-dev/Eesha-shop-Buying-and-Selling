@@ -156,6 +156,8 @@
             .ai-bubble-assistant{background:white;color:#1e293b;border-bottom-left-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
             .ai-bubble-user{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#0f172a;border-bottom-right-radius:4px}
             .ai-bubble strong{font-weight:600}
+            .ai-message-image{margin-bottom:8px}
+            .ai-message-image img{max-width:200px;max-height:150px;border-radius:8px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,.1)}
             .ai-product-card{background:white;border-radius:10px;padding:10px;margin-top:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;gap:10px;cursor:pointer;transition:all .2s;border:2px solid transparent}
             .ai-product-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1);border-color:#f59e0b}
             .ai-product-img{width:50px;height:50px;border-radius:6px;object-fit:cover;background:#f1f5f9}
@@ -227,12 +229,19 @@ Just talk to me naturally!<br>
         const isUser = role === 'user';
         const parsed = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
         
+        // Build image HTML if provided
+        let imageHtml = '';
+        if (data.image) {
+            imageHtml = `<div class="ai-message-image"><img src="${data.image}" alt="Shared image"></div>`;
+        }
+        
         let html = `
             <div class="ai-message ${isUser ? 'ai-message-user' : ''}">
                 <div class="ai-avatar ${isUser ? 'ai-avatar-user' : 'ai-avatar-assistant'}">
                     <i class="fas ${isUser ? 'fa-user' : 'fa-wand-magic-sparkles'}"></i>
                 </div>
                 <div class="ai-message-content">
+                    ${imageHtml}
                     <div class="ai-bubble ${isUser ? 'ai-bubble-user' : 'ai-bubble-assistant'}">${parsed}</div>
                     ${renderProducts(data.products)}
                     ${renderActionResult(data.actionResult)}
@@ -457,9 +466,12 @@ Just talk to me naturally!<br>
             return;
         }
 
-        addMessage('user', text);
-        input.value = '';
+        // Store image before clearing
         const imageToSend = selectedImage;
+        
+        // Show user message with image if provided
+        addMessage('user', text, { image: imageToSend });
+        input.value = '';
         removeSelectedImage();
 
         isLoading = true;
