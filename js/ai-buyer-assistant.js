@@ -212,15 +212,41 @@
         }
     }
 
-    function showWelcomeMessage() {
+    async function showWelcomeMessage() {
+        // Build debug info
+        let debugHtml = '';
+        try {
+            const hasCart = !!window.Cart;
+            const hasSupabase = !!(window.supabaseClient || window.supabase);
+            let userInfo = 'Not logged in';
+            let cartCount = 0;
+            
+            if (hasCart && hasSupabase) {
+                const user = await window.Cart.getCurrentUser();
+                if (user) {
+                    userInfo = `Logged in: ${user.id.substring(0, 8)}...`;
+                    const items = await window.Cart.getCartItems();
+                    cartCount = items ? items.length : 0;
+                }
+            }
+            
+            debugHtml = `<div style="font-size:10px;background:#f1f5f9;padding:8px;border-radius:6px;margin-top:10px;color:#64748b;">
+                <strong>Debug Info:</strong> Cart module: ${hasCart ? '✅' : '❌'} | Supabase: ${hasSupabase ? '✅' : '❌'}<br>
+                ${userInfo} | Cart items: ${cartCount}
+            </div>`;
+        } catch (e) {
+            debugHtml = `<div style="font-size:10px;background:#fee2e2;padding:8px;border-radius:6px;margin-top:10px;color:#991b1b;">
+                Debug error: ${e.message}
+            </div>`;
+        }
+        
         addMessage('assistant', `<strong>👋 Hi! I'm Eesha, your AI shopping assistant!</strong><br><br>
 I understand natural language - just talk to me:<br>
 • "Show me phones under ₦50,000"<br>
 • "Add the first one to my cart"<br>
-• "Add both of them"<br>
-• "Add all"<br>
 • "What's in my cart?"<br><br>
-<strong>100% FREE & Open Source!</strong>`);
+<strong>100% FREE & Open Source!</strong>
+${debugHtml}`);
     }
 
     function addMessage(role, content, data = {}) {
