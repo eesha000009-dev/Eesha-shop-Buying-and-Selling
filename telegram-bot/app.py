@@ -1,6 +1,6 @@
 """
 EeshaMart Telegram Bot - Production Ready
-100% FREE on Render.com!
+Email/Password Authentication for Seamless Account Linking
 
 Bot: https://t.me/eeshamart_bot
 """
@@ -10,9 +10,10 @@ import os
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Optional
 import random
 import string
+import re
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,44 +23,98 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="EeshaMart Telegram Bot")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-# Configuration - Uses environment variables (set in Render)
+# Configuration
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8142562507:AAG-_UExIh18e6mz-0URKmv67-CQOk_cuA4")
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://tcwdbokruvlizkxcpkzj.supabase.co")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjd2Rib2tydXZsaXpreGNwa3pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMDkyNjQsImV4cCI6MjA3NTY4NTI2NH0.p871FXUakrWQ7PhhZr8Ly2BxLOhwQjRJiDGd59wAhyg")
 AI_BACKEND_URL = os.environ.get("AI_BACKEND_URL", "https://fuhaddesmond-eeshamart-ai.hf.space/api/chat")
 
-logger.info(f"🤖 EeshaMart Telegram Bot Starting...")
-logger.info(f"📡 Token configured: {'Yes' if TELEGRAM_BOT_TOKEN else 'No'}")
+logger.info("🤖 EeshaMart Telegram Bot Starting...")
 
-# Storage (in-memory for free tier)
-linked_accounts: Dict[int, dict] = {}
-pending_links: Dict[str, dict] = {}
-user_sessions: Dict[int, dict] = {}
+# Storage
+linked_accounts: Dict[int, dict] = {}  # chat_id -> user info
+auth_sessions: Dict[int, dict] = {}    # chat_id -> auth session (email waiting, password waiting)
+user_sessions: Dict[int, dict] = {}    # chat_id -> shopping session
 
-def gen_code() -> str:
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+# Auth states
+AUTH_STATE_NONE = "none"
+AUTH_STATE_EMAIL = "waiting_email"
+AUTH_STATE_PASSWORD = "waiting_password"
 
-async def send_telegram(chat_id: int, text: str):
+async def send_telegram(chat_id: int, text: str, keyboard: list = None):
     """Send message via Telegram API"""
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
-    logger.info(f"📤 Sending to {chat_id}: {text[:50]}...")
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "Markdown"
+    }
+    if keyboard:
+        payload["reply_markup"] = json.dumps({"keyboard": keyboard, "resize_keyboard": True, "one_time_keyboard": True})
     
+    logger.info(f"📤 Sending to {chat_id}")
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(url, json=payload)
             result = response.json()
-            if result.get("ok"):
-                logger.info(f"✅ Message sent successfully!")
-            else:
+            if not result.get("ok"):
                 logger.error(f"❌ Telegram error: {result}")
             return result
     except Exception as e:
         logger.error(f"❌ Send error: {e}")
         return {"ok": False, "error": str(e)}
 
+async def verify_supabase_auth(email: str, password: str) -> Optional[dict]:
+    """Verify user credentials with Supabase Auth"""
+    url = f"{SUPABASE_URL}/auth/v1/token?grant_type=password"
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "email": email,
+        "password": password
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.post(url, headers=headers, json=payload)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "user_id": data.get("user", {}).get("id"),
+                    "email": data.get("user", {}).get("email"),
+                    "access_token": data.get("access_token")
+                }
+            else:
+                error = response.json().get("error_description", "Invalid credentials")
+                logger.error(f"Auth failed: {error}")
+                return None
+    except Exception as e:
+        logger.error(f"Auth error: {e}")
+        return None
+
+async def get_user_profile(user_id: str, token: str) -> Optional[dict]:
+    """Get user profile from Supabase"""
+    url = f"{SUPABASE_URL}/rest/v1/profiles?id=eq.{user_id}&select=*"
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {token}"
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url, headers=headers)
+            if response.status_code == 200:
+                profiles = response.json()
+                return profiles[0] if profiles else None
+    except Exception as e:
+        logger.error(f"Profile error: {e}")
+    return None
+
 async def get_cart(user_id: str) -> List[dict]:
-    """Get user's cart from Supabase"""
+    """Get user's cart"""
     url = f"{SUPABASE_URL}/rest/v1/cart_items?user_id=eq.{user_id}&select=id,quantity,product_id,products(*)"
     headers = {"apikey": SUPABASE_KEY}
     try:
@@ -71,7 +126,7 @@ async def get_cart(user_id: str) -> List[dict]:
         return []
 
 async def add_to_cart(user_id: str, product_id: int, quantity: int = 1) -> bool:
-    """Add product to cart in Supabase"""
+    """Add product to cart"""
     url = f"{SUPABASE_URL}/rest/v1/cart_items?user_id=eq.{user_id}&product_id=eq.{product_id}&select=*"
     headers = {
         "apikey": SUPABASE_KEY,
@@ -101,21 +156,18 @@ async def add_to_cart(user_id: str, product_id: int, quantity: int = 1) -> bool:
         return False
 
 async def call_ai(message: str, context: dict) -> dict:
-    """Call EeshaMart AI backend"""
+    """Call AI backend"""
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                AI_BACKEND_URL,
-                json={"message": message, "context": context}
-            )
+            response = await client.post(AI_BACKEND_URL, json={"message": message, "context": context})
             return response.json() if response.status_code == 200 else {"success": False}
     except Exception as e:
         logger.error(f"AI error: {e}")
-        return {"success": False, "response": "AI service unavailable. Please try again."}
+        return {"success": False, "response": "AI service unavailable"}
 
 async def process_message(chat_id: int, user_id: int, text: str, username: str = None) -> str:
-    """Process incoming message and return response"""
-    logger.info(f"📩 Processing from {chat_id}: {text}")
+    """Process incoming message"""
+    logger.info(f"📩 From {chat_id}: {text}")
     
     text_lower = text.strip().lower()
     
@@ -123,93 +175,118 @@ async def process_message(chat_id: int, user_id: int, text: str, username: str =
     if chat_id not in user_sessions:
         user_sessions[chat_id] = {"last_products": []}
     
+    # ========== AUTHENTICATION FLOW ==========
+    
+    # Check if user is in auth flow
+    if chat_id in auth_sessions:
+        session = auth_sessions[chat_id]
+        
+        # Cancel auth
+        if text_lower in ['/cancel', 'cancel']:
+            del auth_sessions[chat_id]
+            return "❌ Authentication cancelled. Send /start to try again."
+        
+        # Waiting for email
+        if session["state"] == AUTH_STATE_EMAIL:
+            email = text.strip()
+            # Validate email
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                return "❌ Invalid email format. Please enter a valid email:\n\nOr send /cancel to cancel."
+            
+            auth_sessions[chat_id] = {"state": AUTH_STATE_PASSWORD, "email": email}
+            return "🔑 *Great! Now enter your password:*\n\n_Your password is secure and not stored._"
+        
+        # Waiting for password
+        if session["state"] == AUTH_STATE_PASSWORD:
+            password = text.strip()
+            email = session["email"]
+            
+            # Verify with Supabase
+            auth_result = await verify_supabase_auth(email, password)
+            
+            if auth_result:
+                # Get user profile
+                profile = await get_user_profile(auth_result["user_id"], auth_result["access_token"])
+                name = profile.get("full_name", email.split("@")[0]) if profile else email.split("@")[0]
+                
+                # Link account
+                linked_accounts[chat_id] = {
+                    "user_id": auth_result["user_id"],
+                    "email": email,
+                    "name": name,
+                    "telegram_id": chat_id,
+                    "username": username,
+                    "history": []
+                }
+                
+                del auth_sessions[chat_id]
+                
+                return f"""✅ *Welcome, {name}!*
+
+🎉 Your account is now linked!
+
+🛒 *You can now:*
+• Search for products
+• Add items to cart
+• View your cart
+• Checkout
+
+_What would you like to shop for today?_"""
+            else:
+                del auth_sessions[chat_id]
+                return """❌ *Login Failed*
+
+Invalid email or password. Please try again:
+Send /start to retry"""
+    
     # ========== COMMANDS ==========
     
-    # /start command
+    # Start command
     if text_lower.startswith('/start'):
-        code = gen_code()
-        pending_links[code] = {
-            "chat_id": chat_id,
-            "user_id": user_id,
-            "username": username,
-            "expires": datetime.now() + timedelta(minutes=10)
-        }
-        
+        # Check if already linked
         if chat_id in linked_accounts:
-            return """✅ *Welcome Back to EeshaMart!*
+            account = linked_accounts[chat_id]
+            name = account.get("name", "there")
+            return f"""✅ *Welcome back, {name}!*
 
 🛒 *I can help you:*
 • Search for products
 • Add items to cart
 • View your cart
 • Checkout
-• Answer questions
-
-_What would you like to shop for today?_"""
-        
-        return f"""👋 *Welcome to EeshaMart AI!*
-
-I'm your personal shopping assistant, ready to help you find the best products!
-
-🔗 *To link your account:*
-1️⃣ Go to EeshaMart Profile Settings
-2️⃣ Click "Link Telegram"
-3️⃣ Enter code: `{code}`
-
-_Or reply with:_ `LINK <your-user-id>`
-
-_Code valid for 10 minutes_"""
-    
-    # Greetings
-    if text_lower in ['hi', 'hello', 'hey', 'start', 'link', 'connect']:
-        code = gen_code()
-        pending_links[code] = {
-            "chat_id": chat_id,
-            "user_id": user_id,
-            "username": username,
-            "expires": datetime.now() + timedelta(minutes=10)
-        }
-        
-        if chat_id in linked_accounts:
-            return """✅ *Welcome Back!*
-
-🛒 Search products
-🛍️ Add to cart
-📦 View cart
-💳 Checkout
 
 _What would you like?_"""
         
-        return f"""👋 *EeshaMart AI!*
+        # Start auth flow
+        auth_sessions[chat_id] = {"state": AUTH_STATE_EMAIL}
+        return """👋 *Welcome to EeshaMart AI!*
 
-🔗 Link your account:
-Code: `{code}`
+I'm your personal shopping assistant.
 
-Or reply: `LINK <user-id>`"""
+🔐 *To get started, please enter your email:*
+
+_This will link your Telegram to your EeshaMart account._
+
+Or send /cancel to cancel."""
     
-    # Direct account linking
-    if text_lower.startswith('link '):
-        parts = text.strip().split()
-        if len(parts) >= 2:
-            eeshamart_user_id = parts[1]
-            linked_accounts[chat_id] = {
-                "user_id": eeshamart_user_id,
-                "telegram_id": chat_id,
-                "username": username,
-                "history": []
-            }
-            return """✅ *Account Linked Successfully!*
-
-🛒 Search products
-🛍️ Add to cart
-📦 View cart
-
-_What would you like to buy?_"""
+    # Login command
+    if text_lower in ['/login', 'login']:
+        if chat_id in linked_accounts:
+            return "✅ You're already logged in! Send /logout to unlink."
+        auth_sessions[chat_id] = {"state": AUTH_STATE_EMAIL}
+        return "🔐 *Enter your email to login:*"
     
-    # View cart command
+    # Logout command
+    if text_lower in ['/logout', 'logout']:
+        if chat_id in linked_accounts:
+            del linked_accounts[chat_id]
+            return "✅ You've been logged out. Send /start to login again."
+        return "You're not logged in."
+    
+    # Cart command
     if text_lower in ['/cart', 'cart', 'my cart', 'view cart']:
         if chat_id not in linked_accounts:
-            return "🔐 Please link your account first. Reply: `LINK <your-user-id>`"
+            return "🔐 Please login first. Send /start"
         
         account = linked_accounts[chat_id]
         cart_items = await get_cart(account["user_id"])
@@ -217,7 +294,6 @@ _What would you like to buy?_"""
         if cart_items:
             response = "🛒 *Your Cart:*\n\n"
             total = 0
-            
             for i, item in enumerate(cart_items, 1):
                 product = item.get("products", {})
                 name = product.get("name", "Item")
@@ -225,80 +301,76 @@ _What would you like to buy?_"""
                 qty = item.get("quantity", 1)
                 subtotal = price * qty
                 total += subtotal
-                
-                response += f"{i}. *{name}*\n"
-                response += f"   {qty}x ₦{price:,} = ₦{subtotal:,}\n\n"
-            
+                response += f"{i}. *{name}*\n   {qty}x ₦{price:,} = ₦{subtotal:,}\n\n"
             response += f"💰 *Total: ₦{total:,}*\n\n"
             response += "_Say 'checkout' to proceed!_"
             return response
-        else:
-            return "🛒 Your cart is empty. Search for products to add!"
+        return "🛒 Your cart is empty. Search for products to add!"
     
     # Checkout
     if text_lower in ['checkout', 'check out', '/checkout']:
+        if chat_id not in linked_accounts:
+            return "🔐 Please login first. Send /start"
         return """💳 *Ready to Checkout!*
 
 To complete your purchase:
 1️⃣ Visit eeshamart.com
-2️⃣ Log in to your account
-3️⃣ Go to your cart
-4️⃣ Complete payment
+2️⃣ Your cart is synced!
+3️⃣ Complete payment
 
-_Your items are waiting!_ 🎉"""
+🎉 _Your items are waiting!_"""
     
-    # Need account for other actions
+    # Help command
+    if text_lower in ['/help', 'help']:
+        return """🆘 *Help - EeshaMart AI Bot*
+
+📋 *Commands:*
+/start - Login to your account
+/cart - View your cart
+/checkout - Proceed to checkout
+/logout - Sign out
+/help - Show this help
+
+🛒 *Shopping:*
+• Just type what you want to buy
+• "Show me phones under 50000"
+• "I need a laptop for school"
+• "Add 1 to cart"
+
+❓ *Need help?* Contact support@eeshamart.com"""
+    
+    # Check if logged in
     if chat_id not in linked_accounts:
-        code = gen_code()
-        pending_links[code] = {
-            "chat_id": chat_id,
-            "user_id": user_id,
-            "expires": datetime.now() + timedelta(minutes=10)
-        }
-        return f"""🔐 *Link Required*
+        return """🔐 *Please login first!*
 
-Your code: `{code}`
-
-Reply: `LINK <your-user-id>`"""
+Send /start to login to your EeshaMart account."""
     
-    # ========== PROCESS WITH AI ==========
+    # ========== SHOPPING WITH AI ==========
     
     account = linked_accounts[chat_id]
-    eeshamart_user_id = account["user_id"]
+    cart = await get_cart(account["user_id"])
     
-    # Get cart for context
-    cart = await get_cart(eeshamart_user_id)
-    
-    # Build context for AI
     context = {
         "lastShownProducts": user_sessions[chat_id]["last_products"],
         "cartItems": cart,
-        "cartTotal": sum(
-            (item.get("products", {}).get("price", 0) * item.get("quantity", 1))
-            for item in cart
-        ),
+        "cartTotal": sum((item.get("products", {}).get("price", 0) * item.get("quantity", 1)) for item in cart),
         "isLoggedIn": True,
         "conversationHistory": account.get("history", [])[-10:]
     }
     
-    # Call AI
     ai_result = await call_ai(text, context)
     
     if not ai_result.get("success"):
-        return "❌ _Sorry, an error occurred. Please try again._"
+        return "❌ _Error. Please try again._"
     
     response = ai_result.get("response", "I'm here to help!")
     
-    # Handle products returned
+    # Handle products
     if ai_result.get("products"):
         user_sessions[chat_id]["last_products"] = ai_result["products"]
-        
         response += "\n\n📦 *Products Found:*\n"
         for i, p in enumerate(ai_result["products"][:5], 1):
-            name = p.get("name", "Product")
-            price = p.get("price", 0)
-            response += f"\n{i}. *{name}*\n   💰 ₦{price:,}\n"
-        
+            response += f"\n{i}. *{p.get('name')}* - ₦{p.get('price'):,}\n"
         response += "\n_Reply with a number to add to cart!_"
     
     # Handle actions
@@ -311,44 +383,22 @@ Reply: `LINK <your-user-id>`"""
             
             if action.get("all"):
                 for p in user_sessions[chat_id]["last_products"]:
-                    await add_to_cart(eeshamart_user_id, p["id"], quantity)
-                response = f"✅ Added all items to cart!"
-            
+                    await add_to_cart(account["user_id"], p["id"], quantity)
+                response = "✅ Added all items to cart!"
             elif action.get("product_index"):
                 idx = action["product_index"] - 1
                 products = user_sessions[chat_id]["last_products"]
-                
                 if 0 <= idx < len(products):
                     product = products[idx]
-                    await add_to_cart(eeshamart_user_id, product["id"], quantity)
-                    response = f"✅ Added *{product.get('name')}* (x{quantity}) to your cart!"
+                    await add_to_cart(account["user_id"], product["id"], quantity)
+                    response = f"✅ Added *{product.get('name')}* (x{quantity}) to cart!"
                 else:
-                    response = "❌ Invalid product number. Please try again."
+                    response = "❌ Invalid product number."
         
         elif action_type == "view_cart":
-            cart_items = await get_cart(eeshamart_user_id)
-            
-            if cart_items:
-                response = "🛒 *Your Cart:*\n\n"
-                total = 0
-                
-                for i, item in enumerate(cart_items, 1):
-                    product = item.get("products", {})
-                    name = product.get("name", "Item")
-                    price = product.get("price", 0)
-                    qty = item.get("quantity", 1)
-                    subtotal = price * qty
-                    total += subtotal
-                    
-                    response += f"{i}. *{name}*\n"
-                    response += f"   {qty}x ₦{price:,} = ₦{subtotal:,}\n\n"
-                
-                response += f"💰 *Total: ₦{total:,}*\n\n"
-                response += "_Say 'checkout' to proceed!_"
-            else:
-                response = "🛒 Your cart is empty."
+            return await process_message(chat_id, user_id, "/cart", username)
     
-    # Update conversation history
+    # Update history
     account.setdefault("history", []).extend([
         {"role": "user", "content": text},
         {"role": "assistant", "content": response}
@@ -362,135 +412,52 @@ Reply: `LINK <your-user-id>`"""
 
 @app.get("/")
 async def root():
-    """Health check endpoint"""
-    return {
-        "status": "online",
-        "service": "EeshaMart Telegram Bot",
-        "bot": "https://t.me/eeshamart_bot",
-        "version": "1.0.0"
-    }
+    return {"status": "online", "service": "EeshaMart Telegram Bot", "bot": "https://t.me/eeshamart_bot"}
 
 @app.get("/health")
 async def health():
-    """Health check for Render"""
     return {"status": "healthy"}
 
 @app.post("/webhook/telegram")
 async def telegram_webhook(request: Request):
-    """Handle incoming Telegram webhook"""
     try:
         body = await request.json()
-        logger.info(f"📬 Webhook received: {json.dumps(body, indent=2)}")
+        logger.info(f"📬 Webhook: {json.dumps(body)}")
         
         if "message" in body:
             message = body["message"]
             chat_id = message.get("chat", {}).get("id")
             user_id = message.get("from", {}).get("id")
             username = message.get("from", {}).get("username", "")
-            
             text = message.get("text", "")
             
-            # Handle photo messages
             if "photo" in message and not text:
                 text = "What is this product?"
             
             if text:
                 reply = await process_message(chat_id, user_id, text, username)
-                result = await send_telegram(chat_id, reply)
-                logger.info(f"📤 Send result: {result}")
+                await send_telegram(chat_id, reply)
         
         return {"status": "ok"}
-    
     except Exception as e:
-        logger.error(f"❌ Webhook error: {e}", exc_info=True)
+        logger.error(f"❌ Error: {e}")
         return {"status": "error", "message": str(e)}
 
 @app.get("/setwebhook")
 async def set_webhook(request: Request):
-    """Set Telegram webhook - call this after deployment"""
     host = request.headers.get("host", "")
-    if not host:
-        return {"error": "Cannot determine host URL"}
-    
     webhook_url = f"https://{host}/webhook/telegram"
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook"
     
     async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(url, json={"url": webhook_url})
-        result = response.json()
-    
-    logger.info(f"🔗 Webhook set: {webhook_url}")
-    return {
-        "webhook_url": webhook_url,
-        "result": result
-    }
-
-@app.get("/getme")
-async def get_me():
-    """Get bot info"""
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getMe"
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.get(url)
-        return response.json()
+        return {"webhook_url": webhook_url, "result": response.json()}
 
 @app.get("/getwebhookinfo")
 async def get_webhook_info():
-    """Get current webhook info"""
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getWebhookInfo"
     async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.get(url)
-        return response.json()
-
-# API for account linking from website
-@app.post("/api/link")
-async def link_api(request: Request):
-    """Link Telegram to EeshaMart account (called from website)"""
-    try:
-        body = await request.json()
-        action = body.get("action")
-        
-        if action == "verify":
-            code = body.get("code", "").upper()
-            user_id = body.get("user_id")
-            
-            pending = pending_links.get(code)
-            if not pending:
-                return {"success": False, "error": "Invalid code"}
-            
-            if datetime.now() > pending["expires"]:
-                del pending_links[code]
-                return {"success": False, "error": "Code expired"}
-            
-            # Link account
-            chat_id = pending["chat_id"]
-            linked_accounts[chat_id] = {
-                "user_id": user_id,
-                "telegram_id": chat_id,
-                "username": pending.get("username"),
-                "history": []
-            }
-            
-            del pending_links[code]
-            
-            # Notify user on Telegram
-            await send_telegram(
-                chat_id,
-                "✅ *Account Linked Successfully!*\n\nYou can now shop via Telegram!"
-            )
-            
-            return {"success": True}
-        
-        if action == "status":
-            user_id = body.get("user_id")
-            for chat_id, account in linked_accounts.items():
-                if account["user_id"] == user_id:
-                    return {"linked": True, "telegram_id": chat_id}
-            return {"linked": False}
-        
-        return {"error": "Invalid action"}
-    
-    except Exception as e:
-        return {"error": str(e)}
+        return (await client.get(url)).json()
 
 if __name__ == "__main__":
     import uvicorn
